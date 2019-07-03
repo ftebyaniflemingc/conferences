@@ -2,36 +2,36 @@
 
 length: 60 min
 
-presenters: Raluca Nicola, Kristian Ekenes
+presenters: Janett Baresel, Kristian Ekenes
 
-Mar. 7, 2019 4:00 p.m. - 5:00 p.m.
+July 10, 2019 2:30 p.m. - 3:30 p.m.
 
-Palm Springs Convention Center, Primrose C-D
+San Diego Convention Center, Room 15A
 
 ## Summary
 
-The ArcGIS API 4.x for JavaScript provides a set of APIs allowing you to build powerful interactive 3D mapping applications. In this session, we'll focus on the visualization capabilities specific to 3D views. We'll dive into the various symbol types and visual variables and demonstrate how they interact with renderers. You'll learn cartographic techniques unique to 3D and see several demos showing how to thematically visualize 2D features with 3D symbols. We'll also provide an overview of how to visualize data in layers specific to 3D views.
+The ArcGIS API 4.x for JavaScript provides a set of APIs allowing you to build powerful interactive 3D mapping applications. In this session, we'll focus on the visualization capabilities specific to 3D views. We'll dive into the various symbol types and demonstrate how you can drive 3D visualization using visual variables. You'll learn cartographic techniques unique to 3D and see several demos showing how to thematically visualize 2D features with 3D symbols. We'll also provide an overview of how to visualize data in layers specific to 3D views.
 
 ## Demos
 
-### [Buildings with Visual Variables and Edges](https://ekenes.github.io/conferences/ds-2019/3d-viz/demos/thematic-edges/)
+### [3D Visualization Overview](https://ralucanicola.github.io/JSAPI_demos/)
+
+A portfolio of various 3D samples from [Raluca Nicola](https://github.com/ralucanicola/).
+
+### [Realistic Trees]()
 
 San Francisco buildings visualized with a color visual variable showing walk times. Edges can be toggled on and off of the buildings.
 
-### [Smart Mapping: Building scene layer](https://ekenes.github.io/conferences/ds-2019/3d-viz/demos/thematic-edges/)
+### [School routes](http://zurich.maps.arcgis.com/home/webscene/viewer.html?webscene=9c697240d3304968af8dde614603ab5d&viewpoint=cam:-118.14532024,34.16384267,601.57;330.183,67.66)
 
 San Francisco buildings visualized with a color visual variable showing walk times. The renderer is generated using smart mapping. The color slider allows users to explore the visual aspect of the data.
 
-### [Point Styles for cities](https://developers.arcgis.com/javascript/latest/sample-code/visualization-point-styles/index.html)
+### [Realistic Water](https://developers.arcgis.com/javascript/latest/sample-code/visualization-realistic-water/index.html)
 
 App that demonstrates how to visualize points of interest in a city scene.
 
-### Bivariate Smart Mapping in 3D
 
-The following examples demonstrate several examples of relationship (aka bivariate) maps in 3D scenes. These take advantage of 2 color ramps overlaid on one another to view whether each attribute agrees with one another.
+### [SceneLayerView - query statistics by geometry
+](https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayerview-query-stats/index.html)
 
-- [Trees](https://ekenes.github.io/esri-ts-samples/visualization/smart-mapping/relationship/trees/)
-
-- [Buildings](https://ekenes.github.io/esri-ts-samples/visualization/smart-mapping/relationship/buildings-energy/)
-
-- [Three variables](https://ekenes.github.io/esri-ts-samples/visualization/smart-mapping/relationship/transit/)
+San Francisco buildings visualized with a color visual variable showing walk times. The renderer is generated using smart mapping. The color slider allows users to explore the visual aspect of the data.
