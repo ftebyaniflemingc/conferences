@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>HistogramRangeSlider - 4.12</title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.12/esri/themes/dark/main.css"
+    />
+    <script src="https://js.arcgis.com/4.12/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #313030
+      }
+
+      #controls {
+        width: 500px;
+      }
+
+      #outer-container {
+        padding: 15px;
+        width: 500px;
+      }
+
+      #description {
+        padding: 10px 10px 0px 10px;
+        font-size: 14pt;
+      }
+
+      #titleDiv {
+        padding: 10px;
+      }
+
+      #titleText {
+        font-size: 20pt;
+        font-weight: 60;
+        padding-bottom: 10px;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/views/MapView",
+        "esri/Map",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Expand",
+        "esri/widgets/HistogramRangeSlider",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/core/promiseUtils"
+      ], function(
+        SceneView,
+        Map,
+        FeatureLayer,
+        Expand,
+        HistogramRangeSlider,
+        histogram,
+        promiseUtils
+      ) {
+        // Project base layer (world countries) to Equal Earth projection
+        const baseLayer = new FeatureLayer({
+          portalItem: {
+            id: "2b93b06dc0dc4e809d3c8db5cb96ba69"
+          },
+          legendEnabled: false,
+          popupEnabled: false,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              // color: [200, 200, 200, 0.75],
+              color: "#4c4949",
+              outline: null
+            }
+          },
+          spatialReference: {
+            wkid: 24373
+          }
+        });
+
+        // flash flood warnings layer
+        const layer = new FeatureLayer({
+          portalItem: {
+            id: "fded240144c74ce988771a503a3a03d8"
+          },
+          outFields: ["Temp"],
+          // only display surface temperature data
+          definitionExpression: "UnitTop = 0"
+        });
+
+        const map = new Map({
+          // basemap: "dark-gray-vector",
+          layers: [ baseLayer, layer ]
+        });
+
+        const view = new SceneView({
+          map: map,
+          container: "viewDiv",
+          center: {
+            x: 0,
+            y: -5000000,
+            spatialReference: baseLayer.spatialReference
+          },
+          scale: 75000000
+        });
+
+        view.whenLayerView(layer).then(function(layerView) {
+          const field = "temp";
+          const min = 0;
+          const max = 30;
+
+          histogram({
+            layer: layer,
+            field: field,
+            numBins: 100,
+            minValue: min,
+            maxValue: max
+          }).then(function(histogramResponse) {
+            const durationSlider = new HistogramRangeSlider({
+              bins: histogramResponse.bins,
+              min: min,
+              max: max,
+              values: [min, max],
+              excludedBarColor: "#524e4e",
+              rangeType: "between",
+              container: document.getElementById("slider-container")
+            });
+
+            durationSlider.on(["value-change", "values-change"], function(
+              event
+            ) {
+              filterByHistogramRange(field);
+            });
+
+            const filterByHistogramRange = promiseUtils.debounce(function(
+              field
+            ) {
+              layerView.effect = {
+                excludedEffect: "opacity(10%)",
+                filter: {
+                  where: durationSlider.generateWhereClause(field)
+                }
+              };
+            });
+
+            const filterExpand = new Expand({
+              view: view,
+              content: document.getElementById("controls"),
+              expandIconClass: "esri-icon-filter",
+              expanded: true
+            });
+
+            view.ui.add(filterExpand, "bottom-left");
+            view.ui.add("titleDiv", "top-right");
+          });
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="titleDiv" class="esri-widget">
+      <div id="titleText">Ecological Marine Units</div>
+      <div>Indian Ocean</div>
+    </div>
+    <div id="controls" class="esri-widget">
+      <div id="description" class="esri-widget">Surface Temperature (°C)</div>
+      <div id="outer-container" class="esri-widget">
+        <div id="slider-container"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Histogram widget - 4.12</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.12/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #containerDiv {
+        padding: 10px;
+        text-align: center;
+      }
+      .padding {
+        padding: 10px;
+      }
+      #histogram {
+        width: 300px;
+        height: 200px;
+      }
+      #titleDiv {
+        padding: 10px;
+      }
+      #titleText {
+        font-size: 20pt;
+        font-weight: 60;
+        padding-bottom: 10px;
+      }
+      .labels {
+        padding: 5px;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/renderers/smartMapping/statistics/summaryStatistics",
+        "esri/renderers/smartMapping/creators/color",
+        "esri/Color",
+        "esri/widgets/Histogram",
+        "esri/core/promiseUtils"
+      ], function(
+        Map,
+        MapView,
+        FeatureLayer,
+        histogram,
+        summaryStatistics,
+        colorRendererCreator,
+        Color,
+        Histogram,
+        promiseUtils
+      ) {
+
+        const baseLayer = new FeatureLayer({
+          portalItem: {
+            id: "2b93b06dc0dc4e809d3c8db5cb96ba69"
+          },
+          legendEnabled: false,
+          popupEnabled: false,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [200, 200, 200, 0.75],
+              outline: null
+            }
+          },
+          spatialReference: {
+            wkid: 24373
+          }
+        });
+
+        const layer = new FeatureLayer({
+          portalItem: {
+            // 4aca4d837a1e406c9d1361d803e1961d - view layer
+            // fded240144c74ce988771a503a3a03d8 - base layer
+            id: "4aca4d837a1e406c9d1361d803e1961d"
+          },
+          outFields: ["*"],
+          // only display surface temperature data
+          definitionExpression: "UnitTop = 0"
+        });
+
+        const map = new Map({
+          layers: [baseLayer, layer]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: {
+            x: 0,
+            y: -5000000,
+            spatialReference: baseLayer.spatialReference
+          },
+          scale: 75000000
+        });
+        view.ui.add("containerDiv", "bottom-left");
+        view.ui.add("titleDiv", "top-right");
+
+        view.when()
+          .then(createRenderer)
+          .then(createHistogram)
+          .catch(function(error){
+            console.error(error);
+          });
+
+        const fieldSelect = document.getElementById("field-select");
+        let selectedField = fieldSelect.value;
+
+        fieldSelect.addEventListener("change", function(){
+          selectedField = fieldSelect.value;
+          createRenderer()
+            .then(createHistogram)
+            .catch(function(error){
+              console.error(error);
+            });
+        });
+
+        function createRenderer(){
+          const params = {
+            layer: layer,
+            basemap: "gray",
+            field: selectedField,
+            theme: "above-and-below"
+          };
+
+          return colorRendererCreator.createContinuousRenderer(params)
+            .then(function(rendererResult){
+              const renderer = rendererResult.renderer.clone();
+              const symbol = renderer.classBreakInfos[0].symbol.clone();
+              symbol.outline = null;
+              symbol.size = "6px";
+              renderer.classBreakInfos[0].symbol = symbol;
+              layer.renderer = renderer;
+              return null;
+            });
+        }
+
+        function fetchStats(field, features) {
+          const params = {
+            layer: layer,
+            field: field,
+            numBins: 100,
+            features: features ? features : null,
+            view: features ? view : null
+          };
+
+          return promiseUtils.eachAlways([
+            histogram(params),
+            summaryStatistics(params)
+          ]);
+        }
+
+        let histogramWidget = null;
+        const bars = [];
+
+        function createHistogram(features) {
+          //  Other available fields:
+          //  temp, salinity, appO2ut, dissO2
+          //  nitrate, percO2sat, phosphate, silicate
+
+          // fetches summary statistics and histogram bins
+          // from the feature service
+          fetchStats(selectedField, features)
+            .then(function(response) {
+              const histogramResult = response[0].value;
+              const statsResult = response[1].value;
+
+              const minElement = document.getElementById("min");
+              const maxElement = document.getElementById("max");
+              minElement.innerText = formatNumbers(histogramResult.minValue);
+              maxElement.innerText = formatNumbers(histogramResult.maxValue);
+
+              const vv = layer.renderer.visualVariables[0];
+
+              // Creates a Histogram instance from the returned histogram result
+              if(!histogramWidget){
+                histogramWidget = Histogram.fromHistogramResult(histogramResult);
+                histogramWidget.container = "histogram";
+                histogramWidget.labelFormatFunction = function(value, type) {
+                  return formatNumbers(value);
+                };
+                histogramWidget.barCreatedFunction = function(index, element) {
+                  const bin = histogramResult.bins[index];
+                  const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
+
+                  const color = getColorFromValue(vv.stops, midValue);
+                  element.setAttribute("fill", color.toHex());
+                  bars.push(element);
+                };
+              } else {
+                histogramWidget.min = histogramResult.minValue;
+                histogramWidget.max = histogramResult.maxValue;
+                histogramWidget.bins = histogramResult.bins;
+                bars.forEach(function(bar, index) {
+                  const bin = histogramWidget.bins[index];
+                  const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
+                  const color = getColorFromValue(vv.stops, midValue);
+                  bar.setAttribute("fill", color.toHex());
+                });
+              }
+              
+              histogramWidget.average = statsResult.avg;
+              
+            })
+            .catch(function(error) {
+              console.error(error);
+            });
+        }
+
+        function formatNumbers(value) {
+          return value.toFixed(2);
+        }
+
+        // infers the color for a given value
+        // based on the stops from a ColorVariable
+        function getColorFromValue(stops, value) {
+          let minStop = stops[0];
+          let maxStop = stops[stops.length - 1];
+
+          const minStopValue = minStop.value;
+          const maxStopValue = maxStop.value;
+
+          if (value < minStopValue) {
+            return minStop.color;
+          }
+
+          if (value > maxStopValue) {
+            return maxStop.color;
+          }
+
+          const exactMatches = stops.filter(function(stop) {
+            return stop.value === value;
+          });
+
+          if (exactMatches.length > 0) {
+            return exactMatches[0].color;
+          }
+
+          minStop = null;
+          maxStop = null;
+          stops.forEach(function(stop, i) {
+            if (!minStop && !maxStop && stop.value >= value) {
+              minStop = stops[i - 1];
+              maxStop = stop;
+            }
+          });
+
+          const weightedPosition = (value - minStop.value) / (maxStop.value - minStop.value);
+
+          return Color.blendColors(minStop.color, maxStop.color, weightedPosition);
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="titleDiv" class="esri-widget">
+      <div id="titleText">Ecological Marine Units</div>
+      <div>Indian Ocean</div>
+    </div>
+    <div id="containerDiv" class="esri-widget">
+      <div class="padding">
+        <select id="field-select" class="esri-widget">
+          <option value="temp" selected>Temperature</option>
+          <option value="salinity">Salinity</option>
+          <option value="appO2ut">Apparent O2</option>
+          <option value="dissO2">Dissolved O2</option>
+          <option value="nitrate">Nitrate</option>
+          <option value="percO2sat">% O2 Saturation</option>
+          <option value="phosphate">Phosphate</option>
+          <option value="silicate">Silicate</option>
+          <option value="ChlorA_12yrAvg">ChlorA (12 yr avg)</option>
+        </select>
+      </div>
+      <div id="histogram"></div>
+      <div class="labels esri-widget">
+        <span style="float: left" id="min"></span>
+        <span style="float: right" id="max"></span>
+      </div>
+    </div>
+  </body>
+</html>

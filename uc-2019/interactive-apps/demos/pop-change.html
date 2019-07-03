@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Population change</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/dark/main.css"/>
+    <script src="https://js.arcgis.com/4.12/"></script>
+
+    <style>
+      #containerDiv {
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0;
+      }
+
+      #sliderDiv {
+        height: 100px;
+      }
+
+      #histogram {
+        width: 500px;
+        height: 150px;
+      }
+      .labels {
+        padding: 5px;
+      }
+
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #viewDiv {
+        position: absolute;
+        right: 0;
+        left: 0;
+        top: 0;
+        bottom: 100px;
+        background-color: #313030
+      }
+
+      #sliderContainer {
+        position: absolute;
+        bottom: 0;
+        height: 100px;
+        width: 100%;
+        text-align: center;
+      }
+      </style>
+  
+
+    <script id="highest-growth-arcade" type="arcgis-arcade">
+      var highest = -Infinity;
+      var previousValue = null;
+      var value = null;
+      var highestYear = null;
+      for (var att in $feature){
+        if( typeof($feature[att]) == 'Number' && Find('POP_', att) > -1){
+          if(Find('POP_1950', att) == -1){
+            value = $feature[att] - previousValue;
+            // highest = IIF(value > highest, value, highest);
+            if(value > highest){
+              highest = value;
+              highestYear = Mid(att, 4,4);
+            }
+            previousValue = $feature[att];
+          } else {
+            previousValue = $feature[att];
+          }
+        }
+      }
+      return Text(highest, "#,###") + " (" + highestYear + ")"; 
+    </script>
+
+    <script id="lowest-growth-arcade" type="arcgis-arcade">
+      var lowest = Infinity;
+      var previousValue = null;
+      var value = null;
+      var lowestYear = null;
+      for (var att in $feature){
+        var value = $feature[att];
+        if( typeof(value) == 'Number' && Find('POP_', att) > -1){
+          if(Find('POP_1950', att) == -1){
+            value = $feature[att] - previousValue;
+            //lowest = IIF(value < lowest, value, lowest);
+            if(value < lowest){
+              lowest = value;
+              lowestYear = Mid(att, 4,4);
+            }
+            
+            previousValue = $feature[att];
+          } else {
+            previousValue = $feature[att];
+          }
+        }
+      }
+      return Text(lowest, "#,###") + " (" + lowestYear + ")"; 
+    </script>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/renderers/smartMapping/creators/color",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/widgets/ColorSlider",
+        "esri/widgets/Histogram",
+        "esri/widgets/Slider",
+        "esri/core/lang",
+        "esri/widgets/Legend",
+        "esri/core/promiseUtils",
+        "esri/core/watchUtils",
+        "esri/Color",
+        "esri/geometry/Circle"
+      ], function(
+        Map,
+        MapView,
+        FeatureLayer,
+        colorRendererCreator,
+        histogram,
+        ColorSlider,
+        Histogram,
+        Slider,
+        lang,
+        Legend,
+        promiseUtils,
+        watchUtils,
+        Color,
+        Circle
+      ) {
+
+        // Project base layer (world countries) to Equal Earth projection
+        const baseLayer = new FeatureLayer({
+          portalItem: {
+            id: "2b93b06dc0dc4e809d3c8db5cb96ba69"
+          },
+          legendEnabled: false,
+          popupEnabled: false,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: "#4c4949",
+              outline: null
+            }
+          },
+          spatialReference: {
+            wkid: 54035
+          }
+        });
+
+        var layer = new FeatureLayer({
+          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Join_Features_to_World__Countries_(Generalized)/FeatureServer/0",
+          outFields: ["*"],
+          title: "Global Population (1950 - 2015)",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-marker",
+              outline: null,
+              style: "square"
+            }
+          },
+          popupTemplate: createPopupTemplate(1951),
+          spatialReference: {
+            wkid: 54035
+          },
+          opacity: 1
+        });
+
+        // Create a map and add it to a MapView
+
+        var map = new Map({
+          layers: [ baseLayer, layer ]
+        });
+
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          scale: 150000000,
+          center: {
+            x: 0,
+            y: 0,
+            spatialReference: layer.spatialReference
+          },
+          popup: {
+            dockOptions: {
+              position: "top-left"
+            }
+          }
+        });
+
+        view.ui.add("containerDiv", "bottom-left");
+        view.ui.add(new Legend({ view: view }), "bottom-right");
+
+        const slider = new Slider({
+          min: 1951,
+          max: 2015,
+          values: [ 1951 ],
+          rangeLabelsVisible: true,
+          labelsVisible: true,
+          labelInputsEnabled: true,
+          precision: 0,
+          steps: 1,
+          container: "sliderDiv"
+        });
+        slider.on("value-change", function(event){
+          updateRenderer(event.value);
+          updateHistogram(event.value);
+          updateYearDisplay(event.value);
+        });
+
+        // Create FeatureLayer instance with popupTemplate
+
+        function createPopupTemplate(year){
+          return {
+            title: "{NAME}",
+            expressionInfos: [{
+              name: "max",
+              title: "Highest growth",
+              expression: document.getElementById("highest-growth-arcade").innerText
+            }, {
+              name: "min",
+              title: "Lowest growth",
+              expression: document.getElementById("lowest-growth-arcade").innerText
+            }, {
+              name: "growth",
+              title: `Growth from ${year-1} - ${year}`,
+              expression: `
+                var popCurrent = $feature.POP_${year};
+                var popPrevious = IIF(${year} == 1950, 0, $feature.POP_${year - 1});
+                popCurrent - popPrevious;
+              `
+            }, {
+              name: "percent-growth",
+              title: `% growth from ${year-1} - ${year}`,
+              expression: `
+                var popCurrent = $feature.POP_${year};
+                var popPrevious = IIF(${year} == 1950, 0, $feature.POP_${year - 1});
+                ((popCurrent - popPrevious) / popPrevious) * 100;
+              `
+            }],
+            content: [{
+              type: "fields",
+              fieldInfos: [{
+                fieldName: "expression/max"
+              }, {
+                fieldName: "expression/min"
+              }, {
+                fieldName: "expression/growth",
+                format: {
+                  places: 0,
+                  digitSeparator: true
+                }
+              }, {
+                fieldName: "expression/percent-growth",
+                format: {
+                  places: 1,
+                  digitSeparator: false
+                }
+              }]
+            }]
+          };
+        }
+
+        var points = null;
+        var lv = null;
+        view.whenLayerView(layer).then(function(layerView){
+          lv = layerView;
+          watchUtils.whenFalseOnce(layerView, "updating", function(){
+            return layerView.queryFeatures().then(function(response){
+              points = response.features;
+              updateRenderer( slider.values[0] );
+              updateHistogram( slider.values[0]);
+            }).catch(function(e){
+              console.error(e);
+            });
+          });
+        }).catch(function(e){
+          console.error(e);
+        });
+
+        var renderer = null;
+        function updateRenderer(value){
+
+          if(!renderer){
+            renderer = {
+              type: "simple",
+              symbol: {
+                type: "simple-marker",
+                style: "square",
+                size: "6px",
+                color: [226, 226, 226, 0.75],
+                outline: {
+                  color: [255, 255, 255, 0.25],
+                  width: "0.75px",
+                  style: "solid"
+                }
+              },
+              visualVariables: [{
+                type: "size",
+                valueExpression: `
+                  var popCurrent = $feature.POP_${value};
+                  var popPrevious = IIF(${value} == 1950, 0, $feature.POP_${value - 1});
+                  Abs(popCurrent - popPrevious);
+                `,
+                valueExpressionTitle: "Population change from previous year",
+                maxDataValue: 1000000,
+                maxSize: "24px",
+                minDataValue: 0,
+                minSize: "4px"
+              }, {
+                legendOptions: {
+                  showLegend: false                  
+                },
+                type: "color",
+                valueExpression: `
+                  var popCurrent = $feature.POP_${value};
+                  var popPrevious = IIF(${value} == 1950, 0, $feature.POP_${value - 1});
+                  ((popCurrent - popPrevious) / popPrevious) * 100;
+                `,
+                valueExpressionTitle: "% Change from previous year",
+                stops: [
+                  { value: -5, color: "#ff29ed" },
+                  { value: -0.1, color: "#ffb8f9" },
+                  { value: 0.1, color: "#c9ffd7" },
+                  { value: 5, color: "#36c95b" }
+                ]
+              }]
+            };
+          } else {
+            renderer = layer.renderer.clone();
+            var sizeVariable = renderer.visualVariables[0];
+            var colorVariable = renderer.visualVariables[1];
+            sizeVariable.valueExpression = getSizeValueExpression(value);
+            colorVariable.valueExpression = getColorValueExpression(value);
+            renderer.visualVariables = [ sizeVariable, colorVariable ];
+          }
+
+          layer.renderer = renderer;
+          layer.popupTemplate = createPopupTemplate(slider.values[0]);
+        }
+
+        function getColorValueExpression(value){
+          return `
+            var popCurrent = $feature.POP_${value};
+            var popPrevious = IIF(${value} == 1950, 0, $feature.POP_${value - 1});
+            ((popCurrent - popPrevious) / popPrevious) * 100;
+          `;
+        }
+
+        function getSizeValueExpression(value){
+          return `
+            var popCurrent = $feature.POP_${value};
+            var popPrevious = IIF(${value} == 1950, 0, $feature.POP_${value - 1});
+            Abs(popCurrent - popPrevious);
+          `;
+        }
+
+        var histograms = {};
+        var histogramChart = null;
+        var histMin = -10;
+        var histMax = 10;
+
+        var highlight;
+
+        function updateHistogram(year){
+
+          if(histograms[year]){
+            histogramChart.bins = histograms[year];
+          }
+
+          histogram({
+            layer: layer,
+            valueExpression: getColorValueExpression(year),
+            view: view,
+            features: points,
+            numBins: 100,
+            minValue: histMin,
+            maxValue: histMax
+          })
+          .then(function(histogramResult) {
+
+            histograms[year] = histogramResult.bins;
+            if(!histogramChart){
+              histogramChart = Histogram.fromHistogramResult(histogramResult);
+              histogramChart.container = "histogram";
+              histogramChart.dataLines = [{
+                value: 0
+              }];
+              histogramChart.min = histMin;
+              histogramChart.max = histMax;
+
+              histogramChart.barCreatedFunction = function(index, element){
+                var bin = histogramChart.bins[index];
+                var midValue = ((bin.maxValue - bin.minValue) / 2) + bin.minValue;
+                var color = getColorFromValue(midValue);
+                element.setAttribute("fill", color.toHex());
+                element.addEventListener("focus", function(){
+                  const { minValue, maxValue, count } = bin;
+                  const query = lv.layer.createQuery();
+                  const field =  `
+                    ( ( POP_${slider.values[0]} - POP_${slider.values[0]-1} ) / POP_${slider.values[0]-1} ) * 100
+                  `;
+                  query.where = `${field} >= ${minValue} AND ${field} <= ${maxValue}`;
+                  lv.queryObjectIds(query).then(function(ids){
+                    if(highlight){
+                      highlight.remove();
+                      highlight = null;
+                    }
+                    highlight = lv.highlight(ids);
+                  });
+                });
+
+                element.addEventListener("blur", function(){
+                  if(highlight){
+                    highlight.remove();
+                    highlight = null;
+                  }
+                });
+              };
+            } else {
+              histogramChart.bins = histogramResult.bins;
+            }
+
+
+
+        }).catch(function(e){
+          console.error(e);
+        });
+      }
+
+
+      function getColorFromValue(value){
+        var visualVariable = layer.renderer.visualVariables.filter(function(vv){
+          return vv.type === "color";
+        })[0];
+        var stops = visualVariable.stops;
+        var minStop = stops[0];
+        var maxStop = stops[stops.length-1];
+
+        var minStopValue = minStop.value;
+        var maxStopValue = maxStop.value;
+
+        if(value < minStopValue){
+          return minStop.color;
+        }
+
+        if(value > maxStopValue){
+          return maxStop.color;
+        }
+
+        var exactMatches = stops.filter(function(stop){
+          return stop.value === value;
+        });
+
+        if(exactMatches.length > 0){
+          return exactMatches[0].color;
+        }
+
+        var minStop = null;
+        var maxStop = null;
+        stops.forEach(function(stop, i){
+          if(!minStop && !maxStop && stop.value >= value){
+            minStop = stops[i-1];
+            maxStop = stop;
+          }
+        });
+
+        var weightedPosition = (value - minStop.value) / (maxStop.value - minStop.value);
+
+        return Color.blendColors(minStop.color, maxStop.color, weightedPosition);
+      }
+
+      function updateYearDisplay(year){
+        const yearElement = document.getElementById("yearDiv");
+        const nextYearElement = document.getElementById("nextYearDiv");
+        yearElement.innerText = year;
+        nextYearElement.innerText = year + 1;
+      }
+
+      function calculateAverage(field){
+        const query = lv.layer.createQuery();
+      }
+    
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="containerDiv" class="esri-widget">
+      <div class="esri-widget">
+        <div id="title" class="esri-widget">
+          <h3>Population change from <span id="yearDiv">1951</span> - <span id="nextYearDiv">1952</span></h3>
+        </div>
+        <div id="histogram" class="esri-widget"></div>
+        <div class="labels esri-widget">
+          <span style="float: left">-10%</span>
+          <span style="float: center">0</span>
+          <span style="float: right">+10%</span>
+        </div>
+      </div>
+    </div>
+    <div id="sliderContainer" class="esri-widget">
+      <div id="sliderDiv"></div>
+    </div>
+  </body>
+</html>
