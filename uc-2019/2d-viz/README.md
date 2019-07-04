@@ -4,9 +4,9 @@ length: 60 min
 
 presenters: Kristian Ekenes, Jeremy Bartley
 
-Mar. 6, 2019 4:00 p.m. - 5:00 p.m.
+July 11, 2019 1:00 p.m. - 2:00 p.m.
 
-Palm Springs Convention Center, Catalina/Madera
+San Diego Convention Center, Room 4
 
 ## Summary
 
