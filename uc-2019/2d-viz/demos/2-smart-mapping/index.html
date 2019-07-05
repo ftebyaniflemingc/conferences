@@ -7,9 +7,8 @@
 
   <title>Generate above and below color visualization in 3D - 4.4</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/css/main.css">
-  <link rel="stylesheet" href="https://js.arcgis.com/4.11/dijit/themes/claro/claro.css">
-  <script src="https://js.arcgis.com/4.11/"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/css/main.css">
+  <script src="https://js.arcgis.com/4.12/"></script>
 
   <style>
     html,
@@ -51,10 +50,9 @@
       "esri/renderers/smartMapping/creators/size",
       "esri/renderers/smartMapping/creators/location",
       "esri/renderers/smartMapping/statistics/histogram",
-      "esri/widgets/ColorSlider",
-      "esri/widgets/SizeSlider",
-      "esri/core/lang",
-      "dojo/domReady!"
+      "esri/widgets/smartMapping/ColorSlider",
+      "esri/widgets/smartMapping/SizeSlider",
+      "esri/core/lang"
     ], function(
       Map, MapView, FeatureLayer, Legend, Expand, BasemapGallery, colorRendererCreator, sizeRendererCreator, locationRendererCreator,
       histogram, ColorSlider, SizeSlider, lang
@@ -97,7 +95,8 @@
       var bgExpand = new Expand({
         view: view,
         content: basemapGallery.container,
-        expandIconClass: "esri-icon-basemap"
+        expandIconClass: "esri-icon-basemap",
+        group: "top-left"
       });
 
       view.ui.add(bgExpand, "top-left");
@@ -108,7 +107,8 @@
       var sizeSliderExpand = new Expand({
         view: view,
         content: document.getElementById("size-container"),
-        expandIconClass: "esri-icon-pie-chart"
+        expandIconClass: "esri-icon-pie-chart",
+        group: "top-left"
       });
       view.ui.add(sizeSliderExpand, "top-left");
 
@@ -118,30 +118,10 @@
       var colorSliderExpand = new Expand({
         view: view,
         content: document.getElementById("color-container"),
-        expandIconClass: "esri-icon-environment-settings"
+        expandIconClass: "esri-icon-environment-settings",
+        group: "top-left"
       });
       view.ui.add(colorSliderExpand, "top-left");
-
-      sizeSliderExpand.watch("expanded", function(expanded){
-        if(expanded && (colorSliderExpand.expanded || bgExpand.expanded)){
-          colorSliderExpand.collapse();
-          bgExpand.collapse();
-        }
-      });
-
-      colorSliderExpand.watch("expanded", function(expanded){
-        if(expanded && (sizeSliderExpand.expanded || bgExpand.expanded)){
-          sizeSliderExpand.collapse();
-          bgExpand.collapse();
-        }
-      });
-
-      bgExpand.watch("expanded", function(expanded){
-        if(expanded && (sizeSliderExpand.expanded || colorSliderExpand.expanded)){
-          sizeSliderExpand.collapse();
-          colorSliderExpand.collapse();
-        }
-      });
 
       // Create FeatureLayer instance with popupTemplate
 
@@ -255,8 +235,8 @@
           });
           sizeParams.layer.renderer = renderer;
 //           destroy size slider widget
-          sizeSlider.destroy();
           sizeSlideEvent.remove();
+          sizeSlider.container = null;
           sizeSlider = null;
           return;
         }
@@ -291,51 +271,42 @@
             });
           }).then(function(sizeHistogram){
 
-            var sizeSliderParams = {};
-
-            sizeSliderParams.statistics = sizeResponse.statistics;
-            sizeSliderParams.maxValue = sizeResponse.statistics.max;
-            sizeSliderParams.minValue = sizeResponse.statistics.min;
-            sizeSliderParams.histogram = sizeHistogram;
-
-            var sizeVV = sizeVVs.filter(function(vv){
-              return vv.type === "size";
-            })[0];
-            sizeSliderParams.visualVariable = sizeVV;
-
-
             if(!sizeSlider){
 
-              var sizeSliderParent = document.getElementById("size-container");
+              sizeSliderParent = document.getElementById("size-container");
               var sizeSliderContainer = document.createElement("div");
               sizeSliderParent.appendChild(sizeSliderContainer);
-              sizeSliderParams.container = sizeSliderContainer;
 
-              sizeSlider = new SizeSlider(sizeSliderParams);
+              sizeSlider = SizeSlider.fromRendererResult(sizeResponse, sizeHistogram);
+              sizeSlider.container = sizeSliderContainer;
 
               // when the user slides the handle(s), update the renderer
               // with the updated size visual variable objects
 
-              sizeSlideEvent = sizeSlider.on("data-change", function() {
+              sizeSlideEvent = sizeSlider.on(["thumb-change", "thumb-drag"], function() {
 
                 var renderer = layer.renderer.clone();
                 var visualVariables = lang.clone(renderer.visualVariables);
-                var unchangedVVs = [];
+                var unchangedVVs = [], sizeVariable = null;
+                
+
                 if(visualVariables){
                   unchangedVVs = visualVariables.filter(function(vv){
                     return vv.type !== "size";
                   });
+                  sizeVariable = visualVariables.filter(function(vv){
+                    return vv.type === "size";
+                  })[0];
                 }
-                renderer.visualVariables = unchangedVVs.concat(lang.clone(sizeSlider.visualVariable));
-
+                renderer.visualVariables = unchangedVVs.concat(sizeSlider.updateVisualVariable(sizeVariable));
                 layer.renderer = renderer;
               });
 
             } else {
-              sizeSlider.set(sizeSliderParams);
+              sizeSlider.updateFromRendererResult(sizeResponse, sizeHistogram);
             }
 
-          }).otherwise(function(error){
+          }).catch(function(error){
           console.error("There was an error with generating the size vv: ", error);
         });
 
@@ -361,9 +332,10 @@
           });
           colorParams.layer.renderer = renderer;
           // destroy color slider widget
-          colorSlider.destroy();
+          colorSlider.container = null;
           colorSlideEvent.remove();
           colorSlider = null;
+          sizeSliderParent = null;
           return;
         }
 
@@ -386,7 +358,6 @@
               oldRenderer.visualVariables = unchangedVVs.concat([colorVV]);
               renderer = unchangedVVs.length > 0 ? oldRenderer : newRenderer;
             } else {
-//              oldRenderer.visualVariables = [colorVV];
               renderer = newRenderer;
             }
 
@@ -398,15 +369,6 @@
               numBins: 30
             });
           }).then(function(colorHistogram) {
-            var colorSliderParams = {};
-
-            colorSliderParams.statistics = colorResponse.statistics;
-            colorSliderParams.maxValue = colorResponse.statistics.max;
-            colorSliderParams.minValue = colorResponse.statistics.min;
-            colorSliderParams.histogram = colorHistogram;
-            colorSliderParams.visualVariable = colorVV;
-            colorSliderParams.numHandles = getNumHandles(colorParams.theme);
-            colorSliderParams.syncedHandles = getNumHandles(colorParams.theme) > 2;
 
             // input the slider parameters in the slider's constructor
             // and add it to the view's UI
@@ -416,14 +378,15 @@
               var colorSliderParent = document.getElementById("color-container");
               var colorSliderContainer = document.createElement("div");
               colorSliderParent.appendChild(colorSliderContainer);
-              colorSliderParams.container = colorSliderContainer;
 
-              colorSlider = new ColorSlider(colorSliderParams);
+              colorSlider = ColorSlider.fromRendererResult(colorResponse, colorHistogram);
+              colorSlider.container = colorSliderContainer;
+              colorSlider.primaryHandleEnabled = colorParams.theme === "above-and-below";
 
               // when the user slides the handle(s), update the renderer
               // with the updated color visual variable object
 
-              colorSlideEvent = colorSlider.on("data-change", function() {
+              colorSlideEvent = colorSlider.on(["thumb-change", "thumb-drag"], function() {
                 var renderer = layer.renderer.clone();
 
                 var visualVariables = lang.clone(renderer.visualVariables);
@@ -433,19 +396,24 @@
                   var unchangedVVs = visualVariables.filter(function(vv){
                     return vv.type !== "color";
                   });
-                  renderer.visualVariables = unchangedVVs.concat([lang.clone(colorSlider.visualVariable)]);
+                  var colorVariable = visualVariables.filter(function(vv){
+                    return vv.type === "color";
+                  })[0];
+                  colorVariable.stops = colorSlider.stops;
+                  renderer.visualVariables = unchangedVVs.concat(colorVariable);
                 } else {
-                  renderer.visualVariables = [lang.clone(colorSlider.visualVariable)];
+                  console.log("what is going on? Why isn't there a visual variable?");
                 }
 
                 layer.renderer = renderer;
               });
 
             } else {
-              colorSlider.set(colorSliderParams);
+              colorSlider.updateFromRendererResult(colorResponse, colorHistogram);
+              colorSlider.primaryHandleEnabled = colorParams.theme === "above-and-below";
             }
 
-          }).otherwise(function(error){
+          }).catch(function(error){
           console.error("There was an error with color vv generator: ", error);
         });
 
@@ -468,10 +436,6 @@
         }).otherwise(function(err) {
           console.log("there was an error: ", err);
         });
-      }
-
-      function getNumHandles(theme){
-        return theme === "high-to-low" ? 2 : 3;
       }
 
     });

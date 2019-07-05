@@ -17,16 +17,8 @@
   }
 </style>
 
-<link rel="stylesheet" href="https://js.arcgis.com/4.7/esri/css/main.css">
-
-<script>
-  var dojoConfig = {
-    has: {
-      "esri-featurelayer-webgl": 1
-    }
-  }
-</script>
-<script src="https://js.arcgis.com/4.7/"></script>
+<link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/css/main.css">
+<script src="https://js.arcgis.com/4.12/"></script>
 
 <script>
 require([
@@ -46,7 +38,7 @@ require([
 
   // If CSV files are not on the same domain as your website, a CORS enabled server
   // or a proxy is required.
-  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv";
+  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.csv";
   esriConfig.request.corsEnabledServers.push(url);
 
   // Paste the url into a browser's address bar to download and view the attributes
@@ -90,11 +82,11 @@ require([
       title: "Magnitude"
     },
     stops: [
-      { value: 2, size: "4px" },
+      { value: 2, size: "3px" },
       { value: 3, size: "10px" },
       { value: 4, size: "20px" },
-      { value: 5, size: "40px" },
-      { value: 6, size: "60px" }
+      { value: 5, size: "30px" },
+      { value: 6, size: "40px" }
     ]
   };
 
@@ -106,7 +98,7 @@ require([
       size: "10px",
       color: [ 100, 0, 0, 1 ],
       outline: {
-        color: "white",
+        color: [255,255,255,0.5],
         width: 0.5
       }
     },
