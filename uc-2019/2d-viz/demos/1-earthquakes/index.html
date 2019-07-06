@@ -61,14 +61,14 @@ require([
       { value: 2, size: "4px" },
       { value: 3, size: "10px" },
       { value: 4, size: "20px" },
-      { value: 5, size: "40px" },
-      { value: 6, size: "60px" }
+      { value: 5, size: "30px" },
+      { value: 7, size: "50px" }
     ]
   };
 
   // If CSV files are not on the same domain as your website, a CORS enabled server
   // or a proxy is required.
-  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv";
+  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv";
   esriConfig.request.corsEnabledServers.push(url);
 
   // Paste the url into a browser's address bar to download and view the attributes
@@ -80,7 +80,13 @@ require([
 
   var template = {
     title: "Earthquake Info",
-    content: "Magnitude {mag} {type} hit {place} on {time}."
+    content: "Magnitude {mag} {type} hit {place} on {time}.",
+    fieldInfos: [{
+      fieldName: "time",
+      formatOptions: {
+        dateFormat: "day-short-month-year-short-time"
+      }
+    }]
   };
 
   var earthquakesLayer = new CSVLayer({
@@ -98,7 +104,7 @@ require([
   };
 
   var map = new Map({
-    basemap: "gray",
+    basemap: "topo",
     layers: [ earthquakesLayer ]
   });
 
@@ -117,7 +123,7 @@ require([
       size: "7px",
       color: color,
       outline: {
-        color: "white",
+        color: [255,255,255,0.4],
         width: 0.5
       }
     };

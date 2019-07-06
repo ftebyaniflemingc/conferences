@@ -36,7 +36,7 @@ This sample uses an Arcade expression to visualize the predominant educational a
 
 [![mexico-education-predominance](images/mexico-education-predominance.png)](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/mexico-education-predominance/)
 
-[Multivariate visualization: 2012 U.S. presidential election](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/multivariate-election/)
+[Multivariate visualization: 2016 U.S. presidential election](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/multivariate-election/)
 
 This sample demonstrates how to create a multivariate visualization using several variables related to the 2012 U.S. presidential election. The color indicates the winner (or predominant vote-getter). Opacity indicates the strength of the win. Size indicates the total number of votes cast in the county.
 
@@ -61,6 +61,19 @@ This sample demonstrates how to create a data exploration app using the Smart Ma
 [Dot Density Explorer](https://ekenes.github.io/esri-ts-samples/visualization/dot-density/)
 
 [Predominance Explorer](https://ekenes.github.io/esri-ts-samples/visualization/smart-mapping/predominance/boise-housing/)
+
+### Fast updates
+
+[Update renderer's attribute](https://developers.arcgis.com/javascript/latest/sample-code/visualization-update-data/index.html)
+
+[Colored histogram on ColorSlider](https://developers.arcgis.com/javascript/latest/sample-code/visualization-histogram-color/index.html)
+
+### WebStyleSymbol
+
+[WebStyleSymbol (2D)](https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/index.html)
+
+[WebStyleSymbol proportionally sized](https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-proportional-2d/index.html)
+
 
 ## Resources
 
