@@ -56,13 +56,33 @@
         "esri/core/promiseUtils"
       ], function(
         Map,
-        SceneView,
+        MapView,
         FeatureLayer,
         histogram,
         summaryStatistics,
         Histogram,
         promiseUtils
       ) {
+
+        const baseLayer = new FeatureLayer({
+          portalItem: {
+            id: "2b93b06dc0dc4e809d3c8db5cb96ba69"
+          },
+          legendEnabled: false,
+          popupEnabled: false,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [200, 200, 200, 0.75],
+              outline: null
+            }
+          },
+          spatialReference: {
+            wkid: 24373
+          }
+        });
+
         const layer = new FeatureLayer({
           portalItem: {
             // 4aca4d837a1e406c9d1361d803e1961d - view layer
@@ -73,38 +93,17 @@
           definitionExpression: "UnitTop = 0"
         });
 
-        const view = new SceneView({
+        const view = new MapView({
           container: "viewDiv",
           map: new Map({
-            basemap: "gray-vector",
-            layers: [layer]
+            layers: [baseLayer, layer]
           }),
-          camera: {
-            position: {
-              spatialReference: {
-                wkid: 3857
-              },
-              x: 8194043,
-              y: -3409659,
-              z: 16188789
-            },
-            heading: 18,
-            tilt: 0.14
+          center: {
+            x: 0,
+            y: 0,
+            spatialReference: baseLayer.spatialReference
           },
-          environment: {
-            background: {
-              type: "color",
-              color: "#bfd0d6"
-            },
-            starsEnabled: false,
-            atmosphereEnabled: false,
-            environment: {
-              lighting: {
-                directShadowsEnabled: false,
-                cameraTrackingEnabled: false
-              }
-            }
-          }
+          scale: 75000000
         });
         view.ui.add("containerDiv", "bottom-left");
         view.ui.add("titleDiv", "top-right");
