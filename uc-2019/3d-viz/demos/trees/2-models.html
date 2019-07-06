@@ -120,7 +120,7 @@
           }
         }]
 
-        var renderer = {
+        var realisticRenderer = {
           type: "unique-value",
           field: "Cmn_Name",
           uniqueValueInfos: uniqueValueInfos,
@@ -131,6 +131,17 @@
           },
           label: "tree",
           visualVariables: [ treeDepth, treeHeight, treeWidth ]
+        };
+        
+        var renderer = {
+          type: "simple",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Other"
+          },
+          label: "tree",
+          visualVariables: [ treeDepth, treeHeight, treeWidth, carbonStorage ]
         };
 
         // Construct the layer and set the renderer and popupTemplate on it
