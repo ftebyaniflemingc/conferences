@@ -1,3 +1,6 @@
+# *.pptx
+*.potx
+
 node_modules/
 .vscode/*
 
@@ -63,3 +66,5 @@ ds-2018/arcade/arcade-slides.pptx
 ds-2018/geometry-engine/slides.pptx
 ds-2018/geometry-engine/ge-slides.pptx
 ds-2018/smart-mapping/slides.pptx
+
+uc-2019/interactive-apps/presentations

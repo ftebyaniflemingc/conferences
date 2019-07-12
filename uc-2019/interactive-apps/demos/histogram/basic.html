@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Histogram widget - 4.12</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.12/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #containerDiv {
+        padding: 10px;
+      }
+      #histogram-title {
+        font-size: 12pt;
+        text-align: center;
+        padding: 0px 0px 10px 0px;
+      }
+      #histogram {
+        width: 300px;
+        height: 200px;
+      }
+      #titleDiv {
+        padding: 10px;
+      }
+      #titleText {
+        font-size: 20pt;
+        font-weight: 60;
+        padding-bottom: 10px;
+      }
+      .labels {
+        padding: 5px;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/renderers/smartMapping/statistics/summaryStatistics",
+        "esri/widgets/Histogram",
+        "esri/core/promiseUtils"
+      ], function(
+        Map,
+        MapView,
+        FeatureLayer,
+        histogram,
+        summaryStatistics,
+        Histogram,
+        promiseUtils
+      ) {
+
+        const baseLayer = new FeatureLayer({
+          portalItem: {
+            id: "2b93b06dc0dc4e809d3c8db5cb96ba69"
+          },
+          legendEnabled: false,
+          popupEnabled: false,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [200, 200, 200, 0.75],
+              outline: null
+            }
+          },
+          spatialReference: {
+            wkid: 24373
+          }
+        });
+
+        const layer = new FeatureLayer({
+          portalItem: {
+            // 4aca4d837a1e406c9d1361d803e1961d - view layer
+            // fded240144c74ce988771a503a3a03d8 - base layer
+            id: "4aca4d837a1e406c9d1361d803e1961d"
+          },
+          // only display surface temperature data
+          definitionExpression: "UnitTop = 0"
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: new Map({
+            layers: [baseLayer, layer]
+          }),
+          center: {
+            x: 0,
+            y: 0,
+            spatialReference: baseLayer.spatialReference
+          },
+          scale: 75000000
+        });
+        view.ui.add("containerDiv", "bottom-left");
+        view.ui.add("titleDiv", "top-right");
+
+        view.when().then(createHistogram);
+
+        function fetchStats(field) {
+          const params = {
+            layer: layer,
+            field: field,
+            numBins: 100
+          };
+
+          return promiseUtils.eachAlways([
+            histogram(params),
+            summaryStatistics(params)
+          ]);
+        }
+
+        function createHistogram() {
+          //  Other available fields:
+          //  temp, salinity, appO2ut, dissO2
+          //  nitrate, percO2sat, phosphate, silicate
+
+          // fetches summary statistics and histogram bins
+          // from the feature service
+          fetchStats("temp")
+            .then(function(response) {
+              const histogramResult = response[0].value;
+              const statsResult = response[1].value;
+
+              const minElement = document.getElementById("min");
+              const maxElement = document.getElementById("max");
+              minElement.innerText = formatToDegrees(histogramResult.minValue);
+              maxElement.innerText = formatToDegrees(histogramResult.maxValue);
+
+              // Creates a Histogram instance from the returned histogram result
+              const histogramWidget = Histogram.fromHistogramResult(
+                histogramResult
+              );
+              histogramWidget.container = "histogram";
+              histogramWidget.average = statsResult.avg;
+              histogramWidget.labelFormatFunction = function(value, type) {
+                return formatToDegrees(value);
+              };
+            })
+            .catch(function(error) {
+              console.error(error);
+            });
+        }
+
+        function formatToDegrees(value) {
+          return value.toFixed(2) + "°";
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="titleDiv" class="esri-widget">
+      <div id="titleText">Ecological Marine Units</div>
+      <div>Indian Ocean</div>
+    </div>
+    <div id="containerDiv" class="esri-widget">
+      <div id="histogram-title" class="esri-widget">Sea Temperature (°C)</div>
+      <div id="histogram"></div>
+      <div class="labels esri-widget">
+        <span style="float: left" id="min"></span>
+        <span style="float: right" id="max"></span>
+      </div>
+    </div>
+  </body>
+</html>
