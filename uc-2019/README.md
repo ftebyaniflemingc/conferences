@@ -10,20 +10,6 @@ The ArcGIS API for JavaScript lets you build powerful interactive mapping applic
 
 The ArcGIS API 4.x for JavaScript provides a set of APIs allowing you to build powerful interactive 3D mapping applications. In this session, we'll focus on the visualization capabilities specific to 3D views. We'll dive into the various symbol types and visual variables and demonstrate how they interact with renderers. You'll learn cartographic techniques unique to 3D and see several demos showing how to thematically visualize 2D features with 3D symbols. We'll also provide an overview of how to visualize data in layers specific to 3D views.
 
-## ArcGIS API for JavaScript: Using Arcade with Your Apps
+## Interactive Client-Side Web Mapping with the ArcGIS API for JavaScript
 
-Sometimes simple calculations can provide more insight than field values when creating data-driven 
-visualizations. Arcade is a scripting language that allows you to drive visualizations, popup content, 
-and labels by a value returned from an expression rather than a field value. This session will provide 
-an overview of how to navigate the Arcade documentation while highlighting some of the key functions 
-available in Arcade and the ArcGIS API for JavaScript. View examples of how powerful Arcade can be when 
-creating visualizations and labels for a FeatureLayer. Also, observe how the live Arcade editor in ArcGIS
-Online can be a powerful tool in helping you write, edit, debug, and execute custom expressions.
-
-## Practical Guide for Building a 3D Web App From 2D Data
-
-Have you hesitated to build 3D apps because they look complicated or you lack the necessary data? 
-In this session, learn how to build a 3D app using your 2D data and the resources provided out of 
-the box by Esri and the ArcGIS API for JavaScript. Even if your data doesn't contain Z-values, you 
-can build sophisticated 3D apps that leverage modern browser technology to render your 2D features 
-with 3D symbology.
+Discover the client-side technologies baked into the JavaScript API to create powerful interactive applications. In this session you will learn about the different technologies that have been developed that allow you execute complex geometric operations on features without doing a round trip to a server. We will also showcase some examples like on-the-fly statistical analysis that could spark new ideas for original data interactions in your applications.
