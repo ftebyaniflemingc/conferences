@@ -60,16 +60,21 @@
       var renderer = {
         type: "simple",
         symbol: {
-          type: "simple-marker",
-          color: "green",
-          size: 6,
-          outline: {
-            color: "lightgray",
-            width: 0.5
-          }
+          type: "point-3d",
+          symbolLayers: [{
+            type: "icon",
+            size: 6,
+            material: {
+              color: "green"
+            },
+            outline: {
+              color: "lightgray",
+              width: 0.5
+            }
+          }]
         },
-        label: "tree",
-        visualVariables: [ realWorldDiameter, carbonStorage ]
+        visualVariables: [ carbonStorage, realWorldDiameter ],
+        label: "tree"
       };
 
       // Assign the renderer to the layer

@@ -83,20 +83,21 @@ require([
 
   const winnerRenderer = new UniqueValueRenderer({
     field: "PRS_PARTY_16",  // PRS_PARTY_12
-    defaultSymbol: createSymbol("#a7c636", false),
+    defaultSymbol: createSymbol("#a7c636", true),
     defaultLabel: "Other",
     legendOptions: {
       title: "Winner"
     },
     uniqueValueInfos: [{
       value: "Dem",
-      symbol: createSymbol("#149ece", false),
+      symbol: createSymbol("#149ece", true),
       label: "Clinton"
     }, {
       value: "GOP",
-      symbol: createSymbol("#ed5151", false),
+      symbol: createSymbol("#ed5151", true),
       label: "Trump"
-    }]
+    }],
+    visualVariables: [ percentWinner, totalVotes ]
   });
 
   const layer = new FeatureLayer({
@@ -107,7 +108,7 @@ require([
   });
 
   const map = new Map({
-    basemap: "gray",
+    basemap: "gray-vector",
     layers: [ layer ]
   });
 
@@ -115,7 +116,7 @@ require([
     container: "viewDiv",
     map: map,
     center: [ -95, 38 ],
-    zoom: 5
+    zoom: 4
   });
 
   const legend = new Legend({

@@ -138,7 +138,7 @@
           symbol: {
             type: "web-style",
             styleName: "esriRealisticTreesStyle",
-            name: "Other"
+            name: "Other" 
           },
           label: "tree",
           visualVariables: [ treeDepth, treeHeight, treeWidth, carbonStorage ]
@@ -147,7 +147,7 @@
         // Construct the layer and set the renderer and popupTemplate on it
         var treesLayer = new FeatureLayer({
           url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
-          renderer: renderer,
+          renderer: realisticRenderer,
           popupTemplate: { // autocasts as new PopupTemplate()
             title: "{Cmn_Name}",
             content: "<i>{Sci_Name}</i><br>" +

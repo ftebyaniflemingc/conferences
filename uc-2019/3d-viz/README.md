@@ -31,7 +31,6 @@ San Francisco buildings visualized with a color visual variable showing walk tim
 App that demonstrates how to visualize points of interest in a city scene.
 
 
-### [SceneLayerView - query statistics by geometry
-](https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayerview-query-stats/index.html)
+### [SceneLayerView - query statistics by geometry](https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayerview-query-stats/index.html)
 
 San Francisco buildings visualized with a color visual variable showing walk times. The renderer is generated using smart mapping. The color slider allows users to explore the visual aspect of the data.

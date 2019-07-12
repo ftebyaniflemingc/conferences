@@ -47,7 +47,7 @@ require([
       { value: 3, color: "#b1cdc2" },
       { value: 4, color: "#629eb0" },
       { value: 5, color: "#38627a" },
-      { value: 6, color: "#0d2644" }
+      { value: 7, color: "#0d2644" }
     ]
   };
 
@@ -66,9 +66,30 @@ require([
     ]
   };
 
+  const renderer = {
+    type: "heatmap",
+    colorStops: [
+      { color: "rgba(63, 40, 102, 0)", ratio: 0 },
+      { color: "#472b77", ratio: 0.083 },
+      { color: "#4e2d87", ratio: 0.166 },
+      { color: "#563098", ratio: 0.249 },
+      { color: "#5d32a8", ratio: 0.332 },
+      { color: "#6735be", ratio: 0.415 },
+      { color: "#7139d4", ratio: 0.498 },
+      { color: "#7b3ce9", ratio: 0.581 },
+      { color: "#853fff", ratio: 0.664 },
+      { color: "#a46fbf", ratio: 0.747 },
+      { color: "#c29f80", ratio: 0.83 },
+      { color: "#e0cf40", ratio: 0.913 },
+      { color: "#ffff00", ratio: 1 }
+    ],
+    maxPixelIntensity: 250,
+    minPixelIntensity: 0
+  };
+
   // If CSV files are not on the same domain as your website, a CORS enabled server
   // or a proxy is required.
-  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv";
+  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.csv";
   esriConfig.request.corsEnabledServers.push(url);
 
   // Paste the url into a browser's address bar to download and view the attributes
@@ -92,26 +113,30 @@ require([
   var earthquakesLayer = new CSVLayer({
     url: url,
     copyright: "USGS Earthquakes",
-    title: "Earthquakes from last 7 days (magnitude 2.5+)",
+    title: "Earthquakes from last week (magnitude 2.5+)",
     popupTemplate: template
   });
 
   // set the renderer on the layer
-  earthquakesLayer.renderer = {
-    type: "simple",
-    symbol: createSymbol([ 100, 0, 0, 1 ]),
-    visualVariables: [ magnitudeWithSize ]
-  };
+  earthquakesLayer.renderer = renderer;
 
   var map = new Map({
-    basemap: "topo",
+    basemap: "gray-vector",
     layers: [ earthquakesLayer ]
   });
 
-  var view = new MapView({
+  view = new MapView({
     container: "viewDiv",
-    center: [138, 35],
-    zoom: 3,
+    extent: {
+      "spatialReference": {
+        "latestWkid": 3857,
+        "wkid": 102100
+      },
+      "xmin": -13118369.681767836,
+      "ymin": 4235261.963699823,
+      "xmax": -13041015.409143344,
+      "ymax": 4294959.282790465
+    },
     map: map
   });
 
