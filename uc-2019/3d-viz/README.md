@@ -18,9 +18,9 @@ The ArcGIS API 4.x for JavaScript provides a set of APIs allowing you to build p
 
 A portfolio of various 3D samples from [Raluca Nicola](https://github.com/ralucanicola/).
 
-### [Realistic Trees]()
+### [Realistic Trees](https://ekenes.github.io/conferences/ds-2019/3d-viz/demos/trees/2-models.html)
 
-San Francisco buildings visualized with a color visual variable showing walk times. Edges can be toggled on and off of the buildings.
+2D point layer symbolized with realistic tree 3D web style symbols.
 
 ### [School routes](http://zurich.maps.arcgis.com/home/webscene/viewer.html?webscene=9c697240d3304968af8dde614603ab5d&viewpoint=cam:-118.14532024,34.16384267,601.57;330.183,67.66)
 
@@ -30,7 +30,6 @@ San Francisco buildings visualized with a color visual variable showing walk tim
 
 App that demonstrates how to visualize points of interest in a city scene.
 
-
 ### [SceneLayerView - query statistics by geometry](https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayerview-query-stats/index.html)
 
-San Francisco buildings visualized with a color visual variable showing walk times. The renderer is generated using smart mapping. The color slider allows users to explore the visual aspect of the data.
+Allows the user to explore building materials in a web scene of Helsinki, Finland.
