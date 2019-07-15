@@ -66,7 +66,7 @@ This sample demonstrates how to create a data exploration app using the Smart Ma
 
 ### Fast updates
 
-[Update renderer's attribute](https://developers.arcgis.com/javascript/latest/sample-code/visualization-update-data/index.html)
+[Update renderer attribute](https://developers.arcgis.com/javascript/latest/sample-code/visualization-update-data/index.html)
 
 [Colored histogram on ColorSlider](https://developers.arcgis.com/javascript/latest/sample-code/visualization-histogram-color/index.html)
 
@@ -82,7 +82,7 @@ This sample demonstrates how to create a data exploration app using the Smart Ma
 * [Community](https://developers.arcgis.com/en/javascript/jshelp/community.html)
 * [ArcGIS for JavaScript API Resource Center](http://help.arcgis.com/en/webapi/javascript/arcgis/index.html)
 * [ArcGIS Blog](https://www.esri.com/arcgis-blog/author/kekenes/)
-* [twitter@kekenes](http://twitter.com/kekenes)
+* [Twitter @kekenes](http://twitter.com/kekenes)
 
 ## Issues
 

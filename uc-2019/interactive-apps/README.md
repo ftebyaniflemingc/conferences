@@ -35,7 +35,7 @@ Discover the client-side technologies baked into the JavaScript API to create po
 
 #### [Query 3D SceneLayer by distance](https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayerview-query-stats/live/index.html)
 
-Highilghts buildings within a specified distanced of a sketched geometry in the view and summarizes the buildings by building material type.
+Highlights buildings within a specified distanced of a sketched geometry in the view and summarizes the buildings by building material type.
 
 #### [Query 2D FeatureLayer by distance](https://developers.arcgis.com/javascript/latest/sample-code/featurelayerview-query-distance/live/index.html)
 
@@ -43,7 +43,7 @@ Allows the user to explore homicide data broken down by race, gender, age, and t
 
 #### [Age Pyramid - query by geometry](https://developers.arcgis.com/javascript/latest/sample-code/featurelayerview-query-geometry/live/index.html)
 
-Creates an age pyramid for features within a given radius and udpates on every mouse move.
+Creates an age pyramid for features within a given radius and updates on every mouse move.
 
 #### [Query neighbors](https://ekenes.github.io/esri-ts-samples/query/neighbor-comparison/touches.html)
 
@@ -69,7 +69,7 @@ This app allows the user to emphasize subgroups of the population in the United 
 
 This app animates housing construction density by updating the opacity of dot colors.
 
-#### [Margin of victory - voting precints](https://developers.arcgis.com/javascript/latest/sample-code/visualization-vv-opacity-animate/live/index.html)
+#### [Margin of victory - voting precincts](https://developers.arcgis.com/javascript/latest/sample-code/visualization-vv-opacity-animate/live/index.html)
 
 This app visualizes how contested voting was on the precinct level of the 2008 United States presidential election.
 
