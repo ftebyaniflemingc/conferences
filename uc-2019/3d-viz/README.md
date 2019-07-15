@@ -14,7 +14,7 @@ The ArcGIS API 4.x for JavaScript provides a set of APIs allowing you to build p
 
 ## Presentation
 
-[slides](https://ekenes.github.io/conferences/uc-2019/3d-viz/)
+[slides](https://ekenes.github.io/conferences/uc-2019/3d-viz/slides.pptx)
 
 ## Demos
 
