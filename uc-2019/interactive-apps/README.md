@@ -14,7 +14,7 @@ Discover the client-side technologies baked into the JavaScript API to create po
 
 ## Presentation
 
-https://git.io/fjr3N
+[slides](https://git.io/fjr3N)
 
 ## Outline
 
