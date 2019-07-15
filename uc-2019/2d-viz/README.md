@@ -12,7 +12,9 @@ San Diego Convention Center, Room 4
 
 The ArcGIS API for JavaScript lets you build powerful interactive mapping applications. Learn how you can turn your raw data into information that tells a story with simple 2D data-driven visualizations. This session will provide an overview to the various visualization techniques available in the API specific to 2D vector data.
 
-### Outline
+## Presentation
+
+[slides](https://ekenes.github.io/conferences/uc-2019/2d-viz/)
 
 ## Demos
 
