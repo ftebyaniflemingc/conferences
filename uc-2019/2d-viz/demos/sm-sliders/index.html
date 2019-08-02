@@ -21,19 +21,37 @@
         margin: 10px;
       }
 
+      .timeSlider {
+        width: 800px;
+        height: 100px;
+        display: inline-block;
+        margin: 10px;
+        padding-bottom: 50px;
+      }
+
+      .histogram {
+        width: 500px;
+        height: 300px;
+        display: inline-block;
+        margin: 10px;
+        padding-bottom: 50px;
+      }
+
       .title {
         font-size: 24pt;
         padding: 10px;
       }
     </style>
 
-    <link rel="stylesheet" href="https://jsdev.arcgis.com/4.12/esri/themes/light/main.css"/>
-    <script src="https://jsdev.arcgis.com/4.12/"></script>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/light/main.css"/>
+    <script src="https://js.arcgis.com/4.12/"></script>
 
     <script>
       require([
         "esri/widgets/Slider",
         "esri/widgets/HistogramRangeSlider",
+        "esri/widgets/TimeSlider",
+        "esri/widgets/Histogram",
         "esri/widgets/smartMapping/ColorSlider",
         "esri/widgets/smartMapping/SizeSlider",
         "esri/widgets/smartMapping/ColorSizeSlider",
@@ -47,7 +65,7 @@
         "esri/renderers/visualVariables/OpacityVariable",
 
       ], function(
-        Slider, HistogramRangeSlider, ColorSlider, SizeSlider, ColorSizeSlider, ClassedColorSlider, ClassedSizeSlider, OpacitySlider, HeatmapSlider,
+        Slider, HistogramRangeSlider, TimeSlider, Histogram, ColorSlider, SizeSlider, ColorSizeSlider, ClassedColorSlider, ClassedSizeSlider, OpacitySlider, HeatmapSlider,
         ColorVariable, SizeVariable, OpacityVariable
       ) {
 
@@ -924,12 +942,48 @@
               { color: "#f4cc00", ratio: 0.913 },
               { color: "#ffff00", ratio: 1 }
             ]
+          }),
+
+          new Histogram({
+            min: 0,
+            max: 0.529,
+            bins: bins100,
+            average: 0.158,
+            dataLines: [{
+              value: 0.4,
+              label: "Top 1%"
+            }]
+          }),
+
+          new TimeSlider({
+            mode: "time-window",
+            loop: true,
+            playRate: 100,
+            timeVisible: false,
+            fullTimeExtent: {
+              start: new Date(1990, 0, 1),
+              end: new Date(2000, 0, 1)
+            },
+            values: [
+              new Date(1990, 0, 1),
+              new Date(1991, 0, 1)
+            ],
+            stops: {
+              count: 20
+            }
           })
         ];
 
         sliders.forEach(function(slider, i){
-          const cssClass = i <= 1 ? "horiztontalSliders" : "smartMappingSliders";
+          let cssClass = i <= 1 ? "horiztontalSliders" : "smartMappingSliders";
 
+          if (slider.declaredClass === "esri.widgets.TimeSlider"){
+            cssClass = "timeSlider";
+          }
+
+          if (slider.declaredClass === "esri.widgets.Histogram"){
+            cssClass = "histogram";
+          }
           createContainer(slider, cssClass);
         });
 
