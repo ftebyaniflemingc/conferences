@@ -696,6 +696,10 @@
           titleContainer.classList.add("title");
           titleContainer.innerHTML = sliderInstance.label;
 
+          if(sliderInstance.primaryHandleEnabled){
+            titleContainer.innerHTML += " (synced handles)";
+          }
+
           outerContainer.appendChild(titleContainer);
           outerContainer.appendChild(sliderInstance.container);
           const body = document.getElementsByTagName("body")[0];
