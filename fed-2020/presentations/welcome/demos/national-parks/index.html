@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>NPS Visitation Stats</title>
+
+    <!-- Load the Chart.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css"/>
+    <script src="https://js.arcgis.com/4.14/"></script>
+
+
+    <style>
+
+      #containerDiv {
+        padding: 5px;
+        text-align: center;
+        width: 320px;
+        font-weight: 400;
+      }
+
+      #title{
+        font-weight: 300;
+        font-size: 16pt;
+      }
+
+      /* #sliderDiv {
+        height: 100px;
+      } */
+
+      #bottomPanel {
+        position: absolute;
+        height: 300px;
+        width: 100%;
+        bottom: 0;
+      }
+      #chartContainer {
+        position: inherit;
+        /* padding-top: 10px; */
+        height: 220px;
+        bottom: 20px;
+        width: 100%;
+        z-index: 96;
+      }
+      /* #visitation-chart{
+        height: inherit;
+      } */
+
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #viewDiv {
+        position: absolute;
+        right: 0;
+        left: 0;
+        top: 0;
+        bottom: 300px;
+        overflow: hidden;
+      }
+
+      #sliderContainer {
+        position: absolute;
+        bottom: 0px;
+        padding-left: 50px;
+        padding-right: 60px;
+        height: 50px;
+        width: 850px;
+        text-align: center;
+        z-index: 99;
+        background-color: rgba(0,0,0,0);
+      }
+
+      #listContainer{
+        position: relative;
+        z-index: 98;
+        top: 35px;
+        left: 800px;
+        width: 280px;
+      }
+
+      #annual-summary{
+        position: inherit;
+        top: 0;
+        left: 0;
+        width: 800px;
+        padding-top: 20px;
+        padding-left: 20px;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 12pt;
+      }
+      #listTitle{
+        color:#008837;
+        font-weight: 500;
+        font-size: 16pt;
+        padding-left: 40px;
+        /* text-align: center; */
+      }
+      #annual-visits {
+        color:#008837;
+        font-size: 22pt;
+        font-weight: 600;
+      }
+      .increase-style{
+        color:#008837;
+        font-weight: 500;
+      }
+      .decrease-style {
+        color:#7b3294;
+        font-weight: 500;
+      }
+      #totalContainer{
+        padding-left: 20px;
+        padding-bottom: 10px;
+        text-align: right;
+      }
+      #total-visits {
+        font-size: 28pt;
+        font-weight: 800;
+        text-align: right;
+      }
+      #total-subtext {
+        font-size: 12pt;
+        padding-top: 7px;
+        text-align: right;
+        /* padding-left: 75px; */
+        padding-bottom: 20px;
+      }
+      li{
+        font-size: 12pt;
+        padding-bottom: 3px;
+      }
+    </style>
+
+
+    <script id="highest-growth-arcade" type="arcgis-arcade">
+      var highest = -Infinity;
+      var previousValue = null;
+      var value = null;
+      var highestYear = null;
+      for (var att in $feature){
+        if( typeof($feature[att]) == 'Number' && Find('F', att) > -1){
+          if(Find('F_1904', att) == -1){
+            value = $feature[att] - previousValue;
+            if(value > highest){
+              highest = value;
+              highestYear = Mid(att, 1,4);
+            }
+            previousValue = $feature[att];
+          } else {
+            previousValue = $feature[att];
+          }
+        }
+      }
+      return highestYear + " (" + Text(highest, "#,###") + ")";
+    </script>
+
+    <script id="lowest-growth-arcade" type="arcgis-arcade">
+      var lowest = Infinity;
+      var previousValue = null;
+      var value = null;
+      var lowestYear = null;
+      for (var att in $feature){
+        var value = $feature[att];
+        if( typeof(value) == 'Number' && Find('F', att) > -1){
+          if(Find('F1904', att) == -1){
+            value = $feature[att] - previousValue;
+            if(value < lowest){
+              lowest = value;
+              lowestYear = Mid(att, 1,4);
+            }
+
+            previousValue = $feature[att];
+          } else {
+            previousValue = $feature[att];
+          }
+        }
+      }
+      return lowestYear + " (" + Text(lowest, "#,###") + ")";
+    </script>
+
+    <script id="visitation-change-arcade" type="arcgis/arcade">
+      var lowest = Infinity;
+      var ignoreFields = [ "OBJECTID", "x", "y", "Range" ];
+      for (var att in $feature){
+        var value = $feature[att];
+        if( typeof(value) == 'Number' && IndexOf(ignoreFields, att) == -1){
+          lowest = IIF(value < lowest, value, lowest);
+        }
+      }
+      return lowest;
+    </script>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/renderers/smartMapping/statistics/summaryStatistics",
+        "esri/symbols/WebStyleSymbol",
+        "esri/symbols/CIMSymbol",
+        "esri/widgets/Histogram",
+        "esri/widgets/Slider",
+        "esri/widgets/Legend",
+        "esri/widgets/Expand",
+        "esri/widgets/Home",
+        "esri/core/watchUtils",
+        "esri/Color",
+        "esri/intl"
+      ], function(
+        Map,
+        MapView,
+        FeatureLayer,
+        histogram,
+        summaryStatistics,
+        WebStyleSymbol,
+        CIMSymbol,
+        Histogram,
+        Slider,
+        Legend,
+        Expand,
+        Home,
+        watchUtils,
+        Color,
+        intl
+      ) {
+
+        // const starCIM = new CIMSymbol({
+        //     data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":10,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-4.76,"ymin":-4.05,"xmax":4.76,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[1.12,1.55],[4.76,1.55],[1.82,-0.59],[2.94,-4.05],[0.0,-1.91],[-2.94,-4.05],[-1.82,-0.59],[-4.76,1.55],[-1.12,1.55],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidFill","enable":true,"color":[255,255,190,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
+        //   });
+
+        const pentagonCIM = new CIMSymbol({
+          data: {"type":"CIMPointSymbol","symbolLayers":[{
+            "type":"CIMVectorMarker",
+            "enable":true,
+            "anchorPoint":{"x":0,"y":0,"z":0},
+            "anchorPointUnits":"Relative",
+            "dominantSizeAxis3D":"Y",
+            "size":10,
+            "billboardMode3D":"FaceNearPlane",
+            "frame":{"xmin":0.0,"ymin":0.0,"xmax":17.0,"ymax":17.0},
+            "markerGraphics":[{
+              "type":"CIMMarkerGraphic",
+              "geometry":{
+                "rings":[[
+                  [17.0,11.01],
+                  [13.75,1.0],
+                  [3.25,1.0],
+                  [0.0,11.01],
+                  [8.49,17.19],
+                  [17.0,11.01]]
+                ]},
+                "symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{
+                  "type":"CIMSolidStroke",
+                  "enable":true,"capStyle":"Round",
+                  "joinStyle":"Round",
+                  "lineStyle3D":"Strip",
+                  "miterLimit":10,
+                  "width":0.75,
+                  "color":[167,169,172,255]
+                }, {
+                  "type":"CIMSolidFill",
+                  "enable":true,
+                  "color":[255,255,255,255]}]}
+          }],
+          "scaleSymbolsProportionally":true,
+          "respectFrame":true
+          }],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
+        });
+
+        const parkCIM = new CIMSymbol({
+          data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":15.75,"billboardMode3D":"FaceNearPlane","frame":{"xmin":0.0,"ymin":0.0,"xmax":21.0,"ymax":21.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[15.0,15.0],[12.0,15.0],[16.0,10.0],[13.0,10.0],[17.0,5.0],[11.0,5.0],[11.0,2.0],[10.0,2.0],[10.0,5.0],[4.0,5.0],[8.0,10.0],[5.0,10.0],[9.0,15.0],[6.0,15.0],[10.5,19.0],[15.0,15.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidStroke","enable":true,"capStyle":"Round","joinStyle":"Round","lineStyle3D":"Strip","miterLimit":10,"width":0,"color":[0,0,0,255]},{"type":"CIMSolidFill","enable":true,"color":[113,201,110,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true},{"type":"CIMVectorMarker","enable":true,"colorLocked":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":18.5,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-5.0,"ymin":-5.0,"xmax":5.0,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[0.87,4.92],[1.71,4.7],[2.5,4.33],[3.21,3.83],[3.83,3.21],[4.33,2.5],[4.7,1.71],[4.92,0.87],[5.0,0.0],[4.92,-0.87],[4.7,-1.71],[4.33,-2.5],[3.83,-3.21],[3.21,-3.83],[2.5,-4.33],[1.71,-4.7],[0.87,-4.92],[0.0,-5.0],[-0.87,-4.92],[-1.71,-4.7],[-2.5,-4.33],[-3.21,-3.83],[-3.83,-3.21],[-4.33,-2.5],[-4.7,-1.71],[-4.92,-0.87],[-5.0,0.0],[-4.92,0.87],[-4.7,1.71],[-4.33,2.5],[-3.83,3.21],[-3.21,3.83],[-2.5,4.33],[-1.71,4.7],[-0.87,4.92],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidStroke","enable":true,"capStyle":"Round","joinStyle":"Round","lineStyle3D":"Strip","miterLimit":10,"width":0.5,"color":[167,169,172,255]},{"type":"CIMSolidFill","enable":true,"color":[255,255,255,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
+        });
+
+        console.log("park outline: ", parkCIM.data.symbolLayers[1])
+
+        console.log("star outline: ", pentagonCIM.data.symbolLayers[0])
+
+        let pentagonOutline = pentagonCIM.data.symbolLayers[0];
+        pentagonOutline.size = 20;
+        pentagonOutline.colorLocked = true;
+
+        parkCIM.data.symbolLayers[1] = pentagonOutline;
+
+        let visitationChart;
+
+        const colors = [ "#7b3294", "#c2a5cf", "#cfcfcf", "#a6dba0", "#008837" ];
+
+        const threshold = 3000000;
+
+        const layer = new FeatureLayer({
+          portalItem: {
+            id: "0e3fd5de259f46acb169c54eb501cfe5"
+          },
+          outFields: ["*"],
+          popupTemplate: createPopupTemplate(1904),
+          renderer: {
+            type: "class-breaks",
+            field: "F1904",
+            classBreakInfos: [
+              {
+                minValue: threshold,
+                maxValue: 1000000000,
+                symbol: parkCIM
+              },
+
+              {
+                minValue: 0,
+                maxValue: threshold-1,
+                symbol: {
+
+                  type: "web-style",
+                  name: "park",
+                  styleName: "Esri2DPointSymbolsStyle"
+                }
+              }
+            ],
+            visualVariables: [
+              {
+                type: "size",
+                field: "F1904",
+                // maxDataValue: 10000000,
+                // maxSize: "60px",
+                // minDataValue: 100000,
+                // minSize: "14px",
+                stops: [
+                  { value: 100000, size: "14px" },
+                  { value: 1000000, size: "25px" },
+                  { value: 4000000, size: "40px" },
+                  { value: 10000000, size: "60px" }
+                ]
+              }, {
+                type: "color",
+                valueExpression: getColorValueExpression(1904),
+                valueExpressionTitle: "% Change from previous year",
+                stops: [
+                  { value: -25, color: colors[0] },
+                  { value: -10, color: colors[1] },
+                  { value: 0, color: colors[2] },
+                  { value: 10, color: colors[3] },
+                  { value: 25, color: colors[4] }
+                ]
+              }
+            ]
+          }
+        });
+
+        const map = new Map({
+          // colors d582a9e953c44c09bb998c7d9b66f8d4
+          //hg 3582b744bba84668b52a16b0b6942544
+          // bluish 27aeeef7c21447a8a309c488d0ea8b96
+          // khaki - 93ecbbd5f3984d7f8a387de919ce7149
+          // Lisa's khaki
+          basemap: {
+            portalItem: {
+              id: "ba223f982a3c4a0ea8c9953346e2a201"
+            }
+          },
+          // basemap: "gray",
+          layers: [layer]
+        });
+
+
+       view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-99.85113143918292, 39.66953859854104],
+          scale: 36978595.474472,
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              breakpoint: false,
+              position: "bottom-right"
+            }
+          }
+        });
+
+        view.ui.add(
+          new Expand({
+            view: view,
+            content: document.getElementById("containerDiv"),
+            expanded: true,
+            expandIconClass: "esri-icon-chart"
+          }),
+          "top-right"
+        );
+
+        view.ui.add( new Home({ view: view }), "top-left");
+
+        // view.ui.add(new Expand({
+        //   content: new Legend({
+        //     view: view,
+        //     // style: "card"
+        //   }),
+        //   view: view,
+        //   expanded: true
+        // }), "bottom-left");
+
+        const slider = new Slider({
+          min: 1904,
+          max: 2018,
+          values: [1904],
+          labelsVisible: true,
+          rangeLabelsVisible: false,
+          labelInputsEnabled: true,
+          precision: 0,
+          steps: 1,
+          container: "sliderDiv"
+        });
+
+        // When the user changes the slider's value,
+        // change the renderer and histogram to reflect
+        // data corresponding to the year indicated on the slider
+
+        slider.on(["thumb-change", "thumb-drag"], function(event) {
+          updateRenderer(event.value);
+          updateYearDisplay(event.value);
+        });
+
+        let points = null;
+        let lv = null;
+        let aklv = null;
+
+        // Query all the features in the layer. These will by used
+        // for client-side queries as the user slides the thumb of the slider
+
+        view
+          .whenLayerView(layer)
+          .then(function(layerView) {
+            lv = layerView;
+            watchUtils.whenFalseOnce(layerView, "updating", function() {
+              return layerView
+                .queryFeatures()
+                .then(function(response) {
+                  points = response.features;
+                  const year = slider.values[0];
+                  return year;
+                })
+                .then(updateRenderer)
+                .then(queryAnnualTotals)
+                //   function(){
+                //   updateRenderer(year, layerView);
+                // })
+
+                .catch(function(e) {
+                  console.error(e);
+                });
+            });
+          })
+          .catch(function(e) {
+            console.error(e);
+          });
+
+        // Updates the underlying data value driving the expression
+        // based on the given year provided by the slider
+
+        function updateRenderer(value) {
+          renderer = layer.renderer.clone();
+          const sizeVariable = renderer.visualVariables.filter( vv => vv.type === "size" )[0];
+          const colorVariable = renderer.visualVariables.filter( vv => vv.type === "color" )[0];
+          renderer.field = `F${value}`;
+          sizeVariable.field = `F${value}`;
+          colorVariable.valueExpression = getColorValueExpression(value);
+          renderer.visualVariables = [sizeVariable, colorVariable];
+
+          layer.renderer = renderer;
+          layer.popupTemplate = createPopupTemplate(value);
+
+          queryTotalVisitation(value)
+            .then(updateParkVisitationDisplay);
+          queryTopParksByYear(value)
+            .then(updateTopParksDisplay);
+          updateChart(value);
+
+          return value;
+        }
+
+        // Generate color visual variable based on the given year
+
+        function getColorValueExpression(value){
+          return `
+            $feature.F${value};
+            var current = $feature.F${value};
+            var previous = 0;
+            if(HasKey($feature, 'F${value - 1}')){
+              previous = $feature.F${value - 1};
+            }
+            return ((current - previous) / previous) * 100;
+          `;
+        }
+
+        const yearElement = document.getElementById("yearDiv");
+
+        function updateYearDisplay(year) {
+          yearElement.innerText = year;
+        }
+
+        const annualVisitsElement = document.getElementById("annual-visits");
+        const totalVisitsElement = document.getElementById("total-visits");
+        const percentIncreaseElement = document.getElementById("percent-increase");
+
+        function updateParkVisitationDisplay(stats){
+          const annual = stats.annual_visitation;
+          const total = stats.total_accumulated_visitation;
+          const previous = stats.previous_annual_visitation || null;
+          const percentIncrease = ( (annual - previous) / previous) * 100;
+          // const increaseOrDecrease = percentIncrease > 0 ? "increase" : "decrease";
+          const formattedIncrease = intl.formatNumber(Math.abs(percentIncrease), {
+            digitSeparator: true,
+            maximumFractionDigits: 1,
+            minimumFractionDigits: 1
+          });
+
+          annualVisitsElement.innerText = intl.formatNumber(annual, {
+            digitSeparator: true
+          });
+          totalVisitsElement.innerText = intl.formatNumber(total, {
+            digitSeparator: true
+          });
+
+          if(previous){
+            if(percentIncrease > 0){
+              percentIncreaseElement.innerHTML = `, a
+              <span class='increase-style'><b>${formattedIncrease}% increase</b></span> from the previous year
+              `;
+            } else {
+              percentIncreaseElement.innerHTML = `, a
+              <span class='decrease-style'><b>${formattedIncrease}% decrease</b></span> from the previous year
+              `;
+            }
+          } else {
+            percentIncreaseElement.innerHTML = null;
+          }
+        }
+
+        const topParksList = document.getElementById("top-parks");
+
+        function updateTopParksDisplay(stats){
+          topParksList.innerHTML = null;
+          stats.forEach( stat => {
+            const formattedVisits = intl.formatNumber(stat.visits, {
+              digitSeparator: true
+            });
+            const li = document.createElement("li");
+            li.innerText = `${stat.park.replace("National Park", "")} (${formattedVisits})`;
+            topParksList.appendChild(li);
+          });
+        }
+
+        function createPopupTemplate(year){
+          return {
+            title: "{Park}",
+            expressionInfos: [{
+              name: "max",
+              title: "Highest growth year",
+              expression: document.getElementById("highest-growth-arcade").innerText
+            }, {
+              name: "min",
+              title: "Lowest growth year",
+              expression: document.getElementById("lowest-growth-arcade").innerText
+            }, {
+              name: "growth",
+              title: `Change from ${year-1} - ${year}`,
+              expression: `
+                var popCurrent = $feature.F${year};
+                var popPrevious = IIF(${year} == 1904, 0, $feature.F${year - 1});
+                popCurrent - popPrevious;
+              `
+            }, {
+              name: "percent-growth",
+              title: `% growth from ${year-1} - ${year}`,
+              expression: `
+                var popCurrent = $feature.F${year};
+                var popPrevious = IIF(${year} == 1904, 0, $feature.F${year - 1});
+                var perChange = ((popCurrent - popPrevious) / popPrevious) * 100;
+                var direction = IIF(perChange < 0, "decrease", "increase");
+                return Text(Abs(perChange), '#,###.0') + "% " + direction;
+              `
+            }],
+            fieldInfos: [{
+              fieldName: `F${year}`,
+              format: {
+                places: 0,
+                digitSeparator: true
+              }
+            }],
+            content: [{
+              type: "text",
+              text: `
+                <b>{F${year}}</b> people visited {Park} in ${year}, a <b>{expression/percent-growth}</b> from the previous year.
+              `
+            }, {
+              type: "fields",
+              fieldInfos: [{
+                fieldName: "expression/growth",
+                format: {
+                  places: 0,
+                  digitSeparator: true
+                }
+              }, {
+                fieldName: "expression/max"
+              }, {
+                fieldName: "expression/min"
+              }, {
+                fieldName: "TOTAL",
+                label: "Total visits (1904-2018)",
+                format: {
+                  places: 0,
+                  digitSeparator: true
+                }
+              }]
+            }]
+          };
+        }
+
+        function queryTotalVisitation(year){
+          const query = layer.createQuery();
+          const onStatisticField = createCumulativeSumField(year);
+
+          query.outStatistics = [{
+            statisticType: "sum",
+            onStatisticField: createCumulativeSumField(year),
+            outStatisticFieldName: "total_accumulated_visitation"
+          }, {
+            statisticType: "sum",
+            onStatisticField: `F${year}`,
+            outStatisticFieldName: "annual_visitation"
+          }];
+
+          if(year > 1904){
+            query.outStatistics.push({
+              statisticType: "sum",
+              onStatisticField: `F${year-1}`,
+              outStatisticFieldName: "previous_annual_visitation"
+            });
+          }
+
+          return lv.queryFeatures(query).then(function(response){
+            const stats = response.features[0].attributes;
+            return stats;
+          });
+        }
+
+        function queryTopParksByYear(year){
+          const query = layer.createQuery();
+          query.outFields = [ `F${year}`, "Park" ];
+          query.returnGeometry = false;
+
+          return lv.queryFeatures(query).then(function(response){
+            return response.features
+              .map( (feature) => {
+                return {
+                  park: feature.attributes.Park,
+                  visits: feature.attributes[`F${year}`]
+                }
+              })
+              .sort( ( a, b ) => b.visits - a.visits )
+              .slice(0,5);
+          });
+        }
+
+        function createCumulativeSumField(year){
+          let onStatisticField = "";
+          for( let start = 1904; start < year; start++){
+            onStatisticField += `F${start} + `;
+          }
+          onStatisticField += `F${year}`;
+          return onStatisticField;
+        }
+
+        let visitationByYear = [];
+        function queryAnnualTotals(year){
+          const query = layer.createQuery();
+
+          let fieldNames = [];
+          let startYear = 1904;
+
+          while(startYear < 2018+1){
+            fieldNames.push( `F${(startYear++).toString()}` );
+          }
+
+          query.outStatistics = fieldNames.map( fieldName => {
+            return {
+              onStatisticField: fieldName,
+              statisticType: "sum",
+              outStatisticFieldName: fieldName + "_total"
+            }
+          });
+
+          query.returnGeometry = false;
+
+          return lv.queryFeatures(query).then(function(response){
+            const attributes = response.features[0].attributes;
+            visitationByYear = Object.values(attributes);
+          });
+        }
+
+        function createChart(){
+          const visitationCanvas = document.getElementById("visitation-chart");
+
+          let yearsLabels = [];
+          let startYear = 1904;
+
+          while(startYear < 2018+1){
+            yearsLabels.push( (startYear++).toString() );
+          }
+
+          visitationChart = new Chart(visitationCanvas.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: yearsLabels,
+              datasets: [{
+                label: 'Total annual visits',
+                backgroundColor: "#008837",
+                borderColor: "#008837",
+                data: [ visitationByYear[0] ],
+                fill: false,
+              }]
+            },
+            options: {
+              responsive: false,
+              legend: {
+                display: false
+              },
+              title: {
+                display: false,
+                text: "Annual Visitation"
+              },
+              scales: {
+                xAxes: [
+                  {
+                    ticks: {
+                      beginAtZero: true,
+                      min: 1904,
+                      max: 2018,
+                      stepSize: 1,
+                      callback:(label, index, labels) => {
+                        return label % 5 === 0 ? label : "";
+                      }
+                    }
+                  }
+                ],
+                yAxes: [
+                  {
+                    ticks: {
+                      enabled: false,
+                      min: 0,
+                      max: 100000000,
+                      stepSize: 20000000,
+                      callback:(label, index, labels) => {
+                        return label / 1000000 + " m";
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          })
+        }
+
+        function updateChart(year){
+          if(!visitationChart){
+            createChart();
+            return;
+          }
+
+          const finalIndex = year - 1904;
+          visitationChart.data.datasets[0].data = visitationByYear.slice(0,finalIndex+1);
+          visitationChart.update();
+        }
+
+        createStarSymbol()
+
+        function createStarSymbol(){
+          const starWebStyle = new WebStyleSymbol({
+            name: "star-3",
+            styleName: "Esri2DPointSymbolsStyle"
+          });
+
+          const parkSymbol = new WebStyleSymbol({
+            name: "park",
+            styleName: "Esri2DPointSymbolsStyle"
+          });
+
+          parkSymbol.fetchSymbol()
+            .then(function(parkCIM){
+              console.log(parkCIM);
+
+
+          const starCIM = new CIMSymbol({
+            data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":10,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-4.76,"ymin":-4.05,"xmax":4.76,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[1.12,1.55],[4.76,1.55],[1.82,-0.59],[2.94,-4.05],[0.0,-1.91],[-2.94,-4.05],[-1.82,-0.59],[-4.76,1.55],[-1.12,1.55],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidFill","enable":true,"color":[255,255,190,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
+          });
+
+          console.log("star cim: ", starCIM);
+
+              const starSymbolLayer = starSIM.data.symbolLayers[0];
+
+              parkCIM.data.symbolLayers[1] = starSymbolLayer;
+
+
+
+              console.log("park ", parkCIM)
+
+              view.graphics.add({
+                geometry: {
+                  latitude: 0,
+                  longitude: 0
+                },
+                attributes: {
+                  id: 0
+                },
+                symbol: parkCIM
+              });
+
+            })
+
+
+
+
+        }
+
+
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="containerDiv" class="esri-widget">
+      <div id="title" class="esri-widget">
+        National Park Visits 1904 - 2018
+      </div>
+    </div>
+    <div id="bottomPanel" class="esri-widget">
+      <div id="annual-summary" class="esri-widget">
+        <span id="annual-visits"></span> people
+          visited national parks
+          in <span id="yearDiv">1904</span><span id="percent-increase"></span>
+      </div>
+      <div id="chartContainer" class="esri-widget">
+        <canvas id="visitation-chart" height="200" width="800"></canvas>
+      </div>
+      <div id="sliderContainer" class="esri-widget">
+        <div id="sliderDiv"></div>
+      </div>
+      <div id="listContainer" class="esri-widget">
+        <div id="totalContainer" class="esri-widget">
+          <span id="total-visits"></span>
+          <div id="total-subtext">
+            total visits since 1904
+          </div>
+        </div>
+        <div id="listTitle">Most Popular Parks</div>
+        <ol id="top-parks"></ol>
+      </div>
+    </div>
+  </body>
+</html>
