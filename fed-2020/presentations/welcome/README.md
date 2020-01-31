@@ -4,7 +4,7 @@
 
 JS - 18 minutes
 
-## Performance
+## Performance (3-4 min)
 
 - VTL
   - First draw comparison is faster. Load performance.
@@ -27,10 +27,13 @@ JS - 18 minutes
 
     cache on browser, then CDN, then server, then db query
 
-- WebGL on a VM (Andy)
+- WebGL on a VM (virtualized client)
+  - browser gif
   - Set up style and histogram range slider for Andy
 
-## Visualization and client-side analytics
+## Visualization and client-side analytics (10 min)
+
+All the performance improvements we've made allows you to make highly interactive applications.
 
 ### Flash flood warnings
 
@@ -75,7 +78,7 @@ since it's webgl gpu, all the attributes are stored in a texture on the gpu, whi
 
 ### WebStyleSymbols (CIM) scaled with color locking
 
-[NPS Stats](https://localhost/conferences/fed-2020/presentations/welcome/demos/cim.html)
+[NPS Stats](https://localhost/conferences/fed-2020/presentations/welcome/demos/national-parks/cim.html)
 
 show fat table here too
 
@@ -107,3 +110,5 @@ customizable, So you can change the out of the box symbol to your liking...
 ### Ocean viz (3D) - interactivity, sliders, filters
 
 [Live app](http://localhost/esri-ts-samples/visualization/emu/3d/)
+
+## Building apps (5 min)

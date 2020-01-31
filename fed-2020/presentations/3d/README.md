@@ -21,3 +21,35 @@ This app demonstrates how to load a web scene with the ArcGIS Portal API and mod
 ##### [Basic scene](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/basics/)
 
 This sample demonstrates how to construct a simple 3D app using the SceneView.
+
+
+- Time? TimeSlider?
+- UFOs?
+- gltf / WebStyles - https://jscore.esri.com/javascript/latest/sample-code/import-gltf/index.html
+
+- http://localhost/conferences/uc-2019/3d-viz/demos/trees/1-icons.html
+- http://localhost/conferences/uc-2019/3d-viz/demos/trees/2-models.html
+
+add VV possibly?
+
+http://localhost/conferences/uc-2018/3d-viz/samples/airspace-encroachment/
+
+point clouds
+
+
+http://localhost/conferences/uc-2018/3d-viz/samples/types/
+
+https://www.arcgis.com/apps/Cascade/index.html?appid=052128d3cc8f44119781ea09698afcf9
+
+Mud Creek
+
+- Bookmarks
+- Measurement widget
+
+NYC Energy score
+
+- filter
+- smart mapping with color
+- Search widget - building search
+
+sketchy https://ralucanicola.github.io/JSAPI_demos/sketch-the-city/?id=3c647dba420a4f3da9091ae83772e78e

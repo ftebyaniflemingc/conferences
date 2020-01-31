@@ -84,10 +84,10 @@ In this session, you'll learn the basics of the ArcGIS API 4.x for JavaScript, i
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
 ## Widgets - Popup Template
 
- - Define fields, charts, custom html content
+ - [Define fields, charts, custom html content](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popup-multipleelements)
  - [Using a function](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-promise)
  - Promises
- - Arcade
+ - [Arcade](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-arcade-groupby)
 
 <aside class="notes"> Talk about different ways to define/set popup content</aside>
 
