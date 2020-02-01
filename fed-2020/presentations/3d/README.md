@@ -20,6 +20,14 @@ I. Introduction to 3D
   C. Create a basic 3D app (from 2D to 3D)
 II. Web Scenes
 III. Build web app with web scene
+  Use same scene, add buildings, and a couple of widgets
+    - search
+    - line of sight
+    - measurement
+
+  Visualization
+    - trees
+    - 2d vs 3d symbols
 
 ### Demos
 
