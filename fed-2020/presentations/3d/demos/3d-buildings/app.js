@@ -4,20 +4,13 @@ require([
   "esri/renderers/UniqueValueRenderer",
   "esri/symbols/MeshSymbol3D",
   "esri/symbols/FillSymbol3DLayer",
-  "esri/widgets/Legend",
-  "esri/config",
-  "dojo/dom",
-  "dojo/dom-construct",
-  "dojo/dom-class",
-  "dojo/query",
-  "dojo/on",
-  "dojo/domReady!"
+  "esri/widgets/Legend"
 ], function(
-  SceneView, WebScene, UniqueValueRenderer, MeshSymbol3D, FillSymbol3DLayer, Legend, esriConfig, dom, domConstruct, domClass, query, on
+  SceneView, WebScene, UniqueValueRenderer, MeshSymbol3D, FillSymbol3DLayer, Legend
 ) {
 
-  var titleDiv = dom.byId("titleDiv");
-  var slidesDiv = dom.byId("slidesDiv");
+  var titleDiv = document.getElementById("titleDiv");
+  var slidesDiv = document.getElementById("slidesDiv");
 
   /**
    * Returns a 3D Mesh Symbol with the given fill color.
@@ -37,10 +30,9 @@ require([
 
   // When the user's mouse location leaves the slides div,
   // scroll the position back to the top so "Slides" always shows
-  on(slidesDiv, "mouseleave", function(){
+  slidesDiv.addEventListener("mouseleave", function(){
     slidesDiv.scrollTop = 0;
   });
-
 
   /**
    * Creates the UI for working with the scene's slides
@@ -68,7 +60,7 @@ require([
 
     // When the slide element is clicked, apply the
     // slide's settings to the view
-    on(slideElement, "click", function() {
+    slideElement.addEventListener("click", function() {
       query(".slide").removeClass("active");
       domClass.add(slideElement, "active");
       titleDiv.innerHTML = slide.title.text;
@@ -113,7 +105,7 @@ require([
 
   var buildingsLayer, legend;
 
-  view.then(function() {
+  view.when().then(function() {
     // when the scene and view resolve, display the scene's
     // title in the DOM
 
@@ -172,8 +164,8 @@ require([
     }])
 
     // Set up event handlers for filtering and visualization
-    on(dom.byId("type-select"), "change", selectUsageType);
-    on(dom.byId("market-check"), "change", viewDaysOnMarket);
+    document.getElementById("type-select").addEventListener("change", selectUsageType);
+    document.getElementById("market-check").addEventListener("change", viewDaysOnMarket);
   });
 
   /**
@@ -193,7 +185,7 @@ require([
     // for all floors, set visual variables on all floors.
     if (newVal < 0){
 
-      if (dom.byId("market-check").checked){
+      if (document.getElementById("market-check").checked){
         renderer.uniqueValueInfos = [];
         renderer.visualVariables = [{
           type: "color",
@@ -217,7 +209,7 @@ require([
     // If the number of days on the market box is
     // still checked, then re-apply visual variables
     // using the scheme of the newly selected usage type
-    if(dom.byId("market-check").checked){
+    if(document.getElementById("market-check").checked){
       renderer.visualVariables = [{
         type: "color",
         field: "daysMarketReport",
@@ -239,7 +231,7 @@ require([
   function viewDaysOnMarket (evt){
     var checked = evt.target.checked;
     // the currently selected usage type
-    var typeValue = parseInt(dom.byId("type-select").value);
+    var typeValue = parseInt(document.getElementById("type-select").value);
     var renderer = buildingsLayer.renderer.clone();
 
     if(checked && typeValue >= 0){

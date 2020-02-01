@@ -35,22 +35,22 @@
           axis: "height",
           field: "Height", // tree height
           valueUnit: "feet"
-        }; 
-          
+        };
+
         var treeWidth = {
           type: "size",
           axis: "width",
           field: "Width_EW", // crown diameter from east to west
           valueUnit: "feet"
-        }; 
-        
+        };
+
         var treeDepth = {
           type: "size",
           axis: "depth",
           field: "Width_NS", // crown diameter from north to south
           valueUnit: "feet"
         };
-          
+
         var carbonStorage = {
           type: "color",
           field: "C_Storage", // Carbon storage
@@ -132,13 +132,13 @@
           label: "tree",
           visualVariables: [ treeDepth, treeHeight, treeWidth ]
         };
-        
+
         var renderer = {
           type: "simple",
           symbol: {
             type: "web-style",
             styleName: "esriRealisticTreesStyle",
-            name: "Other" 
+            name: "Other"
           },
           label: "tree",
           visualVariables: [ treeDepth, treeHeight, treeWidth, carbonStorage ]

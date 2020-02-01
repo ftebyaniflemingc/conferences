@@ -31,6 +31,10 @@ JS - 18 minutes
   - browser gif
   - Set up style and histogram range slider for Andy
 
+  - 16GB VM with no graphics card
+  - running in a 32 bit browser
+  - Map load
+
 ## Visualization and client-side analytics (10 min)
 
 All the performance improvements we've made allows you to make highly interactive applications.
