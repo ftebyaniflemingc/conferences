@@ -5,7 +5,7 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Floor Area Ratio</title>
 
-<link rel="stylesheet" href="https://jsdev.arcgis.com/4.11/esri/css/main.css">
+<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
 
 <style>
   html, body, #viewDiv {
@@ -13,16 +13,16 @@
     margin: 0;
     height: 100%;
     width: 100%;
-  }  
+  }
 </style>
 
-<script src="https://jsdev.arcgis.com/4.11/"></script>
+<script src="https://js.arcgis.com/4.14/"></script>
 
 <script type="text/plain" id="far-arcade">
   // buildings represents the buildings that intersect the clicked parcel
   var buildingFootprints = Intersects($feature, FeatureSetByName($map, "Building Footprints"));
   var grossFloorArea = 0;
-  
+
   // since a building may have multiple floors, we must multiply the floor area by the number
   // of floors. Also note the building data shows some buildings in dense areas as crossing
   // multiple polygons. To avoid miscalculation, we calculate the intersection of the building.

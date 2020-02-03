@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Add multiple label classes to a layer - 4.11</title>
+  <title>Add multiple label classes to a layer - 4.14</title>
 
-  <link rel="stylesheet" href="https://jsdev.arcgis.com/4.11/esri/themes/light/main.css" />
-  <script src="https://jsdev.arcgis.com/4.11/"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.14/"></script>
 
   <style>
     html,
@@ -30,13 +30,19 @@
       MapView,
       FeatureLayer
     ) {
-        const map = new Map({ basemap: "dark-gray" });
+        const map = new Map({
+          basemap: {
+            portalItem: {
+              id: "9d5cf81cf8ce437584cedc8a2ee4ea4e"
+            }
+          }
+        });
 
         const view = new MapView({
           container: "viewDiv",
           map: map,
-          center: [-118.25, 34], // Los Angeles
-          zoom: 10
+          center: [-77.0006, 38.8517], // Los Angeles
+          scale: 577790
         });
 
         // Arcade expression that converts the temperature to a
@@ -45,8 +51,9 @@
         const tempClass = {
           // labelExpression: "[TEMP]",
           labelExpressionInfo: {
+            // expression: "$feature.Temp",
             // expression: "Round($feature.TEMP) + '° F';"
-            expression: "Round(($feature.TEMP - 32) * 5/9) + '° C';"
+            expression: "Text((($feature.TEMP - 32) * 5/9), '##° C')"
           },
           symbol: {
             type: "text",
@@ -60,15 +67,15 @@
 
         // Create the layer and add it to the map
 
-        const serviceUrl =
-          "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0";
+        // const serviceUrl = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0";
+        const serviceUrl = "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer/0";
         const layer = new FeatureLayer({
           url: serviceUrl,
           renderer: {
             type: "simple",
             symbol: {
               type: "simple-marker",
-              color: [255, 255, 255, 0.1],
+              color: [241, 196, 15, 0.8],
               size: 5,
               outline: null
             }

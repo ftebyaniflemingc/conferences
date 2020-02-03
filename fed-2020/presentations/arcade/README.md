@@ -33,14 +33,13 @@ VI. Use Arcade in the JS API (Kristian) <12>
     - Predominance visualization (TDB)
     - Elevation offset
     - Popup sample
-    - Popup Feature Set - Use something in my localhost I've already done
+    - Popup Feature Set
 VII. New Features <5>
   - Feature Set in popups (also calculate)
 VIII. Generating Arcade (Kristian) <10>
   - Slide
   - Examples
     - Simple case (matches with simple viz sample)
-    - Site suitability - WOW
     - Popup template generator
     - Smart mapping (same app)
 IX. Conclusion (Kristian) <2>
@@ -128,6 +127,10 @@ The popup in this sample calculates the ratio of the floor area of buildings wit
 [Top 3 Crimes](https://ekenes.github.io/conferences/ds-2019/arcade/demos/popup-featuresets/top-3-crimes.html)
 
 Presents a polygon layer that queries a point layer of crimes and lists the top 3 types of crimes in the popup.
+
+[Summarize intersecting points in a popup](https://developers.arcgis.com/javascript/latest/sample-code/popuptemplate-arcade-groupby/index.html)
+
+This sample demonstrates how use an Arcade expression in a PopupTemplate to summarize points from one layer that intersect a polygon in a different layer.
 
 ### Z Values
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Compare Neighbors</title>
 
-<link rel="stylesheet" href="https://jsdev.arcgis.com/4.11/esri/css/main.css">   
+<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
 
 <style>
   html, body, #viewDiv {
@@ -13,10 +13,10 @@
     margin: 0;
     height: 100%;
     width: 100%;
-  }   
+  }
 </style>
 
-<script src="https://jsdev.arcgis.com/4.11/"></script>
+<script src="https://js.arcgis.com/4.14/"></script>
 
 <script type="text/plain" id="crimes-arcade">
   var allCrimes = FeatureSetById($map, /* la_crimes_2015_all */ "la_crimes_2015_all_4748");
@@ -49,8 +49,8 @@ require([
       container: "viewDiv",
       map: map
     });
-    
-    // Create new feature layer pointing to service with educational 
+
+    // Create new feature layer pointing to service with educational
     // attainment data by city and assigns it a PopupTemplate
 
     view.when().then(function(){

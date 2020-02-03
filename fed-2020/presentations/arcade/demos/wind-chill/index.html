@@ -7,8 +7,8 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Arcade - temperatures</title>
 
-<link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/css/main.css">
-<script src="https://js.arcgis.com/4.11/"></script>
+<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
+<script src="https://js.arcgis.com/4.14/"></script>
 
 <style>
   html, body, #viewDiv {
@@ -90,7 +90,8 @@
 
     // FeatureLayer options
 
-    const serviceUrl = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0";
+    // const serviceUrl = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0";
+    const serviceUrl = "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer/0";
 
     const popupTemplate = {
       title: "{STATION_NAME}, {COUNTRY}",
