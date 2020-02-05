@@ -59,12 +59,12 @@
             content: [
               {
                 type: "text",
-                text: "This cluster represents <b>{cluster_count}</b> features."
+                text: "This cluster represents <b>{cluster_count}</b> power plants."
               },
               {
                 type: "text",
                 text:
-                  "The predominant fuel type in this cluster of power plants is <b>{cluster_type_fuel1}</b>."
+                  "The most common method of generating power among power plants in this cluster is <b>{cluster_type_fuel1}</b>."
               }
             ]
           }
@@ -73,8 +73,7 @@
         const layer = new FeatureLayer({
           portalItem: {
             id: "eb54b44c65b846cca12914b87b315169"
-          },
-          featureReduction: clusterConfig
+          }
         });
 
         const map = new Map({
@@ -86,19 +85,18 @@
           layers: [layer]
         });
 
-        const view = new MapView({
+         view = new MapView({
           container: "viewDiv",
           map: map,
-          extent: {
-            spatialReference: {
-              latestWkid: 3857,
-              wkid: 102100
+          center: {
+            "spatialReference": {
+              "latestWkid": 3857,
+              "wkid": 102100
             },
-            xmin: -42087672,
-            ymin: 4108613,
-            xmax: -36095009,
-            ymax: 8340167
-          }
+            "x": -48799279.67847024,
+            "y": 4677340.439498659
+          },
+          scale: 9244648.868618
         });
 
         const legend = new Legend({
@@ -165,7 +163,7 @@
   <body>
     <div id="viewDiv"></div>
     <div id="infoDiv" class="esri-widget">
-      <button id="toggleCluster" class="esri-button">Disable Clustering</button>
+      <button id="toggleCluster" class="esri-button">Enable Clustering</button>
       <div id="description">
         Show power plants with at least
         <span id="sliderValue">0</span> megawatts of capacity
