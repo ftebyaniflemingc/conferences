@@ -6,7 +6,7 @@
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
     />
-    <title>Load a basic WebMap - 4.14</title>
+    <title>Number of cars per household</title>
 
     <style>
       html,
@@ -120,14 +120,6 @@
           content: bookmarks
         }), "top-left");
 
-        const requestHeaderExpand = new Expand({
-          view: view,
-          content: document.getElementById("headers"),
-          group: "bottom-left",
-          expandIconClass: "esri-icon-table"
-        });
-        view.ui.add(requestHeaderExpand, "bottom-left");
-
         const requestResponseExpand = new Expand({
           view: view,
           content: document.getElementById("response"),
@@ -136,6 +128,14 @@
         });
         view.ui.add(requestResponseExpand, "bottom-left");
 
+        const requestHeaderExpand = new Expand({
+          view: view,
+          content: document.getElementById("headers"),
+          group: "bottom-left",
+          expandIconClass: "esri-icon-table"
+        });
+        view.ui.add(requestHeaderExpand, "bottom-left");
+
       });
     </script>
   </head>
@@ -143,10 +143,10 @@
   <body>
     <div id="viewDiv"></div>
     <div id="headers" class="code">
-      <img src="ftiles-headers.png">
+      <img src="request-params.png">
     </div>
     <div id="response" class="code">
-      <img src="ftiles.png">
+      <img src="response-headers.png">
     </div>
   </body>
 </html>

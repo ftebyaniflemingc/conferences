@@ -29,8 +29,12 @@
       }
 
       #title{
-        font-weight: 00;
+        font-weight: 500;
         font-size: 24pt;
+      }
+      #year-range{
+        font-weight: 500;
+        font-size: 16pt;
       }
 
       /* #sliderDiv {
@@ -157,6 +161,13 @@
         font-size: 12pt;
         padding-bottom: 3px;
       }
+      .code{
+        background-color: white;
+        color: rgb(148, 4, 40);
+        overflow-y: auto;
+        max-height: 250px;
+        padding: 5px;
+      }
     </style>
 
 
@@ -253,10 +264,6 @@
         intl
       ) {
 
-        // const starCIM = new CIMSymbol({
-        //     data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":10,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-4.76,"ymin":-4.05,"xmax":4.76,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[1.12,1.55],[4.76,1.55],[1.82,-0.59],[2.94,-4.05],[0.0,-1.91],[-2.94,-4.05],[-1.82,-0.59],[-4.76,1.55],[-1.12,1.55],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidFill","enable":true,"color":[255,255,190,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
-        //   });
-
         const pentagonCIM = new CIMSymbol({
           data: {"type":"CIMPointSymbol","symbolLayers":[{
             "type":"CIMVectorMarker",
@@ -296,19 +303,15 @@
           }],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
         });
 
-        const parkCIM = new CIMSymbol({
+        const popularParkCIM = new CIMSymbol({
           data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":15.75,"billboardMode3D":"FaceNearPlane","frame":{"xmin":0.0,"ymin":0.0,"xmax":21.0,"ymax":21.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[15.0,15.0],[12.0,15.0],[16.0,10.0],[13.0,10.0],[17.0,5.0],[11.0,5.0],[11.0,2.0],[10.0,2.0],[10.0,5.0],[4.0,5.0],[8.0,10.0],[5.0,10.0],[9.0,15.0],[6.0,15.0],[10.5,19.0],[15.0,15.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidStroke","enable":true,"capStyle":"Round","joinStyle":"Round","lineStyle3D":"Strip","miterLimit":10,"width":0,"color":[0,0,0,255]},{"type":"CIMSolidFill","enable":true,"color":[113,201,110,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true},{"type":"CIMVectorMarker","enable":true,"colorLocked":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":18.5,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-5.0,"ymin":-5.0,"xmax":5.0,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[0.87,4.92],[1.71,4.7],[2.5,4.33],[3.21,3.83],[3.83,3.21],[4.33,2.5],[4.7,1.71],[4.92,0.87],[5.0,0.0],[4.92,-0.87],[4.7,-1.71],[4.33,-2.5],[3.83,-3.21],[3.21,-3.83],[2.5,-4.33],[1.71,-4.7],[0.87,-4.92],[0.0,-5.0],[-0.87,-4.92],[-1.71,-4.7],[-2.5,-4.33],[-3.21,-3.83],[-3.83,-3.21],[-4.33,-2.5],[-4.7,-1.71],[-4.92,-0.87],[-5.0,0.0],[-4.92,0.87],[-4.7,1.71],[-4.33,2.5],[-3.83,3.21],[-3.21,3.83],[-2.5,4.33],[-1.71,4.7],[-0.87,4.92],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidStroke","enable":true,"capStyle":"Round","joinStyle":"Round","lineStyle3D":"Strip","miterLimit":10,"width":0.5,"color":[167,169,172,255]},{"type":"CIMSolidFill","enable":true,"color":[255,255,255,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
         });
-
-        console.log("park outline: ", parkCIM.data.symbolLayers[1])
-
-        console.log("star outline: ", pentagonCIM.data.symbolLayers[0])
 
         let pentagonOutline = pentagonCIM.data.symbolLayers[0];
         pentagonOutline.size = 20;
         pentagonOutline.colorLocked = true;
 
-        parkCIM.data.symbolLayers[1] = pentagonOutline;
+        popularParkCIM.data.symbolLayers[1] = pentagonOutline;
 
         let visitationChart;
 
@@ -329,14 +332,12 @@
               {
                 minValue: threshold,
                 maxValue: 1000000000,
-                symbol: parkCIM
+                symbol: popularParkCIM
               },
-
               {
                 minValue: 0,
                 maxValue: threshold-1,
                 symbol: {
-
                   type: "web-style",
                   name: "park",
                   styleName: "Esri2DPointSymbolsStyle"
@@ -347,10 +348,6 @@
               {
                 type: "size",
                 field: "F1904",
-                // maxDataValue: 10000000,
-                // maxSize: "60px",
-                // minDataValue: 100000,
-                // minSize: "14px",
                 stops: [
                   { value: 100000, size: "14px" },
                   { value: 1000000, size: "25px" },
@@ -384,7 +381,6 @@
               id: "ba223f982a3c4a0ea8c9953346e2a201"
             }
           },
-          // basemap: "gray",
           layers: [layer]
         });
 
@@ -403,16 +399,6 @@
           }
         });
 
-        view.ui.add(
-          new Expand({
-            view: view,
-            content: document.getElementById("containerDiv"),
-            expanded: true,
-            expandIconClass: "esri-icon-chart"
-          }),
-          "top-right"
-        );
-
         view.ui.add( new Home({ view: view }), "top-left");
 
         // view.ui.add(new Expand({
@@ -424,11 +410,41 @@
         //   expanded: true
         // }), "bottom-left");
 
+        const codeSnippet = `<pre>
+const parkSymbol = new WebStyleSymbol({
+  name: "park",
+  styleName: "Esri2DPointSymbolsStyle"
+});</pre>`;
+
+        const codeSnippetDiv = document.createElement("div");
+        codeSnippetDiv.classList.add("code");
+        codeSnippetDiv.innerHTML = codeSnippet;
+
         view.ui.add(new Expand({
-          content: document.getElementById("legend"),
+          content: document.getElementById("code"),
           view: view,
-          expanded: true
-        }), "bottom-left");
+          expandIconClass: "esri-icon-table",
+          group: "expand"
+        }), "top-left");
+
+        view.ui.add(
+          new Expand({
+            view: view,
+            content: document.getElementById("containerDiv"),
+            expanded: true,
+            expandIconClass: "esri-icon-chart",
+            group: "expand"
+          }),
+          "top-left"
+        );
+
+        // view.ui.add(new Expand({
+        //   content: document.getElementById("legend"),
+        //   view: view,
+        //   expanded: true,
+        //   expandIconClass: "esri-icon-layer-list",
+        //   group: "expand"
+        // }), "bottom-left");
 
         const slider = new Slider({
           min: 1904,
@@ -453,7 +469,6 @@
 
         let points = null;
         let lv = null;
-        let aklv = null;
 
         // Query all the features in the layer. These will by used
         // for client-side queries as the user slides the thumb of the slider
@@ -472,11 +487,9 @@
                 })
                 .then(updateRenderer)
                 .then(queryAnnualTotals)
-                //   function(){
-                //   updateRenderer(year, layerView);
-                // })
-
-                .catch(function(e) {
+                .then(function(year){
+                  updateRenderer(year, layerView);
+                }).catch(function(e) {
                   console.error(e);
                 });
             });
@@ -726,6 +739,7 @@
           return lv.queryFeatures(query).then(function(response){
             const attributes = response.features[0].attributes;
             visitationByYear = Object.values(attributes);
+            return year;
           });
         }
 
@@ -803,68 +817,12 @@
           visitationChart.update();
         }
 
-        createStarSymbol()
-
-        function createStarSymbol(){
-          const starWebStyle = new WebStyleSymbol({
-            name: "star-3",
-            styleName: "Esri2DPointSymbolsStyle"
-          });
-
-          const parkSymbol = new WebStyleSymbol({
-            name: "park",
-            styleName: "Esri2DPointSymbolsStyle"
-          });
-
-          parkSymbol.fetchSymbol()
-            .then(function(parkCIM){
-              console.log(parkCIM);
-
-
-          const starCIM = new CIMSymbol({
-            data: {"type":"CIMPointSymbol","symbolLayers":[{"type":"CIMVectorMarker","enable":true,"anchorPointUnits":"Relative","dominantSizeAxis3D":"Y","size":10,"billboardMode3D":"FaceNearPlane","frame":{"xmin":-4.76,"ymin":-4.05,"xmax":4.76,"ymax":5.0},"markerGraphics":[{"type":"CIMMarkerGraphic","geometry":{"rings":[[[0.0,5.0],[1.12,1.55],[4.76,1.55],[1.82,-0.59],[2.94,-4.05],[0.0,-1.91],[-2.94,-4.05],[-1.82,-0.59],[-4.76,1.55],[-1.12,1.55],[0.0,5.0]]]},"symbol":{"type":"CIMPolygonSymbol","symbolLayers":[{"type":"CIMSolidFill","enable":true,"color":[255,255,190,255]}]}}],"scaleSymbolsProportionally":true,"respectFrame":true}],"haloSize":1,"scaleX":1,"angleAlignment":"Display","version":"2.0.0","build":"8933"}
-          });
-
-          console.log("star cim: ", starCIM);
-
-              const starSymbolLayer = starSIM.data.symbolLayers[0];
-
-              parkCIM.data.symbolLayers[1] = starSymbolLayer;
-
-
-
-              console.log("park ", parkCIM)
-
-              view.graphics.add({
-                geometry: {
-                  latitude: 0,
-                  longitude: 0
-                },
-                attributes: {
-                  id: 0
-                },
-                symbol: parkCIM
-              });
-
-            })
-
-
-
-
-        }
-
-
       });
     </script>
   </head>
 
   <body>
     <div id="viewDiv"></div>
-    <div id="containerDiv" class="esri-widget">
-      <div id="title" class="esri-widget">
-        National Park Visits 1904 - 2018
-      </div>
-    </div>
     <div id="bottomPanel" class="esri-widget">
       <div class="left-side">
         <div id="annual-summary" class="esri-widget">
@@ -892,8 +850,17 @@
         </div>
       </div>
     </div>
-    <div id="legend">
-      <img src="nps-legend2.png">
+    <div id="containerDiv" class="esri-widget">
+      <div id="title" class="esri-widget">
+        National Park Visits
+        <div id="year-range">1904 - 2018</div>
+      </div>
+      <div id="legend">
+        <img src="nps-legend3.png" width="300px">
+      </div>
+    </div>
+    <div id="code">
+      <img src="web-style-snippet.png">
     </div>
   </body>
 </html>
