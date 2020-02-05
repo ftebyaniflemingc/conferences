@@ -161,12 +161,23 @@
         font-size: 12pt;
         padding-bottom: 3px;
       }
-      .code{
+      .code {
         background-color: white;
         color: rgb(148, 4, 40);
         overflow-y: auto;
-        max-height: 250px;
+        height: 500px;
         padding: 5px;
+      }
+
+      .esri-slider__thumb{
+        border: 2px solid #008837;
+      }
+
+      .esri-slider__thumb:hover{
+        border-color: 2px solid #015c26;
+      }
+      .esri-slider__track {
+        background-color: #008837;
       }
     </style>
 
@@ -410,23 +421,6 @@
         //   expanded: true
         // }), "bottom-left");
 
-        const codeSnippet = `<pre>
-const parkSymbol = new WebStyleSymbol({
-  name: "park",
-  styleName: "Esri2DPointSymbolsStyle"
-});</pre>`;
-
-        const codeSnippetDiv = document.createElement("div");
-        codeSnippetDiv.classList.add("code");
-        codeSnippetDiv.innerHTML = codeSnippet;
-
-        view.ui.add(new Expand({
-          content: document.getElementById("code"),
-          view: view,
-          expandIconClass: "esri-icon-table",
-          group: "expand"
-        }), "top-left");
-
         view.ui.add(
           new Expand({
             view: view,
@@ -437,6 +431,13 @@ const parkSymbol = new WebStyleSymbol({
           }),
           "top-left"
         );
+
+        view.ui.add(new Expand({
+          content: document.getElementById("snippet"),
+          view: view,
+          expandIconClass: "esri-icon-table",
+          group: "expand"
+        }), "top-left");
 
         // view.ui.add(new Expand({
         //   content: document.getElementById("legend"),
@@ -859,7 +860,7 @@ const parkSymbol = new WebStyleSymbol({
         <img src="nps-legend3.png" width="300px">
       </div>
     </div>
-    <div id="code">
+    <div id="snippet">
       <img src="web-style-snippet.png">
     </div>
   </body>

@@ -54,6 +54,22 @@ import { durations, seasons } from "./constants";
     }
   });
 
+  const effectSnippetExpand = new Expand({
+    view: view,
+    content: document.getElementById("effect-snippet"),
+    group: "bottom-left",
+    expandIconClass: "esri-icon-table"
+  });
+  view.ui.add(effectSnippetExpand, "bottom-left");
+
+  const filterSnippetExpand = new Expand({
+    view: view,
+    content: document.getElementById("filter-snippet"),
+    group: "bottom-left",
+    expandIconClass: "esri-icon-table"
+  });
+  view.ui.add(filterSnippetExpand, "bottom-left");
+
   await view.when();
   const seasonsElement = document.getElementById("seasons-filter");
   seasonsElement.style.visibility = "visible";
@@ -78,7 +94,7 @@ import { durations, seasons } from "./constants";
 
   const layerStats = await queryLayerStatistics(layer);
   updateGrid(layerStats, layerView);
-  
+
   seasonsElement.addEventListener("click", filterBySeason);
   const seasonsNodes = document.querySelectorAll(`.season-item`);
 
@@ -128,7 +144,7 @@ import { durations, seasons } from "./constants";
           highlight.remove();
           highlight = null;
         }
-        
+
         highlight = countiesLayerView.highlight([previousId]);
         const geometry = graphic && graphic.geometry;
         let queryOptions = {
@@ -181,7 +197,7 @@ import { durations, seasons } from "./constants";
       const duration = timeSpan[1];
       return {
         duration,
-        season, 
+        season,
         value: feature.attributes.value
       };
     });
@@ -207,7 +223,7 @@ import { durations, seasons } from "./constants";
       const duration = timeSpan[1];
       return {
         duration,
-        season, 
+        season,
         value: feature.attributes.value
       };
     });

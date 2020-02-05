@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -35,9 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/views/layers/support/FeatureFilter", "esri/views/layers/support/FeatureEffect", "esri/tasks/support/StatisticDefinition", "esri/symbols", "esri/renderers", "./heatmapChart", "esri/widgets/Expand", "./constants"], function (require, exports, EsriMap, MapView, FeatureLayer, FeatureFilter, FeatureEffect, StatisticDefinition, symbols_1, renderers_1, heatmapChart_1, Expand, constants_1) {
     "use strict";
-    var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
-    (function () { return __awaiter(_this, void 0, void 0, function () {
+    (function () { return __awaiter(void 0, void 0, void 0, function () {
         function filterBySeason(event) {
             var selectedSeason = event.target.getAttribute("data-season");
             seasonsNodes.forEach(function (node) {
@@ -201,7 +201,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
             });
             heatmapChart_1.updateGrid(layerStats, layerView, true);
         }
-        var layer, countiesLayer, map, view, seasonsElement, chartExpand, seasonsExpand, layerView, countiesLayerView, layerStats, seasonsNodes, highlight, previousId, resetBtn;
+        var layer, countiesLayer, map, view, effectSnippetExpand, filterSnippetExpand, seasonsElement, chartExpand, seasonsExpand, layerView, countiesLayerView, layerStats, seasonsNodes, highlight, previousId, resetBtn;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -240,6 +240,20 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                             fillOpacity: 0
                         }
                     });
+                    effectSnippetExpand = new Expand({
+                        view: view,
+                        content: document.getElementById("effect-snippet"),
+                        group: "bottom-left",
+                        expandIconClass: "esri-icon-table"
+                    });
+                    view.ui.add(effectSnippetExpand, "bottom-left");
+                    filterSnippetExpand = new Expand({
+                        view: view,
+                        content: document.getElementById("filter-snippet"),
+                        group: "bottom-left",
+                        expandIconClass: "esri-icon-table"
+                    });
+                    view.ui.add(filterSnippetExpand, "bottom-left");
                     return [4 /*yield*/, view.when()];
                 case 1:
                     _a.sent();

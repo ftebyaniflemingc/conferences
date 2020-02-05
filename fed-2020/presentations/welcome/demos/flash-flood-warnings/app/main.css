@@ -111,3 +111,11 @@ body, #viewDiv {
   align-items: center;
   transition: background-color 125ms ease-in-out;
 }
+
+/* #expand-snippet img {
+  height: 500px;
+} */
+
+/* #filter-snippet img{
+  height: 200px;
+} */

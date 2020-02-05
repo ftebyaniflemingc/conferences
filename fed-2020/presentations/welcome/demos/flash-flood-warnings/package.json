@@ -1,7 +1,6 @@
 {
   "name": "tornado-warnings",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/arcgis-js-api": "^4.10.0"
-  }
+    "@types/arcgis-js-api": "4.11.0"
+  },
+  "description": ""
 }
