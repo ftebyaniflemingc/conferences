@@ -40,7 +40,7 @@ This sample uses an Arcade expression to visualize the predominant educational a
 
 [Multivariate visualization: 2016 U.S. presidential election](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/multivariate-election/)
 
-This sample demonstrates how to create a multivariate visualization using several variables related to the 2012 U.S. presidential election. The color indicates the winner (or predominant vote-getter). Opacity indicates the strength of the win. Size indicates the total number of votes cast in the county.
+This sample demonstrates how to create a multivariate visualization using several variables related to the 2016 U.S. presidential election. The color indicates the winner (or predominant vote-getter). Opacity indicates the strength of the win. Size indicates the total number of votes cast in the county.
 
 [![multivariate](images/multivariate.png)](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/multivariate-election/)
 

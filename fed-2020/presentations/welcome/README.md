@@ -93,7 +93,7 @@ multi layer vector symbols (scalable),
 Powered by CIM (cartographic information model) - maybe refer to Kerry's presentation here.
 
 And they are multilayer...notice the color of the tree symbol layer changes with the data.
-Purple indicates parks that experienced a decrese in visits while a a green color indicates parks that had an increase in visitors.
+Purple indicates parks that experienced a decrease in visits while a a green color indicates parks that had an increase in visitors.
 
 customizable, So you can change the out of the box symbol to your liking...
 

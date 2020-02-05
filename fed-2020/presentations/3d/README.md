@@ -18,16 +18,16 @@ I. Introduction to 3D
   A. Examples
   B. 3D Platform
   C. Create a basic 3D app (from 2D to 3D)
+    - Trees. Start with 2D Map and symbology. Move to 3D.
+    - primitives
+    - web styles
+    - z values from 2D attributes/extrusion
 II. Web Scenes
 III. Build web app with web scene
   Use same scene, add buildings, and a couple of widgets
     - search
     - line of sight
     - measurement
-
-  Visualization
-    - trees
-    - 2d vs 3d symbols
 
 ### Demos
 
@@ -41,7 +41,7 @@ III. Build web app with web scene
 - [Airspace encroachment](/uc-2018/3d-viz/samples/airspace-encroachment/)
 - [Portfolio of 3D maps by Raluca Nicola](https://ralucanicola.github.io/JSAPI_demos/)
 
-##### [3D buildings](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/3d-buildings/)
+#### [3D buildings](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/3d-buildings/)
 
 This app demonstrates how to load a web scene with the ArcGIS Portal API and modify its properties. You can leverage the slides API to apply layers, basemaps, and view properties to the view instance referencing the scene. You can also manipulate the filter and visualization of operational layers.
 
@@ -50,9 +50,11 @@ Maybe try this instead...
 https://developers.arcgis.com/javascript/latest/sample-code/widgets-line-of-sight/index.html
 or https://developers.arcgis.com/javascript/latest/sample-code/widgets-measurement-3d/index.html
 
-##### [Basic scene](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/basics/)
+#### [Basic scene](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/basics/)
 
 This sample demonstrates how to construct a simple 3D app using the SceneView.
+
+#### []()
 
 Mud Creek
 
