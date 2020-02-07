@@ -42,7 +42,7 @@ define(["require", "exports", "esri/renderers", "esri/symbols", "esri/widgets/Sl
     var filterSlider = new Slider({
         min: 0,
         max: 100,
-        values: [0, 100],
+        values: [0],
         container: document.getElementById("filter-slider"),
         labelInputsEnabled: true,
         labelsVisible: true,
@@ -52,7 +52,10 @@ define(["require", "exports", "esri/renderers", "esri/symbols", "esri/widgets/Sl
     var filterSliderEventHandle;
     function generateContinuousVisualization(params) {
         return __awaiter(this, void 0, void 0, function () {
-            var symbolType, options, renderer, colorResponse, colorVV, sliderMin, sliderMax;
+            function updateMeanValue() {
+                displayMeanValue.innerText = filterSlider.values[0].toFixed(2).toString();
+            }
+            var symbolType, options, renderer, colorResponse, colorVV, sliderMin, sliderMax, displayMeanValue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -93,11 +96,16 @@ define(["require", "exports", "esri/renderers", "esri/symbols", "esri/widgets/Sl
                             min: sliderMin,
                             max: sliderMax
                         });
-                        filterSlider.values = [sliderMin, sliderMax];
+                        filterSlider.values = [sliderMin];
+                        displayMeanValue = document.getElementById("display-mean-value");
                         filterSliderEventHandle = filterSlider.on(["thumb-change", "thumb-drag", "segment-drag"], function () {
+                            // const options = new FeatureFilter({
+                            //   where: `${colorField1Select.value} >= ${filterSlider.values[0]} AND ${colorField1Select.value} <= ${filterSlider.values[1]}`
+                            // });
                             var options = new FeatureFilter({
-                                where: colorField1Select.value + " >= " + filterSlider.values[0] + " AND " + colorField1Select.value + " <= " + filterSlider.values[1]
+                                where: colorField1Select.value + " <= " + (filterSlider.values[0] + 0.03) + " AND " + colorField1Select.value + " >= " + (filterSlider.values[0] - 0.03)
                             });
+                            updateMeanValue();
                             filterUtils_1.filterLayerView({
                                 layer: params.layer,
                                 view: params.view,

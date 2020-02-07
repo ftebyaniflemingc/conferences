@@ -9,7 +9,6 @@ define(["require", "exports", "esri/layers/FeatureLayer", "esri/Graphic", "esri/
             title: "Depth Reference",
             listMode: "hide-children",
             layers: [horizontalPlanesLayer, tickLabelLayer, cornersLayer],
-            visible: false
         });
         return measurementReferenceLayer;
     }
@@ -180,18 +179,18 @@ define(["require", "exports", "esri/layers/FeatureLayer", "esri/Graphic", "esri/
             //     z: depthValue * exaggeration
             //   })
             // }));
-            features.push(new Graphic({
-                attributes: {
-                    ObjectID: i + 2,
-                    label: "  " + Math.round(depthValue) + " m"
-                },
-                geometry: new geometry_1.Point({
-                    spatialReference: spatialReference,
-                    x: xmax,
-                    y: ymax,
-                    z: depthValue * exaggeration
-                })
-            }));
+            // features.push(new Graphic({
+            //   attributes: {
+            //     ObjectID: i+2,
+            //     label: `  ${Math.round(depthValue)} m`
+            //   },
+            //   geometry: new Point({
+            //     spatialReference,
+            //     x: xmax,
+            //     y: ymax,
+            //     z: depthValue * exaggeration
+            //   })
+            // }));
             // features.push(new Graphic({
             //   attributes: {
             //     ObjectID: i+3,
@@ -218,9 +217,9 @@ define(["require", "exports", "esri/layers/FeatureLayer", "esri/Graphic", "esri/
                     ObjectID: i,
                     label: "  " + Math.round(depthValue) + " m"
                 },
-                geometry: new geometry_1.Polygon({
+                geometry: new geometry_1.Polyline({
                     spatialReference: spatialReference,
-                    rings: [[
+                    paths: [[
                             [xmin, ymin, depthValue * exaggeration],
                             [xmin, ymax, depthValue * exaggeration],
                             [xmax, ymax, depthValue * exaggeration],
@@ -246,19 +245,16 @@ define(["require", "exports", "esri/layers/FeatureLayer", "esri/Graphic", "esri/
                     alias: "label",
                     type: "string"
                 }],
-            geometryType: "polygon",
+            geometryType: "polyline",
             returnZ: true,
             source: createPlanes(extent, interval, depth, exaggeration),
             renderer: new renderers_1.SimpleRenderer({
-                symbol: new symbols_1.PolygonSymbol3D({
-                    symbolLayers: [new symbols_1.FillSymbol3DLayer({
+                symbol: new symbols_1.LineSymbol3D({
+                    symbolLayers: [new symbols_1.LineSymbol3DLayer({
                             material: {
-                                color: [105, 220, 255, 0.25]
+                                color: [105, 220, 255, 0.5]
                             },
-                            outline: {
-                                color: [105, 220, 255, 0.5],
-                                size: 2
-                            }
+                            size: 2
                         })]
                 })
             })

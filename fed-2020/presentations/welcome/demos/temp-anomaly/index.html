@@ -58,9 +58,9 @@
         width: 100%;
         text-align: center;
       }
-      /* #snippet img{
-        height: 200px;
-      } */
+      #snippet img{
+        height: 300px;
+      }
     </style>
 
     <script id="highest-temp-arcade" type="arcgis/arcade">
@@ -346,20 +346,14 @@
         // Updates the underlying data value driving the expression
         // based on the given year provided by the slider
 
-        function updateRenderer(value) {
+        function updateRenderer(year) {
           renderer = layer.renderer.clone();
           const sizeVariable = renderer.visualVariables[0];
           const colorVariable = renderer.visualVariables[1];
-          sizeVariable.valueExpression = getSizeValueExpression(value);
-          colorVariable.valueExpression = getColorValueExpression(value);
+          sizeVariable.valueExpression = getSizeValueExpression(year);
+          colorVariable.valueExpression = `$feature.F${year}`;
           renderer.visualVariables = [sizeVariable, colorVariable];
           layer.renderer = renderer;
-        }
-
-        // Generate color visual variable based on the given year
-
-        function getColorValueExpression(value) {
-          return "$feature.F" + value;
         }
 
         // Generate size visual variable based on the given year

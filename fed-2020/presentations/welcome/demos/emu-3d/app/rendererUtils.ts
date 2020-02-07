@@ -29,7 +29,7 @@ const colorField2Select = document.getElementById("color-field2-select") as HTML
 const filterSlider = new Slider({
   min: 0,
   max: 100,
-  values: [0,100],
+  values: [0],
   container: document.getElementById("filter-slider"),
   labelInputsEnabled: true,
   labelsVisible: true,
@@ -81,12 +81,23 @@ export async function generateContinuousVisualization (params: ContinuousVisPara
     min: sliderMin,
     max: sliderMax
   })
-  filterSlider.values = [ sliderMin, sliderMax ];
+  filterSlider.values = [ sliderMin ];
+
+  const displayMeanValue = document.getElementById("display-mean-value");
+  function updateMeanValue(){
+    displayMeanValue.innerText = filterSlider.values[0].toFixed(2).toString();
+  }
 
   filterSliderEventHandle = filterSlider.on(["thumb-change", "thumb-drag", "segment-drag"] as any, () => {
+    // const options = new FeatureFilter({
+    //   where: `${colorField1Select.value} >= ${filterSlider.values[0]} AND ${colorField1Select.value} <= ${filterSlider.values[1]}`
+    // });
+
     const options = new FeatureFilter({
-      where: `${colorField1Select.value} >= ${filterSlider.values[0]} AND ${colorField1Select.value} <= ${filterSlider.values[1]}`
+      where: `${colorField1Select.value} <= ${filterSlider.values[0] + 0.03} AND ${colorField1Select.value} >= ${filterSlider.values[0] - 0.03}`
     });
+
+    updateMeanValue();
 
     filterLayerView({
       layer: params.layer,

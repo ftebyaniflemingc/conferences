@@ -19,7 +19,7 @@ export function createMeasurementReferenceLayer (view: SceneView, extent: Extent
     title: "Depth Reference",
     listMode: "hide-children",
     layers: [horizontalPlanesLayer, tickLabelLayer, cornersLayer ],
-    visible: false
+    // visible: false
   });
 
   return measurementReferenceLayer;
@@ -201,18 +201,18 @@ function createTicks(extent: Extent, interval: number, depth: number, exaggerati
     //   })
     // }));
 
-    features.push(new Graphic({
-      attributes: {
-        ObjectID: i+2,
-        label: `  ${Math.round(depthValue)} m`
-      },
-      geometry: new Point({
-        spatialReference,
-        x: xmax,
-        y: ymax,
-        z: depthValue * exaggeration
-      })
-    }));
+    // features.push(new Graphic({
+    //   attributes: {
+    //     ObjectID: i+2,
+    //     label: `  ${Math.round(depthValue)} m`
+    //   },
+    //   geometry: new Point({
+    //     spatialReference,
+    //     x: xmax,
+    //     y: ymax,
+    //     z: depthValue * exaggeration
+    //   })
+    // }));
 
     // features.push(new Graphic({
     //   attributes: {
@@ -241,9 +241,9 @@ function createPlanes(extent: Extent, interval: number, depth: number, exaggerat
         ObjectID: i,
         label: `  ${Math.round(depthValue)} m`
       },
-      geometry: new Polygon({
+      geometry: new Polyline({
         spatialReference,
-        rings: [ [
+        paths: [ [
           [ xmin, ymin, depthValue * exaggeration ],
           [ xmin, ymax, depthValue * exaggeration ],
           [ xmax, ymax, depthValue * exaggeration ],
@@ -271,19 +271,16 @@ function createHorizontalMeasurementPlanes (view: SceneView, extent: Extent, dep
       alias: "label",
       type: "string"
     }],
-    geometryType: "polygon",
+    geometryType: "polyline",
     returnZ: true,
     source: createPlanes(extent, interval, depth, exaggeration),
     renderer: new SimpleRenderer({
-      symbol: new PolygonSymbol3D({
-        symbolLayers: [ new FillSymbol3DLayer({
+      symbol: new LineSymbol3D({
+        symbolLayers: [ new LineSymbol3DLayer({
           material: {
-            color: [105, 220, 255, 0.25]
+            color: [105, 220, 255, 0.5]
           },
-          outline: {
-            color: [105, 220, 255, 0.5],
-            size: 2
-          }
+          size: 2
         }) ]
       })
     })
