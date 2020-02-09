@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="initial-scale=1,maximum-scale=1,user-scalable=no"
+/>
+<title>Load a basic WebMap - 4.14</title>
+
+<style>
+  html,
+  body,
+  #viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  #controls {
+    width: 350px;
+    padding: 10px;
+  }
+</style>
+
+<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/dark/main.css"/>
+<script src="https://js.arcgis.com/4.14/"></script>
+
+<script>
+
+require([
+  "esri/WebMap",
+  "esri/views/MapView",
+  "esri/widgets/Home",
+  "esri/widgets/Expand",
+  "esri/widgets/Legend",
+  "esri/widgets/HistogramRangeSlider",
+  "esri/renderers/smartMapping/statistics/histogram",
+  "esri/core/promiseUtils"
+], function(WebMap, MapView, Home, Expand, Legend, HistogramRangeSlider, histogram, promiseUtils) {
+
+  const map = new WebMap({
+    portalItem: {
+      id: "91c93b8c91da41a4bf62355fc1dfcf2b"
+    }
+  });
+
+  const view = new MapView({
+    container: "viewDiv",
+    map: map,
+    center: {
+      "spatialReference": {
+        "latestWkid": 3857,
+        "wkid": 102100
+      },
+      "x": -9937828.452342374,
+      "y": 4450032.18334439
+    },
+    scale: 9244648.868618
+  });
+  view.ui.add(new Home({ view: view}), "top-left");
+  view.ui.add(new Legend({ view: view}), "top-right");
+
+  view.when().then(function(){
+
+    const layer = map.layers.find( layer => layer.visible );
+    layer.outFields = ["*"];
+
+    layer.when().then(function(){
+      view.whenLayerView(layer).then(function(layerView) {
+        const field = "MP18001h_B";
+        const normalizationField = "MP18076h_B";
+        const min = 0;
+        const max = 1500;
+
+        histogram({
+          layer: layer,
+          view: view,
+          valueExpression: `($feature.${field} / $feature.${normalizationField})*100`,
+          numBins: 100,
+        }).then(function(histogramResponse) {
+          const slider = new HistogramRangeSlider({
+            bins: histogramResponse.bins,
+            min: histogramResponse.minValue,
+            max: histogramResponse.maxValue,
+            values: [histogramResponse.minValue],
+            excludedBarColor: "#524e4e",
+            rangeType: "at-least",
+            container: document.getElementById("slider-container")
+          });
+
+          slider.on(["thumb-change", "thumb-drag", "segment-drag"], function(
+            event
+          ) {
+            filterByHistogramRange(field).catch(function(error) {
+              if (error.name !== "AbortError") {
+                console.error(error);
+              }
+            });
+          });
+
+          const filterByHistogramRange = promiseUtils.debounce(function(
+            field
+          ) {
+            layerView.filter = {
+              where: slider.generateWhereClause(`((${field} / ${normalizationField}) * 100)`)
+            };
+          });
+
+          const filterExpand = new Expand({
+            view: view,
+            content: document.getElementById("controls"),
+            expandIconClass: "esri-icon-filter",
+            expanded: true
+          });
+
+          view.ui.add(filterExpand, "bottom-left");
+        });
+      }).catch( function(error){
+        console.error(error);
+      });
+
+    });
+    });
+});
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="controls" class="esri-widget">
+      <div id="description" class="esri-widget">% households with only one vehicle</div>
+      <div id="outer-container" class="esri-widget">
+        <div id="slider-container"></div>
+      </div>
+    </div>
+  </body>
+</html>
