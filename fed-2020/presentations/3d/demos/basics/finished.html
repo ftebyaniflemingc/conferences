@@ -26,51 +26,58 @@
     "esri/widgets/BasemapGallery",
     "esri/widgets/Search",
     "esri/layers/FeatureLayer",
+    "esri/layers/SceneLayer",
     "esri/renderers/SimpleRenderer",
     "esri/symbols/PolygonSymbol3D",
     "esri/symbols/ObjectSymbol3DLayer"
-  ], function(Map, SceneView, Expand, BasemapGallery, Search, FeatureLayer,
+  ], function(Map, SceneView, Expand, BasemapGallery, Search, FeatureLayer, SceneLayer,
               SimpleRenderer, PolygonSymbol3D, ObjectSymbol3DLayer) {
 
-    const layer = new FeatureLayer({
-      url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/us_housing_zip_codes/FeatureServer/0",
-      renderer: new SimpleRenderer({
-        symbol: new PolygonSymbol3D({
-          symbolLayers: [
-            new ObjectSymbol3DLayer({
-              width: 500,
-              depth: 500,
-              resource: { primitive: "cone" }
-            })
-          ]
-        }),
-        visualVariables: [{
-          type: "size",
-          axis: "width-and-depth",
-          useSymbolValue: true
-        }, {
-          type: "size",
-          axis: "height",
-          field: "AVGHINC_CY",
-          stops: [
-            { value: 40000, size: 250},
-            { value: 100000, size: 8000}
-          ]
-        }, {
-          type: "color",
-          field: "AVGHINC_CY",
-          stops: [
-            { value: 20000, color: "white" },
-            { value: 150000, color: "blue" }
-          ]
-        }]
-      })
+    const layer = new SceneLayer({
+      portalItem: {
+        id: "e61cfbbbe148472c8e3150da03d8ee13"
+      }
     });
+
+    // const layer = new FeatureLayer({
+    //   url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/us_housing_zip_codes/FeatureServer/0",
+    //   renderer: new SimpleRenderer({
+    //     symbol: new PolygonSymbol3D({
+    //       symbolLayers: [
+    //         new ObjectSymbol3DLayer({
+    //           width: 500,
+    //           depth: 500,
+    //           resource: { primitive: "cone" }
+    //         })
+    //       ]
+    //     }),
+    //     visualVariables: [{
+    //       type: "size",
+    //       axis: "width-and-depth",
+    //       useSymbolValue: true
+    //     }, {
+    //       type: "size",
+    //       axis: "height",
+    //       field: "AVGHINC_CY",
+    //       stops: [
+    //         { value: 40000, size: 250},
+    //         { value: 100000, size: 8000}
+    //       ]
+    //     }, {
+    //       type: "color",
+    //       field: "AVGHINC_CY",
+    //       stops: [
+    //         { value: 20000, color: "white" },
+    //         { value: 150000, color: "blue" }
+    //       ]
+    //     }]
+    //   })
+    // });
 
     const map = new Map({
       basemap: "streets",
       ground: "world-elevation",
-//      layers: [ layer ]
+     layers: [ layer ]
     });
 
      view = new SceneView({
