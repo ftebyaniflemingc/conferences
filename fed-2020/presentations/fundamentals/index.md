@@ -3,8 +3,8 @@
 
 <h2 style="text-align: left; font-size: 50px; padding-top: 150px;">ArcGIS API for JavaScript Programming Patterns</h1>
 <h2 style="text-align: left; font-size: 50px;">and API Fundamentals</h2>
-<p style="text-align: left; font-size: 30px;">Kristian Ekenes</p>
-<p style="text-align: left; font-size: 30px;">slides: <a href="https://git.io/Je0yr" target="_blank">https://git.io/Je0yr</a></p>
+<p style="text-align: left; font-size: 30px;">Kristian Ekenes (<a href="https://twitter.com/kekenes" target="_blank">@kekenes</a>)</p>
+<!-- <p style="text-align: left; font-size: 30px;">slides: <a href="https://git.io/JvnpF" target="_blank">https://git.io/JvnpF</a> (not live yet!)</p> -->
 
 <!--
 In this session, you'll learn the basics of the ArcGIS API 4.x for JavaScript, including the fundamentals of watching for property changes, autocasting, working with collections, and lazy-loading data in your applications. You'll learn more details about maps, webmaps, layers, 2D and 3D views, UI, and widgets. This is a key session for developers new to the 4.x version of the API.
@@ -14,9 +14,12 @@ In this session, you'll learn the basics of the ArcGIS API 4.x for JavaScript, i
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
 
-## What do I get with the 4x JSAPI?
+## What you get with the JS API
 
-- Simplified and consistent API
+- Simplified and consistent web mapping API
+- Wraps and consumes ArcGIS Services, but...
+- You can use other data types as well
+  - GeoJSON, CSV, OGC, [Feature Collections](https://developers.arcgis.com/javascript/latest/sample-code/layers-featurelayer-collection/index.html)
 - Write apps in ES6 or TypeScript
 - Modern browser support (IE11+)
 - [Supported in 30+ locales](http://www.arcgis.com/apps/3DInsetMap/index.html?locale=ja)
@@ -24,172 +27,21 @@ In this session, you'll learn the basics of the ArcGIS API 4.x for JavaScript, i
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## What are my options?
 
-- Needs?
-- Resources?
-- Time?
-- Customizations?
+## What you get with the JS API
 
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Why start from scratch?
-
-- App starters
-- Widgets
-
-[![Esri Github](../../common/images/github-esri.png)](https://github.com/search?o=desc&q=topic%3Ajavascript+org%3AEsri+fork%3Atrue&s=updated&type=Repositories)
+- Technical support
+- GeoNet Community
+- Excellent documentation and samples
+  - Links from the sandbox
+- Blogs, videos, and other resources
 
 ----
-
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets!
-- We'll look at a few <a href="https://developers.arcgis.com/javascript/latest/sample-code/index.html?search=Widget">widgets</a>
-- ~30 Widgets out of the box <!-- .element: class="fragment" data-fragment-index="1" -->
-- Widgets help make great apps <!-- .element: class="fragment" data-fragment-index="2" -->
-- Less code for you to write <!-- .element: class="fragment" data-fragment-index="3" -->
-- Designed with responsive apps in mind <!-- .element: class="fragment" data-fragment-index="4" -->
 
-----
+## Fundamentals
 
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Expand
- - [Clickable button to open container](https://codepen.io/kellyhutchins/pen/drOGNJ)
- - Icons
- - Group
- - Mode
-<aside class="notes">Look at a few key widgets start with expand and point out common questions/gotchas </aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Use Portal Content
-
- - [Search](https://codepen.io/kellyhutchins/pen/EMNPmZ)
- - Basemap Gallery
-<aside class="notes">Show how we can provide portal and widgets like search and bmg use that content.  </aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Popup
-
- - [Menu actions](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popup-actions)
- - [Dock](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popup-docking-position)
-<aside class="notes">   </aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Popup Template
-
- - [Define fields, charts, custom html content](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popup-multipleelements)
- - [Using a function](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-promise)
- - Promises
- - [Arcade](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-arcade-groupby)
-
-<aside class="notes"> Talk about different ways to define/set popup content</aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Author popup in online
-
- - [Web Map or Web Scene](http://jsapi.maps.arcgis.com/home/webmap/viewer.html?webmap=e9e5311ac8ec4110abe77b026ce87cf7)
- - Layer.fromPortalItem
- - [App Demo](http://www.arcgis.com/apps/Media/index.html?appid=ba47f08a73e142908475b841e0e38b02)
-<aside class="notes">Popups can be lots of work to define field info etc. If you use web map, scene, layer you get popup (and rendering) info for free</aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Feature
- - Display popup template content
- - [Hover](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=widgets-feature)
-<aside class="notes">Display popup content someplace else</aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Architecture
-
- View + View Model
- ![Search View Model](../../common/images/searchviewmodel.png)
-
-<aside class="notes"> Separate business logic and presentation. Link to doc  </aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## View Models
-
- - [Custom View](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=widgets-frameworks-react)
- - [Use the view model](https://developers.arcgis.com/example-apps/nearby-javascript/?utm_source=github&utm_campaign=example_apps_nearby_javascript)
-  - [Additional Examples](https://odoe.net/blog/view-models-in-the-arcgis-api-for-javascript/)
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Geocoding
-
-```js
-const locator = new Locator({ url: url });
-locator.addressToLocations({
-  address: {
-    "singleLine": "380 New York St, Redlands, CA 92373"
-  }
-});
-locator.locationToAddress({ location: point });
-```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Geocoding
-
-```js
-const searchVM = new SearchVM();
-searchVM.search("380 New York St, Redlands, CA 92373");
-searchVM.search(location);
-```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Geocoding
-
-```js
-const portal = new Portal(...);
-await portal.load();
-portal.helperServices.geocode.map(geocoderService => {
-  // objects with details on
-  // geocode services for your portal
-});
-```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Styling
- Available Themes
-<iframe height="600" style="width: 100%;" scrolling="no" title="Theme Testing" src="https://codepen.io/odoe/embed/preview/oNNGRbz?height=600&theme-id=31222&default-tab=js,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
-  See the Pen <a href='https://codepen.io/odoe/pen/oNNGRbz'>Theme Testing</a> by Rene Rubalcava
-  (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
-
-<aside class="notes">Look at ways to customize appearance of widgets</aside>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Widgets - Styling
- - CSS Extension language
- - SASS
- - [Theme Utility](https://github.com/jcfranco/jsapi-styles)
-
-
-<aside class="notes">Demo Franco's SASS utility (npm install and show code)</aside>
+...and some patterns
 
 ----
 
@@ -206,10 +58,12 @@ const map = new Map({
   basemap: "topo"
 });
 
+// 2d
 const mView = new MapView({
   map: map,
   container: "viewDiv"
 });
+//3d
 const sView = new SceneView({
   map: map,
   container: "viewDiv"
@@ -239,6 +93,112 @@ const map = new Map({
   ground: "world-elevation"
 });
 ```
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Layer and LayerView
+
+20+ layer types!
+
+- FeatureLayer
+- MapImageLayer
+- CSVLayer
+- GeoJSONLayer
+- WMSLayer, WMTSLayer
+- TileLayer
+- ...
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## FeatureLayer
+
+```js
+const layer = new FeatureLayer({
+  url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Enriched_United_States_Tract_Boundaries_2018/FeatureServer"
+});
+
+const map = new Map({
+  basemap: "topo",
+  layers: [ layer ]
+});
+
+const mView = new MapView({
+  map: map,
+  container: "viewDiv"
+});
+```
+
+[Example](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=layers-featurelayer)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Popup Templates
+
+```js
+layer.popupTemplate = {
+  title: "{NAME} County",
+  content: "{POP2020} people live here.",
+  fieldInfos: [{
+    fieldName: "POP2020",
+    format: {
+      places: 0,
+      digitSeparator: true
+    }
+  }]
+}
+```
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Popup Templates
+
+ - [Define fields, charts, custom html content](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popup-multipleelements)
+ - [Using a function](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-promise)
+ - Promises
+ - [Arcade](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=popuptemplate-arcade-groupby)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Renderers
+
+```js
+layer.renderer = {
+  type: "simple",
+  visualVariables: [{
+    type: "size",
+    field: "POP2020",
+    minSize: 6,
+    maxSize: 50,
+    minDataValue: 10000,
+    maxDataValue: 1000000
+  }]
+};
+```
+
+Go to the Visualization with the ArcGIS API for JavaScript session later this week!
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+
+## LayerView
+
+- Renders the Layer
+- Provides access to features on the client
+- When is it done?
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## LayerView
+
+<iframe height='500' scrolling='no' title='LayerView - Ready' src='//codepen.io/odoe/embed/preview/YvRJgj/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/YvRJgj/'>LayerView - Ready</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
 
 ----
 
@@ -288,18 +248,9 @@ const map = new Map({
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Working with Accessor
+### Working with properties
 
-- Objects are have properties that can be:
-  - read and set
-  - or read-only
-  - constructor arguments
-  - watchable
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-### Accessor - property access
+Getting and setting
 
 ```ts
 layer.opacity = 0.5;
@@ -312,14 +263,16 @@ layer.set({
 });
 
 // accessing the value of a deep property
-view.get("map.basemap.title");
+console.log(view.map.basemap.title);
 view.set("map.basemap.title", "new title");
 ```
 
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-### Accessor - property watching
+### Working with properties
+
+Watching (no events!)
 
 ```ts
 mapView.watch("scale", (newValue, oldValue, property, target) => {
@@ -346,26 +299,33 @@ watchUtils.whenTrue(view, "stationary", () => {
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-### Accessor - autocasting and single constructor
+### Working with properties
+
+Autocasting and single constructor
 
 ```js
   // 4.x
-  {
-    type: "simple-marker",
-    style: 'square',
-    color: 'red',
-    size: 10,
-    outline: {
-      color: 'rgba(255, 255, 255, 0.5)'
-      width: 4
+  layer.renderer = {
+    type: "simple",
+    symbol: {
+      type: "simple-marker",
+      style: "square",
+      color: "red",
+      size: 10,
+      outline: {
+        color: "rgba(255, 255, 255, 0.5)"
+        width: 4
+      }
     }
-  });
+  };
 
   // 3.x
-  new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10,
+  layer.setRenderer(
+    new SimpleRenderer(
+    new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10,
     new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
     new Color([255,0,0]), 4),
-    new Color([255,255,255,0.25]));
+    new Color([255,255,255,0.25])));
 ```
 
 ----
@@ -378,7 +338,8 @@ watchUtils.whenTrue(view, "stationary", () => {
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
 ## Promises
 
-- All asynchronous methods return a promise, no more [events](https://developers.arcgis.com/javascript/jsapi/querytask-amd.html#events)
+- All asynchronous methods return a promise
+- No more [events](https://developers.arcgis.com/javascript/jsapi/querytask-amd.html#events)
 - The basic pattern looks like this:
 
 ```js
@@ -389,8 +350,6 @@ layer.queryFeatures(query).then(handleResult).catch(handleError);
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
 ## Promises with async/await
-
-- work with native promises
 
 ```js
 const doQuery = async (query) => {
@@ -411,12 +370,12 @@ const doQuery = async (query) => {
 ```js
 const map = new Map({...})
 
-view = new SceneView({
+const view = new SceneView({
   map: map,
   //...
 });
 
-view.when(() => {
+view.when().then(() => {
   // the view is ready to go
 });
 ```
@@ -427,7 +386,7 @@ view.when(() => {
 ## Promises
 
 ```js
-view.when(() => {
+view.when().then(() => {
   return view.whenLayerView(map.findLayerById("awesomeLayer"));
 })
 .then(layerView => {
@@ -469,181 +428,6 @@ catch(error) {
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Patterns
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Interactivity with view events
-
-- Use view events to interact with the view
-- [List of events](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#events-summary)
-- You can stop the propagation of the event to prevent the default behavior
-
-```js
-view.on("drag", event => {
-  // user won't be able to drag
-  event.stopPropagation();
-})
-```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Interactivity with view events
-
-- Access the features on click
-
-```js
-view.on("click", ({ x, y }) => {
-  const screenPoint = {x, y};
-  view.hitTest(screenPoint)
-    .then(response => {
-       // do something with the result graphic
-       const graphic = response.results[0].graphic;
-    });
-});
-```
-- [API Sample](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=view-hittest)
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## goTo() with View
-
-- Sets the view to a given target.
-  - Navigate to a geometry/feature/location
-- [API Sample](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=scene-goto)
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Loadables
-
-- brings better control, and scheduling of loading resources.
-- extension of `esri/core/Promise`
-- in 3.x, instanciating a layer loads it. in 4.0, it's an explicit call
-- the views automatically loads the map and its layers
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Loadables
-
-- `WebMap` / `WebScene` need to load:
- - the portal item
- - the layer module
- - the layer's item
-- `MapView` / `SceneView` need to load:
- - the map
- - the layers
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-```js
-  //In a single page application, get a feature from a FeatureLayer from a WebMap without displaying it, ASAP!
-  const webmap = new WebMap({
-    portalItem: {
-      id: 'affa021c51944b5694132b2d61fe1057'
-    }
-  });
-
-  webmap.load()
-    .then(() => {
-      return webmap.getLayer('myFeatureLayerId').load();
-    })
-    .then(featureLayer => {
-      return featureLayer.queryFeatures({
-        where: 'OBJECTID = 1'
-      });
-    })
-    .then(result => {
-      displayDetails(result.features[0]);
-    })
-    .otherwise(error => {
-      console.error(error);
-    });
-```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Zoom or Scale
-
-```js
-const view = new MapView({
-  container: "viewDiv",
-  map: map,
-  center: [-116.5, 33.80],
-  zoom: 14 // what does that really mean?
-});
-```
-
-- Zoom = LOD (Level of Details)
-- Not all LODs are created equal
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Zoom is not Scale
-
-```js
-const view = new MapView({
-  container: "viewDiv",
-  map: map,
-  center: [-116.5, 33.80],
-  scale: 50000 // I know what that means!
-});
-```
-
-- Scale is portable
-- Scale has meaning
-- We still snap to closest LOD/zoom
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## WebMap is still a Map
-
-```js
-const map = new WebMap({
-  basemap: { ... },
-  layers: [ ... ]
-});
-```
-
-- Still acts like a regular `Map`
-- Has some advantages
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## WebMap is still a Map
-
-<iframe height='500' scrolling='no' title='Local bookmarks' src='//codepen.io/odoe/embed/preview/QxrEVX/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/QxrEVX/'>Local bookmarks</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Sublayer to FeatureLayer
-
-- You can extract a FeatureLayer from MapImageLayer Sublayer
-- `sublayer.createFeatureLayer()`
-- Can use capabilities not normally available with Sublayer
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## Sublayer to FeatureLayer
-
-<iframe height='500' scrolling='no' title='createFeatureLayer' src='//codepen.io/odoe/embed/preview/PaxeyO/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/PaxeyO/'>createFeatureLayer</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
 ## createQuery
 
 - When you can do `layer.createQuery()`
@@ -662,38 +446,154 @@ const map = new WebMap({
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## MapImageLayer
+## Zoom or Scale
 
-- If you want to modify Sublayers, do it after you load the layer
-- Defining them upfront overrides the defaults
-  - May not be what you want
+```js
+const view = new MapView({
+  container: "viewDiv",
+  map: map,
+  center: [-116.5, 33.80],
+  zoom: 14 // what does that really mean?
+});
+```
+
+- Zoom = LOD (Level of Detail)
+- Not all LODs are created equal
 
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## MapImageLayer
+## Zoom is not Scale
 
-<iframe height='500' scrolling='no' title='MapImageLayer - Load Sublayers' src='//codepen.io/odoe/embed/preview/WyYBwL/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/WyYBwL/'>MapImageLayer - Load Sublayers</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
+```js
+const view = new MapView({
+  container: "viewDiv",
+  map: map,
+  center: [-116.5, 33.80],
+  scale: 50000 // I know what that means!
+});
+```
+
+- Scale is portable
+- Scale has meaning
+- We still snap to closest LOD/zoom, [unless you disable it](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#constraints)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## goTo() with View
+
+- Sets the view to a given target.
+  - Navigate to a geometry/feature/location
+- [API Sample](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=scene-goto)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Patterns
+
+Things you can do to reduce the amount of code you write
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## How the ArcGIS JS API helps you
+
+Open source app starters and templates
+
+[![Esri Github](../../common/images/github-esri.png)](https://github.com/search?o=desc&q=topic%3Ajavascript+org%3AEsri+fork%3Atrue&s=updated&type=Repositories)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## WebMap is still a Map
+
+```js
+const map = new WebMap({
+  basemap: { ... },
+  layers: [ ... ]
+});
+```
+
+- Still acts like a regular `Map`
+- Has some BIG advantages
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## WebMap is still a Map
+
+<iframe height='500' scrolling='no' title='Local bookmarks' src='//codepen.io/odoe/embed/preview/QxrEVX/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/QxrEVX/'>Local bookmarks</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
 </iframe>
 
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## LayerViews
+## Widgets!
 
-- Renders the Layer
-- When is it done though?
-  - _hotly debated topic!_
-  - When can you actually use it!!
-  - Behavior different with optimized FeatureLayer
+- We'll look at a few <a href="https://developers.arcgis.com/javascript/latest/sample-code/index.html?search=Widget">widgets</a>
+- ~50 Widgets out of the box <!-- .element: class="fragment" data-fragment-index="1" -->
+- Widgets help make great apps <!-- .element: class="fragment" data-fragment-index="2" -->
+- Less code for you to write <!-- .element: class="fragment" data-fragment-index="3" -->
+- Designed with responsive apps in mind <!-- .element: class="fragment" data-fragment-index="4" -->
 
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
-## LayerViews
+## Widgets - Expand
 
-<iframe height='500' scrolling='no' title='LayerView - Ready' src='//codepen.io/odoe/embed/preview/YvRJgj/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/YvRJgj/'>LayerView - Ready</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
+ - [Clickable button to open container](https://codepen.io/kellyhutchins/pen/drOGNJ)
+ - Icons
+ - Group
+ - Mode
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Widgets - Use Portal Content
+
+ - [Search](https://codepen.io/kellyhutchins/pen/EMNPmZ)
+ - Basemap Gallery
+<aside class="notes">Show how we can provide portal and widgets like search and bmg use that content.  </aside>
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Widgets - Architecture
+
+ View + View Model
+ ![Search View Model](../../common/images/searchviewmodel.png)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## View Models
+
+ - [Custom View](https://developers.arcgis.com/javascript/latest/sample-code/sandbox/index.html?sample=widgets-frameworks-react)
+ - [Use the view model](https://developers.arcgis.com/example-apps/nearby-javascript/?utm_source=github&utm_campaign=example_apps_nearby_javascript)
+  - [Additional Examples](https://odoe.net/blog/view-models-in-the-arcgis-api-for-javascript/)
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Widgets - Styling
+ Available Themes
+<iframe height="600" style="width: 100%;" scrolling="no" title="Theme Testing" src="https://codepen.io/odoe/embed/preview/oNNGRbz?height=600&theme-id=31222&default-tab=js,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/odoe/pen/oNNGRbz'>Theme Testing</a> by Rene Rubalcava
+  (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
 </iframe>
+
+<aside class="notes">Look at ways to customize appearance of widgets</aside>
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## Widgets - Styling
+ - CSS Extension language
+ - SASS
+ - [Theme Utility](https://github.com/jcfranco/jsapi-styles)
+
+<aside class="notes">Demo Franco's SASS utility (npm install and show code)</aside>
 
 ----
 
