@@ -203,6 +203,83 @@ Go to the Visualization with the ArcGIS API for JavaScript session later this we
 ----
 
 <!-- .slide: data-background="../../common/images/bg-3.png" -->
+## LayerView vs. Layer (Query)
+
+The same methods execute queries client-side (layer view) and server side (layer)
+
+```js
+*Layer/LayerView.queryFeatures()
+*Layer/LayerView.queryFeatureCount()
+*Layer/LayerView.queryExtent()
+*Layer/LayerView.queryObjectIds()
+```
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## LayerView vs. Layer (Query)
+
+Same methods execute queries client-side (layer view) and server side (layer)
+
+```js
+const layer = new FeatureLayer({ url: "https://..." });
+const view = new MapView({
+  map: new Map({
+    layers: [ layer ]
+  })
+});
+
+const query = layer.createQuery();
+query.where = "Population > 40000";
+
+// layer.queryFeatures queries the server
+const response = await layer.queryFeatures(query);
+// do something with response
+```
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## LayerView vs. Layer (Query)
+
+Same methods execute queries client-side (layer view) and server side (layer)
+
+```js
+const layer = new FeatureLayer({ url: "https://..." });
+const view = new MapView({
+  map: new Map({
+    layers: [ layer ]
+  })
+});
+
+const query = layer.createQuery();
+query.where = "Population > 40000";
+
+// layerView.queryFeatures queries the server
+const layerView = await view.whenLayerView(layer) as FeatureLayerView;
+const response = await layerView.queryFeatures(query);
+// do something with response
+```
+
+----
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## createQuery
+
+- When you can do `layer.createQuery()`
+  - `query` object will already have the layers filters and layer definitions
+  - more consistent
+- Use `new Query()` when you don't want predefined filters to be applied
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
+## createQuery
+
+<iframe height='500' scrolling='no' title='createQuery' src='//codepen.io/odoe/embed/preview/rKQqQW/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/rKQqQW/'>createQuery</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+----
+
+<!-- .slide: data-background="../../common/images/bg-3.png" -->
 ## Basemaps and Ground
 
 ```js
@@ -424,24 +501,6 @@ catch(error) {
 }
 
 ```
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## createQuery
-
-- When you can do `layer.createQuery()`
-  - `query` object will already have the layers filters and layer definitions
-  - more consistent
-- Use `new Query()` when you don't want predefined filters to be applied
-
-----
-
-<!-- .slide: data-background="../../common/images/bg-3.png" -->
-## createQuery
-
-<iframe height='500' scrolling='no' title='createQuery' src='//codepen.io/odoe/embed/preview/rKQqQW/?height=500&theme-id=31222&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/odoe/pen/rKQqQW/'>createQuery</a> by Rene Rubalcava (<a href='https://codepen.io/odoe'>@odoe</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
 
 ----
 

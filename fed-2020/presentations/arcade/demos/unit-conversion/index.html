@@ -41,7 +41,7 @@
         const view = new MapView({
           container: "viewDiv",
           map: map,
-          center: [-77.0006, 38.8517], // Los Angeles
+          center: [-77.0006, 38.8517], // Washington
           scale: 577790
         });
 
@@ -49,10 +49,10 @@
         // string and concatenates it with the degree symbol and units
 
         const tempClass = {
-          // labelExpression: "[TEMP]",
+          // labelExpression: "[TEMP]°",
           labelExpressionInfo: {
-            // expression: "$feature.Temp",
-            // expression: "Round($feature.TEMP) + '° F';"
+            // expression: "$feature.temp",
+            // expression: "Round($feature.TEMP, 2) + '° F';"
             expression: "Text((($feature.TEMP - 32) * 5/9), '##° C')"
           },
           symbol: {

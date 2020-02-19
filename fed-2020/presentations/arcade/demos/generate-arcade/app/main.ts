@@ -13,7 +13,7 @@ import { ClassBreaksRenderer } from "esri/renderers";
 (async () => {
 
   //
-  // Create map with a single FeatureLayer 
+  // Create map with a single FeatureLayer
   //
 
   const layer = new FeatureLayer({
@@ -37,15 +37,15 @@ import { ClassBreaksRenderer } from "esri/renderers";
   const title = "2014 Educational Attainment";
 
   const appDescription = `
-    Educational attainment refers to the 
-    highest level of education that an 
+    Educational attainment refers to the
+    highest level of education that an
     individual has completed. People
     who completed higher levels of
     education are not included in counts
     of lower education levels.
   `;
 
-  // 
+  //
   // Configure aggregated fields for generating Arcade expressions
   // Some field values are a subset of a larger variable. For example,
   // all people who earned a bachelor's, master's, and doctorate degree
@@ -99,7 +99,7 @@ import { ClassBreaksRenderer } from "esri/renderers";
   updatePanel();
 
   /**
-   * Creates the DOM elements needed to render basic UI and contextual information, 
+   * Creates the DOM elements needed to render basic UI and contextual information,
    * including the title, description, and attribute field select
    */
   function updatePanel (){
@@ -112,7 +112,7 @@ import { ClassBreaksRenderer } from "esri/renderers";
     panelDiv.appendChild(titleElement);
 
     // description
-    
+
     const descriptionElement = document.createElement("div");
     descriptionElement.style.paddingBottom = "10px";
     descriptionElement.innerText = appDescription;
@@ -131,12 +131,12 @@ import { ClassBreaksRenderer } from "esri/renderers";
 
   /**
    * Creates the HTML select element for the given field info objects.
-   * 
+   *
    * @param {FieldInfoForArcade[]} fieldInfos - An array of FieldInfoForArcade objects,
-   *   defining the name ane description of known values. The description is 
+   *   defining the name ane description of known values. The description is
    *   used in the text of each option.
-   * 
-   * @returns {HTMLSelectElement} 
+   *
+   * @returns {HTMLSelectElement}
    */
   function createSelect(fieldInfos: FieldInfoForArcade[]): HTMLSelectElement {
 
@@ -158,10 +158,10 @@ import { ClassBreaksRenderer } from "esri/renderers";
   let colorSlider: ColorSlider;
 
   /**
-   * Callback that executes each time the user selects a new variable 
-   * to visualize. 
-   * 
-   * @param event 
+   * Callback that executes each time the user selects a new variable
+   * to visualize.
+   *
+   * @param event
    */
   async function selectVariable(event?: any){
     const selectedValue = event ? event.target.value : variables[0].value;
@@ -180,7 +180,7 @@ import { ClassBreaksRenderer } from "esri/renderers";
     layer.renderer = rendererResponse.renderer;
     layer.popupTemplate = rendererResponse.popupTemplate;
 
-    // updates the ColorSlider with the stats and histogram 
+    // updates the ColorSlider with the stats and histogram
     // generated from the smart mapping generator
 
     colorSlider = updateSlider({
@@ -193,10 +193,10 @@ import { ClassBreaksRenderer } from "esri/renderers";
   /**
    * Returns the object with the associated description and fields for the
    * given value.
-   * 
+   *
    * @param {string} value - The value of the selected variable. For example,
    *   this value could be "no-school".
-   * 
+   *
    * @returns {FieldInfoForArcade}
    */
   function findVariableByValue (value: string): FieldInfoForArcade {
@@ -210,12 +210,12 @@ import { ClassBreaksRenderer } from "esri/renderers";
   }
 
   /**
-   * Generates an Arcade Expression and a title for the expression to use in the 
+   * Generates an Arcade Expression and a title for the expression to use in the
    * Legend widget.
-   * 
+   *
    * @param {string} value - The value selected by the user. For example, "no-school".
    * @param {boolean} [normalize]  - indicates whether to normalize by the normalizationField.
-   * 
+   *
    * @returns {GetValueExpressionResult}
    */
   function getValueExpression(value: string, normalize?: boolean): GetValueExpressionResult {
@@ -224,7 +224,7 @@ import { ClassBreaksRenderer } from "esri/renderers";
 
     const fieldInfo = findVariableByValue(value);
     const normalizationField = normalize ? normalizationVariable : null;
-    
+
     return {
       valueExpression: generateArcade(fieldInfo.fields, normalizationField),
       valueExpressionTitle: fieldInfo.label,
@@ -234,16 +234,16 @@ import { ClassBreaksRenderer } from "esri/renderers";
 
   /**
    * Generates an Arcade expression with the given fields and normalization field.
-   * 
-   * @param {string[]} fields - The fields making up the numerator of the percentage. 
+   *
+   * @param {string[]} fields - The fields making up the numerator of the percentage.
    * @param {string} normalizationField - The field making up the denominator of the percentage.
-   * 
+   *
    * @returns {string}
    */
 
   function generateArcade(fields: string[], normalizationField?: string): string {
     const value = fields.map( field => `$feature.${field}` ).reduce( (a,c) => `${a} + ${c}`);
-    const percentValue = normalizationField ? 
+    const percentValue = normalizationField ?
       `( ( ${value} ) / $feature.${normalizationField} ) * 100` : value;
     return `Round( ${percentValue} )`;
   }
@@ -256,17 +256,17 @@ import { ClassBreaksRenderer } from "esri/renderers";
   }
 
   /**
-   * Generates a renderer with a continuous color ramp for the given layer and 
+   * Generates a renderer with a continuous color ramp for the given layer and
    * Arcade expression.
-   * 
-   * @param {GenerateRendererParams} params 
-   * 
+   *
+   * @param {GenerateRendererParams} params
+   *
    * @return {Object}
    */
   async function generateRenderer(params: GenerateRendererParams) {
 
     const valueExpressionInfo = getValueExpression(params.value, params.normalize);
-
+    console.log(valueExpressionInfo.valueExpression)
     const rendererParams = {
       layer: params.layer,
       valueExpression: valueExpressionInfo.valueExpression,
@@ -310,10 +310,10 @@ import { ClassBreaksRenderer } from "esri/renderers";
   /**
    * Creates a ColorSlider instance if it doesn't already exist. Updates it with the
    * given parameters if it does exist.
-   * 
-   * @param {UpdateSliderParams} params 
-   * @param {ColorSlider} slider 
-   * 
+   *
+   * @param {UpdateSliderParams} params
+   * @param {ColorSlider} slider
+   *
    * @returns {ColorSlider}
    */
   function updateSlider (params: UpdateSliderParams, slider?: ColorSlider): ColorSlider {
@@ -339,10 +339,10 @@ import { ClassBreaksRenderer } from "esri/renderers";
     } else {
       slider.set(params);
     }
-    
+
     return slider;
   }
-  
+
   interface UpdatePopupTemplateParams {
     valueExpression: string,
     valueExpressionTitle: string,
@@ -353,8 +353,8 @@ import { ClassBreaksRenderer } from "esri/renderers";
 
   /**
    * Creates a popup template specific to the generated renderer
-   * 
-   * @param {UpdatePopupTemplateParams} params 
+   *
+   * @param {UpdatePopupTemplateParams} params
    */
   function createPopupTemplate (params: UpdatePopupTemplateParams): esri.PopupTemplate {
     return {

@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -35,9 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/renderers/smartMapping/creators/color", "esri/renderers/smartMapping/statistics/histogram", "esri/widgets/ColorSlider"], function (require, exports, EsriMap, MapView, FeatureLayer, colorRendererCreator, histogram, ColorSlider) {
     "use strict";
-    var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
-    (function () { return __awaiter(_this, void 0, void 0, function () {
+    (function () { return __awaiter(void 0, void 0, void 0, function () {
         /**
          * Creates the DOM elements needed to render basic UI and contextual information,
          * including the title, description, and attribute field select
@@ -108,7 +108,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                             // update the layer with the generated renderer and popup template
                             layer.renderer = rendererResponse.renderer;
                             layer.popupTemplate = rendererResponse.popupTemplate;
-                            // updates the ColorSlider with the stats and histogram 
+                            // updates the ColorSlider with the stats and histogram
                             // generated from the smart mapping generator
                             colorSlider = updateSlider({
                                 statistics: rendererResponse.statistics,
@@ -160,14 +160,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
          * @returns {string}
          */
         function generateArcade(fields, normalizationField) {
-            var value;
-            if (fields.length === 1) {
-                value = "$feature." + fields[0];
-            }
-            else {
-                value = fields.reduce(function (a, c, i) { return i === 1 ?
-                    "$feature." + a + " + $feature." + c : a + " + $feature." + c; });
-            }
+            var value = fields.map(function (field) { return "$feature." + field; }).reduce(function (a, c) { return a + " + " + c; });
             var percentValue = normalizationField ?
                 "( ( " + value + " ) / $feature." + normalizationField + " ) * 100" : value;
             return "Round( " + percentValue + " )";
@@ -187,6 +180,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                     switch (_a.label) {
                         case 0:
                             valueExpressionInfo = getValueExpression(params.value, params.normalize);
+                            console.log(valueExpressionInfo.valueExpression);
                             rendererParams = {
                                 layer: params.layer,
                                 valueExpression: valueExpressionInfo.valueExpression,
@@ -304,7 +298,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                         zoom: 7
                     });
                     title = "2014 Educational Attainment";
-                    appDescription = "\n    Educational attainment refers to the \n    highest level of education that an \n    individual has completed. People\n    who completed higher levels of\n    education are not included in counts\n    of lower education levels.\n  ";
+                    appDescription = "\n    Educational attainment refers to the\n    highest level of education that an\n    individual has completed. People\n    who completed higher levels of\n    education are not included in counts\n    of lower education levels.\n  ";
                     variables = [
                         {
                             value: "no-school",

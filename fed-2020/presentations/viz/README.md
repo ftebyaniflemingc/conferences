@@ -52,6 +52,14 @@ This sample demonstrates how to create a data exploration app using the Smart Ma
 
 ### Clustering
 
+[Basic point clustering](https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster/index.html)
+
+[Cluster weather stations](https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-visualvariables/index.html)
+
+[Filter clusters](https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-filter/index.html)
+
+[Filter clusters with a slider](https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-filter-slider/index.html)
+
 [Clustering - 311 calls in NYC](https://ekenes.github.io/conferences/ds-2019/2d-viz/demos/smart-mapping/)
 
 ### Dot Density

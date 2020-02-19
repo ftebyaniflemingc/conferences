@@ -18,13 +18,14 @@
 
 <script src="https://js.arcgis.com/4.14/"></script>
 
-<script type="text/plain" id="nearest-restaurant-arcade">
+<script type="" id="nearest-restaurant-arcade">
   var searchDistance = 1;
   var restaurants = FeatureSetById($map, /* Restaurants_London */ "Restaurants_London_4772");
-  //var restaurants = FeatureSetByName($map, "Restaurants_London");
 
   // returns all restaurants within 1km of the hotel
-  var closestRestaurants = Intersects( restaurants, BufferGeodetic( $feature, searchDistance, "kilometers") );
+  var closestRestaurants = Intersects( restaurants,
+    BufferGeodetic( $feature, searchDistance, "kilometers") );
+
   var minDistance = Infinity;
   var closestRestaurant = null;
 
