@@ -15,6 +15,6 @@ In this session, you'll learn the basics of the ArcGIS API 4.x for JavaScript, i
 
 ## Slides
 
-[Click here to view the slides and demos](https://ekenes.github.io/ekenes/conferences/fed-2020/presentations/fundamentals/slides.md)
+[Click here to view the slides and demos](https://ekenes.github.io/conferences/fed-2020/presentations/fundamentals/slides.md)
 
 [Click here to download Layer/LayerView slides](https://github.com/ekenes/conferences/raw/master/fed-2020/presentations/fundamentals/slides.pptx)
