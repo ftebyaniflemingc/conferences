@@ -12,9 +12,9 @@ Walter E. Washington Convention Center, Room 103 A
 
 The ArcGIS API for JavaScript provides APIs that allow you to build powerful interactive mapping applications. Learn how you can turn your raw data into information that tells a story with 2D and 3D data-driven visualizations. This session will provide an overview to the various visualization techniques available in the ArcGIS JS API.
 
-## Presentation
+## Slides
 
-[slides](https://ekenes.github.io/conferences/uc-2019/2d-viz/slides.pptx)
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/fed-2020/presentations/viz/slides.pptx)
 
 ## Demos
 

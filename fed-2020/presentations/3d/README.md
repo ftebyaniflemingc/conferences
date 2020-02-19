@@ -12,6 +12,10 @@ Walter E. Washington Convention Center, Room 102 B
 
 Discover the 3D capabilities of the ArcGIS API for JavaScript and learn how to leverage them to build stunning 3D web applications. This session will focus on the fundamental 3D building blocks of the API: SceneView, 2D and 3D layers, terrain, and symbology.
 
+## Slides
+
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/fed-2020/presentations/3d/slides.pptx)
+
 ## Outline
 
 I. Introduction to 3D
@@ -53,16 +57,3 @@ or https://developers.arcgis.com/javascript/latest/sample-code/widgets-measureme
 #### [Basic scene](https://ekenes.github.io/conferences/ds-2017/3d-apps-guide/demos/basics/)
 
 This sample demonstrates how to construct a simple 3D app using the SceneView.
-
-#### []()
-
-Mud Creek
-
-- Bookmarks
-- Measurement widget
-
-NYC Energy score
-
-- filter
-- smart mapping with color
-- Search widget - building search

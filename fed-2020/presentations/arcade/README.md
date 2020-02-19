@@ -12,6 +12,10 @@ Walter E. Washington Convention Center, Room 103 A
 
 Sometimes simple calculations can provide more insight than field values when creating data-driven visualizations. Arcade is a scripting language that allows you to drive visualizations, popup content, and labels by a value returned from an expression rather than a field value. This session will provide an overview of how to navigate the Arcade documentation while highlighting some of the key functions available in Arcade and the ArcGIS API for JavaScript. View examples of how powerful Arcade can be when creating visualizations and labels for a FeatureLayer. Also, observe how the live Arcade editor in ArcGIS Online can be a powerful tool in helping you write, edit, debug, and execute custom expressions.
 
+## Slides
+
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/fed-2020/presentations/arcade/slides.pptx)
+
 ## Outline
 
 I. Intro to the session (Kristian) <1>
