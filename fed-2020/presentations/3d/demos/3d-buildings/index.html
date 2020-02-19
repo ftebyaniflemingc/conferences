@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Load a basic WebScene - 4.1</title>
+
+  <link rel="stylesheet" href="//js.arcgis.com/4.14/esri/themes/dark/main.css">
+  <script src="//js.arcgis.com/4.14/"></script>
+
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
+</head>
+
+<body>
+  <div id="viewDiv">
+    <div id="titleDiv" class="esri-widget"></div>
+    <div id="sidebarDiv" class="esri-widget">
+      <b>Filter by geometry</b>
+      <div class="geometry-options">
+        <button
+          class="esri-widget--button esri-icon-map-pin geometry-button"
+          id="point-geometry-button"
+          value="point"
+          title="Filter by point"
+        ></button>
+      </div>
+      <label for="bufferNum">Set a geometry buffer size:</label>
+      <div id="bufferNum"></div>
+      <br /><br />
+      <button class="esri-button" id="clearFilter" type="button">
+        Clear filter
+      </button>
+    </div>
+    </div>
+    <div id="slidesDiv">
+      <div id="slides-title">Slides</div>
+    </div>
+  </div>
+  <button
+    class="action-button esri-icon-measure-line esri-widget"
+    id="distanceButton"
+    type="button"
+    title="Measure distance between two points"
+  ></button>
+</body>
+
+</html>

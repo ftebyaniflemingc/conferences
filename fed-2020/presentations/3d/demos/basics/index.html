@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Get started with SceneView - Create a 3D map</title>
+<style>
+  html,
+  body,
+  #viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+</style>
+
+<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
+<script src="https://js.arcgis.com/4.14/"></script>
+
+<script>
+  require([
+    "esri/Map",
+    "esri/views/SceneView",
+    "esri/widgets/Expand",
+    "esri/widgets/BasemapGallery",
+    "esri/widgets/Search",
+    "esri/layers/FeatureLayer",
+    "esri/layers/GeoJSONLayer",
+    "esri/layers/SceneLayer",
+    "esri/renderers/SimpleRenderer",
+    "esri/symbols/PolygonSymbol3D",
+    "esri/symbols/ObjectSymbol3DLayer",
+    "esri/layers/BaseElevationLayer",
+    "esri/layers/ElevationLayer",
+    "esri/widgets/Home"
+  ], function(
+    Map, SceneView, Expand, BasemapGallery, Search, FeatureLayer, GeoJSONLayer, SceneLayer,
+              SimpleRenderer, PolygonSymbol3D, ObjectSymbol3DLayer, BaseElevationLayer, ElevationLayer, Home
+  ) {
+
+    const geojsonLayer = new GeoJSONLayer({
+      url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson",
+      copyright: "USGS Earthquakes",
+      popupTemplate: {
+        title: "Earthquake Info",
+        content: "Magnitude {mag} {type} hit {place} on {time}",
+        fieldInfos: [
+          {
+            fieldName: "time",
+            format: {
+              dateFormat: "short-date-short-time"
+            }
+          }
+        ]
+      },
+      renderer: {
+        type: "simple",
+        field: "mag",
+        symbol: {
+          type: "simple-marker",
+          color: "orange",
+          outline: {
+            color: "white"
+          }
+        },
+        visualVariables: [
+          {
+            type: "size",
+            field: "mag",
+            stops: [
+              {
+                value: 2.5,
+                size: "4px"
+              },
+              {
+                value: 8,
+                size: "40px"
+              }
+            ]
+          }
+        ]
+      },
+      elevationInfo: {
+        mode: "absolute-height",
+        featureExpressionInfo: {
+          expression: "Geometry($feature).z * -1000",
+          unit: "kilometer"
+        }
+      }
+    });
+
+    const map = new Map({
+      basemap: "oceans",
+      ground: {
+        layers: [
+          new ElevationLayer({
+            portalItem: {
+              id: "0c69ba5a5d254118841d43f03aa3e97d"
+            }
+          })
+        ]
+      }
+    });
+
+    map.add(geojsonLayer);
+
+    view = new SceneView({
+      container: "viewDiv",
+      map: map,
+      // this is the default
+      camera: {
+        "position": {
+          "spatialReference": {
+            "latestWkid": 3857,
+            "wkid": 102100
+          },
+          "x": -7440734.575981715,
+          "y": 1995804.947089579,
+          "z": 135885.47554746259
+        },
+        "heading": 8.722549956423759,
+        "tilt": 16.352969152928985
+      },
+      environment: {
+        background: {
+          type: "color",
+          color: [50, 50, 50, 1]
+        },
+        starsEnabled: false,
+        atmosphereEnabled: false
+      },
+      constraints: {
+        collision: {
+          enabled: false
+        }
+      }
+    });
+
+    view.when().then(function(){
+
+
+    });
+
+  });
+</script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
