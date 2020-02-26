@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
 
-  <title>Load a basic WebMap - 4.14</title>
+  <title>EMU explorer - Spilhaus</title>
 
   <style>
     html,
@@ -31,10 +31,14 @@
       "esri/WebMap",
       "esri/layers/FeatureLayer",
       "esri/widgets/Slider",
-      "esri/geometry/geometryEngine"
+      "esri/geometry/geometryEngine",
+      "esri/renderers/support/jsonUtils",
+      "esri/widgets/Histogram",
+      "esri/renderers/smartMapping/statistics/histogram"
       ], function(
         MapView, WebMap, FeatureLayer,
-        Slider, geometryEngine
+        Slider, geometryEngine, rendererJsonUtils,
+        Histogram, createHistogram
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
@@ -56,8 +60,8 @@
           }
         });
 
-        const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate" ]
-        const variable = variables[3];
+        const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ]
+        const variable = variables[7];
 
 
 
@@ -67,11 +71,17 @@
         }
 
         function createOutFields (variable){
-          return depthValues.map( (value, i) => `${variable}_${i+1}`)
-                            .slice(0,numDepthLevels);
+          return depthValues
+            .map( (value, i) => `${variable}_${i+1}`)
+            .slice(0,numDepthLevels);
         }
 
-        console.log(createOutFields(variable));
+        // console.log(createOutFields(variable));
+
+        const salinityFields = createOutFields("salinity");
+        const velocityFields = createOutFields("Velocity");
+        const outFields = createOutFields(variable) // salinityFields.concat(velocityFields);  //createOutFields(variable)
+        console.log(outFields);
 
         const currentsLayer = new FeatureLayer({
           portalItem: {
@@ -91,48 +101,68 @@
               url: "https://qaext.arcgis.com"
             }
           },
-          outFields: createOutFields(variable),
+          outFields: outFields,
           popupEnabled: false,
           // spatialReference: { wkid: 54010 }
         });
 
-        updateRenderer();
+        // updateRenderer();
+        updateSalinityVelocityRelationship();
 
         function updateRenderer(){
 
-          const colors = [ "#fee6ce", "#fdae6b", "#e6550d" ];
+          const colors = {
+            "salinity": [ "blue", "#fdae6b", "#e6550d" ],
+            "temp": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "dissO2": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "nitrate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "phosphate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "silicate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "Velocity": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            "Direction": [ "#fee6ce", "#fdae6b", "#e6550d" ]
+          };
 
 
           const variableStops = {
             "salinity": [
-              { value: 33/*31.6*/, color: colors[0] },
-              { value: 34.0, color: colors[1] },
-              { value: 36.4, color: colors[2] }
+              { value: 33/*31.6*/, color: colors.salinity[0] },
+              { value: 34.0, color: colors.salinity[1] },
+              { value: 36.4, color: colors.salinity[2] }
             ],
             "temp": [
-              { value: 2/*31.6*/, color: colors[0] },
-              { value: 13.28, color: colors[1] },
-              { value: 25, color: colors[2] }
+              { value: 2/*31.6*/, color: colors.temp[0] },
+              { value: 13.28, color: colors.temp[1] },
+              { value: 25, color: colors.temp[2] }
             ],
             "dissO2": [
-              { value: 4.75/*31.6*/, color: colors[0] },
-              { value: 6.19, color: colors[1] },
-              { value: 8, color: colors[2] }
+              { value: 4.75/*31.6*/, color: colors.dissO2[0] },
+              { value: 6.19, color: colors.dissO2[1] },
+              { value: 8, color: colors.dissO2[2] }
             ],
             "nitrate": [
-              { value: 12/*31.6*/, color: colors[0] },
-              { value: 25, color: colors[1] },
-              { value: 30, color: colors[2] }
+              { value: 12/*31.6*/, color: colors.nitrate[0] },
+              { value: 25, color: colors.nitrate[1] },
+              { value: 30, color: colors.nitrate[2] }
             ],
             "phosphate": [
-              { value: 0.07/*31.6*/, color: colors[0] },
-              { value: 1, color: colors[1] },
-              { value: 2, color: colors[2] }
+              { value: 0.07/*31.6*/, color: colors.phosphate[0] },
+              { value: 1, color: colors.phosphate[1] },
+              { value: 2, color: colors.phosphate[2] }
             ],
             "silicate": [
-              { value: 2/*31.6*/, color: colors[0] },
-              { value: 50, color: colors[1] },
-              { value: 150, color: colors[2] }
+              { value: 2/*31.6*/, color: colors.silicate[0] },
+              { value: 50, color: colors.silicate[1] },
+              { value: 150, color: colors.silicate[2] }
+            ],
+            "Velocity": [
+              { value: 0, color: colors.Velocity[0] },
+              { value: 0.09, color: colors.Velocity[1] },
+              { value: 0.2, color: colors.Velocity[2] }
+            ],
+            "Direction": [
+              { value: 0, color: colors.Direction[0] },
+              { value: 180, color: colors.Direction[1] },
+              { value: 360, color: colors.Direction[2] }
             ]
           }
 
@@ -154,7 +184,8 @@
           }
         }
 
-        depthSlider.on(["thumb-change", "thumb-drag"], updateRenderer);
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateRenderer);
+        depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityVelocityRelationship);
 
         const webmap = new WebMap({
           portalItem: {
@@ -235,6 +266,360 @@
         function clearFilter(){
           emuLayerView.filter = null;
           emuLayerView.effect = null;
+        }
+
+        function updateSalinityVelocityRelationship(){
+          const level = getLevelFromDepth(depthSlider.values[0]);
+          emuLayer.renderer = rendererJsonUtils.fromJSON({
+            "authoringInfo": {
+              "classificationMethod": "esriClassifyQuantile",
+              "field1": {
+                "field": `salinity_${level}`,
+                "normalizationField": "",
+                "classBreakInfos": [
+                  {
+                    "minValue": 5.017099857330322,
+                    "maxValue": 33.93169021606445
+                  },
+                  {
+                    "minValue": 33.93169021606445,
+                    "maxValue": 34.94491195678711
+                  },
+                  {
+                    "minValue": 34.94491195678711,
+                    "maxValue": 41.148712158203125
+                  }
+                ]
+              },
+              "field2": {
+                "field": `Velocity_${level}`,
+                "normalizationField": "",
+                "classBreakInfos": [
+                  {
+                    "minValue": 0,
+                    "maxValue": 0.03508973866701126
+                  },
+                  {
+                    "minValue": 0.03508973866701126,
+                    "maxValue": 0.08506444096565247
+                  },
+                  {
+                    "minValue": 0.08506444096565247,
+                    "maxValue": 1.5980160236358643
+                  }
+                ]
+              },
+              "focus": "HH",
+              "numClasses": 3,
+              "type": "relationship"
+            },
+            "type": "uniqueValue",
+            "valueExpression": `\n
+              var field1 = $feature['salinity_${level}'];\n
+              var field2 = $feature['Velocity_${level}'];\n
+              var hasNormField1 = false;\n
+              var hasNormField2 = false;\n
+              var normField1 = null;\n
+              var normField2 = null;\n\n
+
+              if (\n
+                IsEmpty(field1) ||\n
+                IsEmpty(field2) ||\n
+                (hasNormField1 && (IsEmpty(normField1) || normField1 == 0)) ||\n
+                (hasNormField2 && (IsEmpty(normField2) || normField2 == 0))\n
+              ) {\n
+                return null;\n
+              }\n\n
+
+              var value1 = IIf(hasNormField1, (field1 / normField1), field1);\n
+              var value2 = IIf(hasNormField2, (field2 / normField2), field2);\n\n
+              var breaks1 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];\n
+              var breaks2 = [[0,0.03508973866701126],[0.03508973866701126,0.08506444096565247],[0.08506444096565247,1.5980160236358643]];\n
+              var classCodes = [\"L\",\"M\",\"H\"];\n\n
+
+              function getClassCode(value, breaks) {\n
+                var code = null;\n\n
+
+                for (var i in breaks) {\n
+                  var info = breaks[i];\n
+                  if (value >= info[0] && value <= info[1]) {\n
+                    code = classCodes[i];\n
+                    break;\n
+                  }\n
+                }\n\n
+                return code;\n
+              }\n\n
+              var code1 = getClassCode(value1, breaks1);\n
+              var code2 = getClassCode(value2, breaks2);\n\n
+              var classValue = IIf(IsEmpty(code1) || IsEmpty(code2), null, code1 + code2);\n
+              return classValue;\n
+            `,
+            "valueExpressionTitle": "Relationship",
+            "legendOptions": {},
+            "uniqueValueInfos": [
+              {
+                "label": "High - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    92,
+                    71,
+                    61,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HH"
+              },
+              {
+                "label": "High - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    66,
+                    122,
+                    142,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HM"
+              },
+              {
+                "label": "High - Low",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    0,
+                    175,
+                    231,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HL"
+              },
+              {
+                "label": "Medium - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    170,
+                    95,
+                    55,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MH"
+              },
+              {
+                "label": "Medium - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    175,
+                    151,
+                    139,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MM"
+              },
+              {
+                "label": "Medium - Low",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    152,
+                    207,
+                    229,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "ML"
+              },
+              {
+                "label": "Low - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    249,
+                    117,
+                    41,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LH"
+              },
+              {
+                "label": "Low - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    255,
+                    178,
+                    134,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LM"
+              },
+              {
+                "label": "Low - Low",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    255,
+                    239,
+                    226,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LL"
+              }
+            ]
+          })
         }
     });
   </script>
