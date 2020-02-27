@@ -20,7 +20,22 @@
       width: 250px;
       height: 600px;
     }
+    #chartContainer {
+      /* position: inherit; */
+      padding-top: 10px;
+      height: 600px;
+      /* bottom: 20px; */
+      width: 300px;
+      z-index: 96;
+    }
+
+    #options {
+      padding: 10px;
+    }
   </style>
+
+  <!-- Load the Chart.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 
   <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
   <script src="https://js.arcgis.com/next/"></script>
@@ -42,12 +57,14 @@
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
+        directionDepthValues = [ -5, -10, -30, -40, -50, -65, -95, -150, -200, -275, -325, -375, -450]// -650, -750, -850, -1150, -2100, -2500, -2900];
+        depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
         const numDepthLevels = 80;  //depthValues.length;
 
         const depthSlider = new Slider({
           container: document.getElementById("depthSlider"),
           values: [ 0 ],
-          min: depthValues[numDepthLevels-1], //-4700,
+          min: -600,//depthValues[numDepthLevels-1], //-4700,  // -600
           max: 0,
           layout: "vertical",
           precision: 0,
@@ -60,8 +77,34 @@
           }
         });
 
-        const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ]
-        const variable = variables[7];
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+
+
+        let variable = variables[0];
+
+
+        function createVariableSelect(){
+          const select = document.createElement("select");
+          select.classList.add("esri-widget");
+          const optionsDiv = document.getElementById("options");
+          optionsDiv.appendChild(select);
+
+          variables.forEach( (variable, i) => {
+            const option = document.createElement("option");
+            option.value = variable;
+            option.innerText = variable;
+            option.selected = i === 0;
+            select.appendChild(option);
+          });
+
+          select.addEventListener("change", (event) => {
+            variable = select.value;
+            emuLayer.outFields = createOutFields(variable);
+            updateRenderer();
+          });
+        }
 
 
 
@@ -80,7 +123,10 @@
 
         const salinityFields = createOutFields("salinity");
         const velocityFields = createOutFields("Velocity");
-        const outFields = createOutFields(variable) // salinityFields.concat(velocityFields);  //createOutFields(variable)
+        const tempFields = createOutFields("temp");
+        const directionFields = createOutFields("Direction");
+        const outFields = velocityFields.concat(directionFields.concat(tempFields));
+        // const outFields = createOutFields(variable) // salinityFields.concat(velocityFields);  //createOutFields(variable)
         console.log(outFields);
 
         const currentsLayer = new FeatureLayer({
@@ -106,66 +152,132 @@
           // spatialReference: { wkid: 54010 }
         });
 
-        // updateRenderer();
-        updateSalinityVelocityRelationship();
 
-        function updateRenderer(){
+        const colors = {
+          "salinity": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+          "temp": [ "#1993ff", "#2e6ca4", "#403031", "#a6242e", "#ff2638" ],
+          "dissO2": [ "#edf8b1", "#7fcdbb", "#2c7fb8" ],
+          "nitrate": [ "#e0ecf4", "#9ebcda", "#8856a7" ],
+          "phosphate": [  "#e6f4ff", "#6f9988",  "#2c593f"],
+          "silicate": [ "#e5f5e0", "#a1d99b", "#31a354" ],
+          "Velocity": [ "#deebf7", "#9ecae1", "#3182bd" ],
+          "Direction": [ "#eae2bb", "#c59ca4", "#1d4e89" ]
+        };
 
-          const colors = {
-            "salinity": [ "blue", "#fdae6b", "#e6550d" ],
-            "temp": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "dissO2": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "nitrate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "phosphate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "silicate": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "Velocity": [ "#fee6ce", "#fdae6b", "#e6550d" ],
-            "Direction": [ "#fee6ce", "#fdae6b", "#e6550d" ]
-          };
-
-
-          const variableStops = {
-            "salinity": [
+        const variableConfig = {
+          "salinity": {
+            colors: [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            chartOptions: {
+              min: 32,
+              max: 37
+            },
+            stops: [
               { value: 33/*31.6*/, color: colors.salinity[0] },
               { value: 34.0, color: colors.salinity[1] },
               { value: 36.4, color: colors.salinity[2] }
-            ],
-            "temp": [
-              { value: 2/*31.6*/, color: colors.temp[0] },
-              { value: 13.28, color: colors.temp[1] },
-              { value: 25, color: colors.temp[2] }
-            ],
-            "dissO2": [
+            ]
+          },
+          "temp": {
+            colors: [ "#1993ff", "#2e6ca4", "#403031", "#a6242e", "#ff2638" ],
+            chartOptions: {
+              min: -2,
+              max: 30
+            },
+            stops: [
+              // { value: 0/*2*/, color: colors.temp[0] },
+              // { value: 15 /*13*/, color: colors.temp[1] },
+              // { value: 30, color: colors.temp[2] }
+
+
+              { value: 0/*2*/, color: colors.temp[0] },
+              { value: 5 /*13*/, color: colors.temp[1] },
+              { value: 15, color: colors.temp[2] },
+              { value: 27/*2*/, color: colors.temp[3] },
+              { value: 30 /*13*/, color: colors.temp[4] }
+            ]
+          },
+          "dissO2": {
+            colors: [ "#edf8b1", "#7fcdbb", "#2c7fb8" ],
+            chartOptions: {
+              min: 0,
+              max: 10
+            },
+            stops: [
               { value: 4.75/*31.6*/, color: colors.dissO2[0] },
               { value: 6.19, color: colors.dissO2[1] },
               { value: 8, color: colors.dissO2[2] }
-            ],
-            "nitrate": [
+            ]
+          },
+          "nitrate": {
+            colors: [ "#e0ecf4", "#9ebcda", "#8856a7" ],
+            chartOptions: {
+              min: 0,
+              max: 50
+            },
+            stops: [
               { value: 12/*31.6*/, color: colors.nitrate[0] },
               { value: 25, color: colors.nitrate[1] },
               { value: 30, color: colors.nitrate[2] }
-            ],
-            "phosphate": [
+            ]
+          },
+          "phosphate": {
+            colors: [ "#e6f4ff", "#6f9988",  "#2c593f"],
+            chartOptions: {
+              min: 0,
+              max: 3
+            },
+            stops: [
               { value: 0.07/*31.6*/, color: colors.phosphate[0] },
               { value: 1, color: colors.phosphate[1] },
               { value: 2, color: colors.phosphate[2] }
-            ],
-            "silicate": [
+            ]
+          },
+          "silicate": {
+            colors: [ "#e5f5e0", "#a1d99b", "#31a354" ],
+            chartOptions: {
+              min: 0,
+              max: 175
+            },
+            stops: [
               { value: 2/*31.6*/, color: colors.silicate[0] },
               { value: 50, color: colors.silicate[1] },
               { value: 150, color: colors.silicate[2] }
-            ],
-            "Velocity": [
+            ]
+          },
+          "Velocity": {
+            colors: [ "#deebf7", "#9ecae1", "#3182bd" ],
+            chartOptions: {
+              min: 0,
+              max: 0.5
+            },
+            stops: [
               { value: 0, color: colors.Velocity[0] },
               { value: 0.09, color: colors.Velocity[1] },
               { value: 0.2, color: colors.Velocity[2] }
-            ],
-            "Direction": [
+            ]
+          },
+          "Direction": {
+            colors: [ "#eae2bb", "#c59ca4", "#1d4e89" ],
+            chartOptions: {
+              min: 0,
+              max: 360
+            },
+            stops: [
               { value: 0, color: colors.Direction[0] },
               { value: 180, color: colors.Direction[1] },
               { value: 360, color: colors.Direction[2] }
             ]
           }
+        };
 
+        let emuLayerView;
+
+
+        // // updateRenderer();
+        // // updateSalinityVelocityRelationship();
+        // updateRotationRenderer();
+
+        function updateRenderer(){
           emuLayer.renderer = {
             type: "simple",
             symbol: {
@@ -179,51 +291,133 @@
             visualVariables: [{
               type: "color",
               field: `${variable}_${getLevelFromDepth(depthSlider.values[0])}`,
-              stops: variableStops[variable]
+              stops: variableConfig[variable].stops
             }]
           }
         }
 
+        function updateRotationRenderer(){
+
+          // depthSlider.steps = directionDepthValues;
+
+          const tempField = `temp_${getLevelFromDepth(depthSlider.values[0])}`;
+          const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+          const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
+          emuLayerView.filter = {
+            where: `${tempField} IS NOT NULL AND ${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
+          };
+
+          emuLayer.renderer = {
+            type: "simple",
+            symbol: {
+              type: "web-style",
+              name: "tear-pin-1",
+              styleName: "Esri2DPointSymbolsStyle"
+            },
+            visualVariables: [{
+              type: "color",
+              field: tempField,
+              stops: variableConfig["temp"].stops
+            }, {
+              type: "size",
+              field: velocityField,
+              minDataValue: 0,
+              maxDataValue: 0.5,
+              minSize: "4px",
+              maxSize: "12px"  //18
+            }, {
+              type: "rotation",
+              valueExpression: `$feature.${directionField} - 180`,
+              rotationType: "geographic"
+            }]
+          };
+        }
+
         // depthSlider.on(["thumb-change", "thumb-drag"], updateRenderer);
-        depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityVelocityRelationship);
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityVelocityRelationship);
+        depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
 
         const webmap = new WebMap({
+          // portalItem: {
+          //   id: "e6c998e10de7442c832b66bf4916ef32",
+          //   portal: {
+          //     url: "https://devext.arcgis.com"
+          //   }
+          // },
           portalItem: {
-            id: "e6c998e10de7442c832b66bf4916ef32",
+            id: "06d3dc52f5cb4ddc96825b399919e916",
             portal: {
-              url: "https://devext.arcgis.com"
+              url: "https://qaext.arcgis.com"
             }
           },
           layers: [ emuLayer, currentsLayer ]
         });
 
-        const view = new MapView({
+        view = new MapView({
           map: webmap,
           container: "viewDiv",
           // center: [0,0],
           // scale: 5000000,
           // spatialReference: { wkid: 54010 }
         });
-        view.ui.add(document.getElementById("verticalDiv"), "top-right");
+        view.ui.add("verticalDiv", "top-right");
+        view.ui.add("chartContainer", "bottom-left");
+        view.ui.add("options", "bottom-right");
 
-        let emuLayerView;
+        view.when().then(function(){
+          createVariableSelect();
+        });
+
+
 
         view.whenLayerView(emuLayer)
           .then(function(lv){
             emuLayerView = lv;
+            createChart();
+
+             // updateRenderer();
+            // updateSalinityVelocityRelationship();
+            depthSlider.steps = directionDepthValues;
+            depthSlider.values = [-5];
+            updateRotationRenderer();
           });
+
+        view.on("pointer-move", function(event){
+          view.hitTest(event)
+            .then(function(hitResponse){
+              if(hitResponse.results.length < 1){
+                return;
+              }
+
+              console.log(hitResponse);
+
+              const emuHit = hitResponse.results
+                .map( result => result.graphic )
+                .filter( graphic => graphic.layer.title === emuLayer.title )[0];
+
+
+              if(emuHit){
+                updateChart(emuHit);
+              }
+            });
+        });
+
+
 
         view.on("click", function(event){
           view.hitTest(event)
             .then(function(hitResponse){
               console.log(hitResponse);
-              const positiveHit = hitResponse.results
+
+              const currentHit = hitResponse.results
                 .map( result => result.graphic )
                 .filter( graphic => graphic.layer.title === currentsLayer.title )[0];
 
+
               // positiveHit.geometry;
-              if(positiveHit){
-                filterByGeometry(positiveHit.geometry);
+              if(currentHit){
+                filterByGeometry(currentHit.geometry);
               } else {
                 clearFilter();
               }
@@ -621,6 +815,156 @@
             ]
           })
         }
+
+        let scatterChart = null;
+
+        function createChart(){
+          const chartCanvas = document.getElementById("line-chart");
+          let xMin = 0;
+          let xMax = 30;
+
+          scatterChart = new Chart(chartCanvas.getContext("2d"), {
+            type: 'scatter',
+            data: {
+              datasets: [{
+                label: variable,
+                backgroundColor: "#008837",
+                borderColor: "#008837",
+                data: [{
+                  x: 0,
+                  y: 0
+                }]
+              }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'top',
+                        ticks: {
+                          min: variableConfig[variable].chartOptions.min,
+                          max: variableConfig[variable].chartOptions.max
+                        }
+                    }],
+                //     xAxes: [
+                //   {
+                //     ticks: {
+                //       beginAtZero: true,
+                //       min: xMin,
+                //       max: xMax,
+                //       stepSize: 1,
+                //       callback:(label, index, labels) => {
+                //         return label % 5 === 0 ? label : "";
+                //       }
+                //     }
+                //   }
+                // ],
+                // yAxes: [
+                //   {
+                //     ticks: {
+                //       enabled: false,
+                //       min: -3000,
+                //       max: 0,
+                //       stepSize: 150,
+                //       callback:(label, index, labels) => {
+                //         return label;// / 1000000 + " m";
+                //       }
+                //     }
+                //   }
+                // ]
+                }
+            }
+        });
+
+
+          // scatterChart = new Chart(chartCanvas.getContext("2d"), {
+          //   type: "line",
+          //   data: {
+          //     labels: [0,5,10,15,20,25,30],
+          //     datasets: [{
+          //       label: 'Temperature',
+          //       backgroundColor: "#008837",
+          //       borderColor: "#008837",
+          //       data: [ 0 ],
+          //       fill: false,
+          //     }]
+          //   },
+          //   options: {
+          //     responsive: true,
+          //     legend: {
+          //       display: false
+          //     },
+          //     title: {
+          //       display: false,
+          //       text: "Salinity"
+          //     },
+          //     scales: {
+          //       xAxes: [
+          //         {
+          //           ticks: {
+          //             beginAtZero: true,
+          //             min: xMin,
+          //             max: xMax,
+          //             stepSize: 1,
+          //             callback:(label, index, labels) => {
+          //               return label % 5 === 0 ? label : "";
+          //             }
+          //           }
+          //         }
+          //       ],
+          //       yAxes: [
+          //         {
+          //           ticks: {
+          //             enabled: false,
+          //             min: -3000,
+          //             max: 0,
+          //             stepSize: 150,
+          //             callback:(label, index, labels) => {
+          //               return label;// / 1000000 + " m";
+          //             }
+          //           }
+          //         }
+          //       ]
+          //     }
+          //   }
+          // })
+        }
+
+      function updateChart(graphic){
+        if(!scatterChart){
+          createChart();
+          return;
+        }
+
+        const attributes = graphic.attributes;
+        let data = [];
+
+        for (let key in attributes){
+          const splitName = key.split("_");
+          const variableName = splitName[0];
+          const depthLevel = splitName[1];
+          if (key.indexOf(variable) > -1){
+            data.push({
+              x: attributes[key],
+              y: depthValues[depthLevel-1]
+            });
+          }
+        }
+        scatterChart.data.datasets[0].data = data;
+        scatterChart.data.datasets[0].label = variable;
+        scatterChart.data.datasets[0].backgroundColor = variableConfig[variable].colors[2];
+        scatterChart.data.datasets[0].borderColor = variableConfig[variable].colors[2];
+
+        scatterChart.options.scales.xAxes = [{
+          type: 'linear',
+          position: 'top',
+          ticks: {
+            min: variableConfig[variable].chartOptions.min,
+            max: variableConfig[variable].chartOptions.max
+          }
+        }];
+        scatterChart.update();
+      }
     });
   </script>
 </head>
@@ -630,5 +974,9 @@
   <div id="verticalDiv" class="esri-widget">
     <div id="depthSlider"></div>
   </div>
+  <div id="chartContainer" class="esri-widget">
+    <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
+  </div>
+  <div id="options" class="esri-widget"></div>
 </body>
 </html>
