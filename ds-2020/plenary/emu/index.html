@@ -38,6 +38,9 @@
     text-align: center;
     box-shadow: 0;
   }
+  #bufferSliderContainer{
+    width: 100%;
+  }
 
   #histogram {
     width: 500px;
@@ -492,7 +495,6 @@
         });
 
         function drawLine(){
-          view.graphics.removeAll();
 
           // creates and returns an instance of PolyLineDrawAction
           const action = draw.create("polyline");
@@ -546,7 +548,7 @@
 
           view.graphics.add(graphic);
 
-          filterByGeometry(graphic.geometry);
+          filterByGeometry(graphic.geometry, bufferSlider.values[0]);
         }
 
         // define the SketchViewModel and pass in the symbols for each geometry type
@@ -582,11 +584,7 @@
 
         drawBtn.addEventListener("click", function(event) {
           deactivateButton(drawBtn);
-          // event.target.classList.add("esri-button--secondary");
-          // // to activate sketching the create method is called passing in the geometry type
-          // // from the data-type attribute of the html element
-          // sketchVM.create("polyline");
-
+          event.target.classList.add("esri-button--secondary");
           drawLine();
         });
 
@@ -594,9 +592,35 @@
           button.classList.remove("esri-button--secondary");
         }
 
-        // const bufferSlider = new Slider({
-        //   container: "bufferSlider"
-        // })
+        const resetBtn = document.getElementById("reset-btn");
+
+        resetBtn.addEventListener("click", function(){
+          clearFilter();
+          clearHisogram();
+        })
+
+        const bufferSlider = new Slider({
+          container: document.getElementById("bufferSlider"),
+          values: [ 500 ],
+          min: 100,
+          max: 1000,
+          layout: "horizontal",
+          precision: 0,
+          steps: 100,
+          visibleElements: {
+            labels: true,
+            rangeLabels: true
+          }
+        });
+
+        bufferSlider.on(["thumb-change", "thumb-drag"], function(){
+          if(view.graphics.length < 1){
+            return;
+          }
+
+          const graphic = view.graphics.getItemAt(0);
+          filterByGeometry(graphic.geometry, bufferSlider.values[0]);
+        })
 
         view.whenLayerView(emuLayer)
           .then(function(lv){
@@ -655,7 +679,7 @@
         // });
 
 
-        function filterByGeometry(geometry){
+        function filterByGeometry(geometry, distance){
           // clearFilter();
 
           // emuLayerView.filter = {
@@ -668,7 +692,7 @@
           emuLayerView.effect = {
             excludedEffect: "grayscale(100%) opacity(20%)",
             filter: {
-              geometry: geometryEngine.buffer(geometry, 800, "kilometers"),
+              geometry: geometryEngine.buffer(geometry, distance, "kilometers"),
               // distance: 100000,
               // units: "kilometers",
               // spatialRelationship: "intersects"
@@ -1431,6 +1455,11 @@
         });
       }
 
+      function clearHisogram(){
+        histogramChart.destroy();
+        histogramChart = null;
+      }
+
       function updateHistogram(features) {
 
         if(!features || features.length < 1){
@@ -1595,8 +1624,14 @@
     </button>
 
     <div id="bufferSliderContainer">
+      Set Distance
       <div id="bufferSlider"></div>
     </div>
+
+
+    <button id="reset-btn" class="esri-button">
+      Reset Filter
+    </button>
   </div>
 
 
