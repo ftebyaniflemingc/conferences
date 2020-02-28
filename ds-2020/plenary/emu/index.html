@@ -46,6 +46,10 @@
   .labels {
     padding: 5px;
   }
+
+  .esri-button {
+    margin: 2px;
+  }
   </style>
 
   <!-- Load the Chart.js library -->
@@ -68,13 +72,17 @@
       "esri/symbols/CIMSymbol",
       "esri/core/lang",
       "esri/Color",
-      "esri/renderers/visualVariables/ColorVariable",
-      "esri/widgets/Legend"
+      "esri/renderers/visualVariables/SizeVariable",
+      "esri/widgets/Legend",
+      "esri/widgets/Sketch/SketchViewModel",
+      "esri/layers/GraphicsLayer",
+      "esri/views/draw/Draw",
+      "esri/Graphic"
       ], function(
         MapView, WebMap, FeatureLayer,
         Slider, geometryEngine, rendererJsonUtils,
-        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, ColorVariable,
-        Legend
+        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, SizeVariable,
+        Legend, SketchVM, GraphicsLayer, Draw, Graphic
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
@@ -148,11 +156,6 @@
           }
           updateVisualization();
         });
-
-        function updateContinuousRenderer(){
-
-        }
-
 
         function updateVisualization(){
           if(relationshipRadio.checked){
@@ -350,8 +353,22 @@
             },
             visualVariables: [{
               type: "color",
+              legendOptions: {
+                showLegend: false
+              },
               field: `${variable}_${getLevelFromDepth(depthSlider.values[0])}`,
               stops: variableConfig[variable].stops
+            }, {
+              type: "size",
+              valueExpression: "$view.scale",
+              stops: [
+                { value: 7812500, size: 12 },
+                { value: 15625000, size: 10 },
+                { value: 31250000, size: 6 },
+                { value: 62500000, size: 4 },
+                { value: 125000000, size: 4 },
+                { value: 250000000, size: 2 }
+              ]
             }]
           }
         }
@@ -375,17 +392,50 @@
             },
             visualVariables: [{
               type: "color",
+              legendOptions: {
+                showLegend: false
+              },
               field: variableField,
               stops: variableConfig[variable].stops
             }, {
               type: "size",
+              legendOptions: {
+                showLegend: false
+              },
               field: velocityField,
               minDataValue: 0,
               maxDataValue: 0.5,
-              minSize: "4px",
-              maxSize: "12px"  //18
+              minSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "12px" },
+                  { value: 15625000, size: "8px" },
+                  { value: 31250000, size: "6px" },
+                  { value: 62500000, size: "4px" },
+                  { value: 125000000, size: "2px" },
+                  { value: 250000000, size: "1px" }
+                ]
+              },
+              maxSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "32px" },
+                  { value: 15625000, size: "20px" },
+                  { value: 31250000, size: "16px" },
+                  { value: 62500000, size: "12px" },
+                  { value: 125000000, size: "6px" },
+                  { value: 250000000, size: "4px" }
+                ]
+              }
+              // minSize: "4px",
+              // maxSize: "12px"  //18
             }, {
               type: "rotation",
+              legendOptions: {
+                showLegend: false
+              },
               valueExpression: `$feature.${directionField} - 180`,
               rotationType: "geographic"
             }]
@@ -401,6 +451,8 @@
         // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityTempRelationship);
         // depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
 
+        const sketchLayer = new GraphicsLayer();
+
         const webmap = new WebMap({
           // portalItem: {
           //   id: "e6c998e10de7442c832b66bf4916ef32",
@@ -414,7 +466,8 @@
               url: "https://qaext.arcgis.com"
             }
           },
-          layers: [ emuLayer, currentsLayer ]
+          //currentsLayer
+          layers: [ emuLayer, sketchLayer ]
         });
 
         view = new MapView({
@@ -428,14 +481,122 @@
         view.ui.add("chartContainer", "bottom-right");
         view.ui.add("options", "top-right");
         view.ui.add("containerDiv", "bottom-left");
-        view.ui.add(new Legend({ view: view }), "top-left");
+        // view.ui.add(new Legend({ view: view }), "top-left");
 
         view.when().then(function(){
           // createVariableSelect();
         });
 
+        const draw = new Draw({
+          view: view
+        });
 
+        function drawLine(){
+          view.graphics.removeAll();
 
+          // creates and returns an instance of PolyLineDrawAction
+          const action = draw.create("polyline");
+
+          // focus the view to activate keyboard shortcuts for sketching
+          view.focus();
+
+          // listen polylineDrawAction events to give immediate visual feedback
+          // to users as the line is being drawn on the view.
+          action.on(
+            [
+              "vertex-add",
+              // "vertex-remove",
+              // "cursor-update",
+              // "redo",
+              // "undo",
+              "draw-complete"
+            ],
+            updateVertices
+          );
+        }
+
+        // Checks if the last vertex is making the line intersect itself.
+        function updateVertices(event) {
+          // create a polyline from returned vertices
+          if (event.vertices.length > 1) {
+            const result = createGraphic(event);
+          }
+        }
+
+        // create a new graphic presenting the polyline that is being drawn on the view
+        function createGraphic(event) {
+          const vertices = event.vertices;
+          view.graphics.removeAll();
+
+          // a graphic representing the polyline that is being drawn
+          const graphic = new Graphic({
+            geometry: {
+              type: "polyline",
+              paths: vertices,
+              spatialReference: view.spatialReference
+            },
+            symbol: {
+              type: "simple-line", // autocasts as new SimpleFillSymbol
+              color: [4, 90, 141],
+              width: 4,
+              cap: "round",
+              join: "round"
+            }
+          });
+
+          view.graphics.add(graphic);
+
+          filterByGeometry(graphic.geometry);
+        }
+
+        // define the SketchViewModel and pass in the symbols for each geometry type
+        const sketchVM = new SketchVM({
+          layer: sketchLayer,
+          view: view,
+          pointSymbol: {
+            type: "simple-marker",
+            color: "black",
+            size: 12,
+            outline: null
+          },
+          polylineSymbol: {
+            type: "simple-line",
+            color: "black",
+            width: 3
+          },
+          defaultUpdateOptions: {
+            enableScaling: false,
+            enableRotation: false
+          }
+        });
+
+        // after drawing the geometry, enter the update mode to update the geometry
+        // and the deactivate the buttons
+        sketchVM.on("create", function(event) {
+          if (event.state === "complete") {
+            deactivateButton(drawBtn);
+          }
+        });
+
+        const drawBtn = document.getElementById("draw-btn");
+
+        drawBtn.addEventListener("click", function(event) {
+          deactivateButton(drawBtn);
+          // event.target.classList.add("esri-button--secondary");
+          // // to activate sketching the create method is called passing in the geometry type
+          // // from the data-type attribute of the html element
+          // sketchVM.create("polyline");
+
+          drawLine();
+        });
+
+        function deactivateButton(button) {
+          button.classList.remove("esri-button--secondary");
+        }
+
+        // const bufferSlider = new Slider({
+        //   container: "bufferSlider"
+        // })
 
         view.whenLayerView(emuLayer)
           .then(function(lv){
@@ -473,29 +634,29 @@
 
 
 
-        view.on("click", function(event){
-          view.hitTest(event)
-            .then(function(hitResponse){
-              console.log(hitResponse);
+        // view.on("click", function(event){
+        //   // view.hitTest(event)
+        //   //   .then(function(hitResponse){
+        //   //     // console.log(hitResponse);
 
-              const currentHit = hitResponse.results
-                .map( result => result.graphic )
-                .filter( graphic => graphic.layer.title === currentsLayer.title )[0];
+        //   //     const currentHit = hitResponse.results
+        //   //       .map( result => result.graphic )
+        //   //       .filter( graphic => graphic.layer.title === currentsLayer.title )[0];
 
 
-              // positiveHit.geometry;
-              if(currentHit){
-                filterByGeometry(currentHit.geometry);
-              } else {
-                clearFilter();
-              }
-              // buffer(positiveHit.geometry);
-            });
-        });
+        //   //     // positiveHit.geometry;
+        //   //     if(currentHit){
+        //   //       filterByGeometry(currentHit.geometry);
+        //   //     } else {
+        //   //       // clearFilter();
+        //   //     }
+        //   //     // buffer(positiveHit.geometry);
+        //   //   });
+        // });
 
 
         function filterByGeometry(geometry){
-          clearFilter();
+          // clearFilter();
 
           // emuLayerView.filter = {
           //   geometry: geometryEngine.buffer(geometry, 100, "kilometers"),
@@ -766,7 +927,7 @@
                   }
                 ]
               },
-              "focus": "none",
+              // "focus": null,
               "numClasses": 3,
               "type": "relationship"
             },
@@ -1080,19 +1241,62 @@
             ]
           });
 
+          renderer.visualVariables = [{
+            type: "size",
+            valueExpression: "$view.scale",
+            stops: [
+              { value: 7812500, size: 12 },
+              { value: 15625000, size: 10 },
+              { value: 31250000, size: 6 },
+              { value: 62500000, size: 4 },
+              { value: 125000000, size: 4 },
+              { value: 250000000, size: 2 }
+            ]
+          }];
+
           if(addCurrents){
             const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
             const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
 
             const visualVariables = [{
               type: "size",
+              legendOptions: {
+                showLegend: false
+              },
               field: velocityField,
               minDataValue: 0,
               maxDataValue: 0.5,
-              minSize: "4px",
-              maxSize: "12px"  //18
+              minSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "12px" },
+                  { value: 15625000, size: "8px" },
+                  { value: 31250000, size: "6px" },
+                  { value: 62500000, size: "4px" },
+                  { value: 125000000, size: "2px" },
+                  { value: 250000000, size: "1px" }
+                ]
+              },
+              maxSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "32px" },
+                  { value: 15625000, size: "20px" },
+                  { value: 31250000, size: "16px" },
+                  { value: 62500000, size: "12px" },
+                  { value: 125000000, size: "6px" },
+                  { value: 250000000, size: "4px" }
+                ]
+              }
+              // minSize: "4px",
+              // maxSize: "12px"  //18
             }, {
               type: "rotation",
+              legendOptions: {
+                showLegend: false
+              },
               valueExpression: `$feature.${directionField} - 180`,
               rotationType: "geographic"
             }];
@@ -1214,7 +1418,7 @@
         scatterChart.update();
       }
 
-      let histograms = {};
+      // let histograms = {};
       let histogramChart = null;
       let binElements = [];
 
@@ -1236,9 +1440,9 @@
 
         const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
 
-        if (histograms[variableField]) {
-          histogramChart.bins = histograms[variableField];
-        }
+        // if (histograms[variableField]) {
+        //   histogramChart.bins = histograms[variableField];
+        // }
 
         // params for generating a histogram using the
         // points available on the client
@@ -1261,7 +1465,7 @@
           .then(function(histogramResult) {
             // cache previously used histograms to improve performance
             const bins = histogramResult.bins
-            histograms[variableField] = bins;
+            // histograms[variableField] = bins;
             minTemp.innerText = histogramResult.minValue.toFixed(2) + "° C";
             maxTemp.innerText = histogramResult.maxValue.toFixed(2) + "° C";
 
@@ -1385,6 +1589,13 @@
       <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
       <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship">Salinity & Temperature<br/>
       <input type="checkbox" id="currents-checkbox" class="esri-widget">Show Currents<br/>
+    </div>
+    <button id="draw-btn" data-type="polyline" class="esri-button">
+      Draw a path
+    </button>
+
+    <div id="bufferSliderContainer">
+      <div id="bufferSlider"></div>
     </div>
   </div>
 
