@@ -126,7 +126,6 @@
             const variableFields = createOutFields(variable)
             emuLayer.outFields = variableFields;
             updateRenderer();
-            // updateRotationRenderer();
           });
         }
 
@@ -135,34 +134,9 @@
         const tempRadio = document.getElementById("temp-radio");
         const relationshipRadio = document.getElementById("relationship-radio");
 
-        salinityRadio.addEventListener("change", function(){
-          // if(salinityRadio.checked){
-          //   variable = "salinity";
-          //   updateContinuousRenderer();
-          // }
-
-
-          updateVisualization();
-        });
-
-        tempRadio.addEventListener("change", function(){
-          // if(tempRadio.checked){
-          //   variable = "temp";
-          //   updateContinuousRenderer();
-          // }
-
-          updateVisualization();
-        });
-
-        relationshipRadio.addEventListener("change", function(){
-
-          updateVisualization();
-          // if(relationshipRadio.checked){
-          //   updateSalinityTempRelationship(currentsCheckbox.checked);
-          // } else {
-          //   updateContinuousRenderer();
-          // }
-        });
+        salinityRadio.addEventListener("change", updateVisualization);
+        tempRadio.addEventListener("change", updateVisualization);
+        relationshipRadio.addEventListener("change", updateVisualization);
 
         currentsCheckbox.addEventListener("change", function(){
           if(currentsCheckbox.checked){
@@ -172,21 +146,28 @@
             depthSlider.steps = depthValues;
             depthSlider.values = [ 0 ];
           }
-
-          // if(relationshipRadio.checked){
-          //   updateSalinityTempRelationship(currentsCheckbox.checked);
-          // } else {
-          //   updateContinuousRenderer();
-          // }
-
           updateVisualization();
         });
 
         function updateContinuousRenderer(){
-          if (currentsCheckbox.checked){
-            updateRotationRenderer();
+
+        }
+
+
+        function updateVisualization(){
+          if(relationshipRadio.checked){
+            updateSalinityTempRelationship(currentsCheckbox.checked);
           } else {
-            updateRenderer();
+
+            variable = salinityRadio.checked ? "salinity" : "temp";
+
+            if (currentsCheckbox.checked){
+              updateRotationRenderer();
+            } else {
+              updateRenderer();
+            }
+
+            updateHistogram(selectedFeatures);
           }
         }
 
@@ -453,19 +434,6 @@
           // createVariableSelect();
         });
 
-        function updateVisualization(){
-          if(relationshipRadio.checked){
-            updateSalinityTempRelationship(currentsCheckbox.checked);
-          } else {
-            if(salinityRadio.checked){
-              variable = "salinity";
-            } else {
-              variable = "temp";
-            }
-            updateContinuousRenderer();
-            updateHistogram(selectedFeatures);
-          }
-        }
 
 
 
@@ -861,7 +829,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -890,7 +858,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -919,7 +887,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -948,7 +916,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -977,7 +945,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -1006,7 +974,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -1035,7 +1003,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -1064,7 +1032,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -1093,7 +1061,7 @@
                   "angle": 0,
                   "xoffset": 0,
                   "yoffset": 0,
-                  "size": 6,
+                  "size": 4,
                   "style": "esriSMSCircle",
                   "outline": {
                     "type": "esriSLS",
@@ -1262,7 +1230,7 @@
       function updateHistogram(features) {
 
         if(!features || features.length < 1){
-          console.error("[HISTOGRAM] You must provide features from the client.");
+          // console.error("[HISTOGRAM] You must provide features from the client.");
           return;
         }
 
