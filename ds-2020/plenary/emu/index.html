@@ -68,11 +68,13 @@
       "esri/symbols/CIMSymbol",
       "esri/core/lang",
       "esri/Color",
-      "esri/renderers/visualVariables/ColorVariable"
+      "esri/renderers/visualVariables/ColorVariable",
+      "esri/widgets/Legend"
       ], function(
         MapView, WebMap, FeatureLayer,
         Slider, geometryEngine, rendererJsonUtils,
-        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, ColorVariable
+        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, ColorVariable,
+        Legend
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
@@ -98,10 +100,11 @@
 
         // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
         // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
         const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
 
 
-        let variable = variables[1];
+        let variable = "salinity";
 
 
         function createVariableSelect(){
@@ -127,6 +130,65 @@
           });
         }
 
+        const currentsCheckbox = document.getElementById("currents-checkbox");
+        const salinityRadio = document.getElementById("salinity-radio");
+        const tempRadio = document.getElementById("temp-radio");
+        const relationshipRadio = document.getElementById("relationship-radio");
+
+        salinityRadio.addEventListener("change", function(){
+          // if(salinityRadio.checked){
+          //   variable = "salinity";
+          //   updateContinuousRenderer();
+          // }
+
+
+          updateVisualization();
+        });
+
+        tempRadio.addEventListener("change", function(){
+          // if(tempRadio.checked){
+          //   variable = "temp";
+          //   updateContinuousRenderer();
+          // }
+
+          updateVisualization();
+        });
+
+        relationshipRadio.addEventListener("change", function(){
+
+          updateVisualization();
+          // if(relationshipRadio.checked){
+          //   updateSalinityTempRelationship(currentsCheckbox.checked);
+          // } else {
+          //   updateContinuousRenderer();
+          // }
+        });
+
+        currentsCheckbox.addEventListener("change", function(){
+          if(currentsCheckbox.checked){
+            depthSlider.steps = directionDepthValues;
+            depthSlider.values = [ -5 ];
+          } else {
+            depthSlider.steps = depthValues;
+            depthSlider.values = [ 0 ];
+          }
+
+          // if(relationshipRadio.checked){
+          //   updateSalinityTempRelationship(currentsCheckbox.checked);
+          // } else {
+          //   updateContinuousRenderer();
+          // }
+
+          updateVisualization();
+        });
+
+        function updateContinuousRenderer(){
+          if (currentsCheckbox.checked){
+            updateRotationRenderer();
+          } else {
+            updateRenderer();
+          }
+        }
 
 
         getLevelFromDepth = function (depth) {
@@ -315,8 +377,6 @@
 
         function updateRotationRenderer(){
 
-          // depthSlider.steps = directionDepthValues;
-
           const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
           const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
           const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
@@ -354,10 +414,8 @@
         let selectedFeatures = [];
 
         depthSlider.on(["thumb-change", "thumb-drag"], function(){
-          updateRenderer();
-          if (selectedFeatures.length > 0){
-            updateHistogram(selectedFeatures);
-          }
+          updateVisualization();
+          updateHistogram(selectedFeatures);
         });
         // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityTempRelationship);
         // depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
@@ -385,15 +443,29 @@
           // scale: 5000000,
           // spatialReference: { wkid: 54010 }
         });
-        view.ui.add("verticalDiv", "top-right");
-        view.ui.add("chartContainer", "bottom-left");
-        view.ui.add("options", "bottom-right");
+        view.ui.add("verticalDiv", "bottom-right");
+        view.ui.add("chartContainer", "bottom-right");
+        view.ui.add("options", "top-right");
         view.ui.add("containerDiv", "bottom-left");
-        containerDiv
+        view.ui.add(new Legend({ view: view }), "top-left");
 
         view.when().then(function(){
-          createVariableSelect();
+          // createVariableSelect();
         });
+
+        function updateVisualization(){
+          if(relationshipRadio.checked){
+            updateSalinityTempRelationship(currentsCheckbox.checked);
+          } else {
+            if(salinityRadio.checked){
+              variable = "salinity";
+            } else {
+              variable = "temp";
+            }
+            updateContinuousRenderer();
+            updateHistogram(selectedFeatures);
+          }
+        }
 
 
 
@@ -402,10 +474,12 @@
             emuLayerView = lv;
             createChart();
 
+            updateVisualization();
+
             // depthSlider.steps = directionDepthValues;
             // depthSlider.values = [-5];
             // updateSalinityTempRelationship();
-             updateRenderer();
+            //  updateRenderer();
             // updateRotationRenderer();
           });
 
@@ -463,7 +537,7 @@
           // };
 
           emuLayerView.effect = {
-            excludedEffect: "grayscale(100%) opacity(30%)",
+            excludedEffect: "grayscale(100%) opacity(20%)",
             filter: {
               geometry: geometryEngine.buffer(geometry, 800, "kilometers"),
               // distance: 100000,
@@ -679,27 +753,11 @@
           "build":"8933"
         };
 
-        function updateSalinityTempRelationship(){
+        function updateSalinityTempRelationship(addCurrents){
           const level = getLevelFromDepth(depthSlider.values[0]);
 
           const field1 = `salinity_${level}`;
           const field2 = `temp_${level}`;
-          const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
-          const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
-
-
-          const visualVariables = [{
-            type: "size",
-            field: velocityField,
-            minDataValue: 0,
-            maxDataValue: 0.5,
-            minSize: "4px",
-            maxSize: "12px"  //18
-          }, {
-            type: "rotation",
-            valueExpression: `$feature.${directionField} - 180`,
-            rotationType: "geographic"
-          }];
 
           const renderer = rendererJsonUtils.fromJSON({
             "authoringInfo": {
@@ -740,7 +798,7 @@
                   }
                 ]
               },
-              "focus": "HH",
+              "focus": "none",
               "numClasses": 3,
               "type": "relationship"
             },
@@ -790,284 +848,302 @@
             "valueExpressionTitle": "Relationship",
             "legendOptions": {},
             "uniqueValueInfos": [
-  {
-    "label": "High - High",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        6,
-        107,
-        45,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "HH"
-  },
-  {
-    "label": "High - Medium",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        57,
-        130,
-        115,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "HM"
-  },
-  {
-    "label": "High - Low",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        102,
-        191,
-        255,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "HL"
-  },
-  {
-    "label": "Medium - High",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        125,
-        119,
-        85,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "MH"
-  },
-  {
-    "label": "Medium - Medium",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        161,
-        172,
-        156,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "MM"
-  },
-  {
-    "label": "Medium - Low",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        172,
-        217,
-        249,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "ML"
-  },
-  {
-    "label": "Low - High",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        240,
-        153,
-        0,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "LH"
-  },
-  {
-    "label": "Low - Medium",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        231,
-        198,
-        150,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "LM"
-  },
-  {
-    "label": "Low - Low",
-    "symbol": {
-      "type": "esriSMS",
-      "color": [
-        242,
-        242,
-        242,
-        255
-      ],
-      "angle": 0,
-      "xoffset": 0,
-      "yoffset": 0,
-      "size": 6,
-      "style": "esriSMSCircle",
-      "outline": {
-        "type": "esriSLS",
-        "color": [
-          153,
-          153,
-          153,
-          64
-        ],
-        "width": 0.75,
-        "style": "esriSLSSolid"
-      }
-    },
-    "value": "LL"
-  }
-]
+              {
+                "label": "High Salinity - Warm",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    89,
+                    63,
+                    179,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HH"
+              },
+              {
+                "label": "High - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    148,
+                    92,
+                    144,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HM"
+              },
+              {
+                "label": "High Salinity - Cold",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    255,
+                    115,
+                    115,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HL"
+              },
+              {
+                "label": "Medium - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    85,
+                    147,
+                    212,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MH"
+              },
+              {
+                "label": "Medium - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    166,
+                    153,
+                    212,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MM"
+              },
+              {
+                "label": "Medium - Low",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    249,
+                    184,
+                    184,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "ML"
+              },
+              {
+                "label": "Low Salinity - Warm",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    98,
+                    231,
+                    245,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LH"
+              },
+              {
+                "label": "Low - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    163,
+                    236,
+                    244,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LM"
+              },
+              {
+                "label": "Low Salinity, Cold",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    242,
+                    242,
+                    242,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 6,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LL"
+              }
+            ]
           });
 
-          renderer.uniqueValueInfos.forEach(function(info){
-            const color = info.symbol.color;
+          if(addCurrents){
+            const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+            const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
 
-            const symbolData = lang.clone(cimData);
-            symbolData.symbolLayers[0].markerGraphics[0].symbol.symbolLayers[1].color = color.toJSON();
+            const visualVariables = [{
+              type: "size",
+              field: velocityField,
+              minDataValue: 0,
+              maxDataValue: 0.5,
+              minSize: "4px",
+              maxSize: "12px"  //18
+            }, {
+              type: "rotation",
+              valueExpression: `$feature.${directionField} - 180`,
+              rotationType: "geographic"
+            }];
 
-            const symbol = new CIMSymbol({
-              data: symbolData
+            renderer.uniqueValueInfos.forEach(function(info){
+              const color = info.symbol.color;
+
+              const symbolData = lang.clone(cimData);
+              symbolData.symbolLayers[0].markerGraphics[0].symbol.symbolLayers[1].color = color.toJSON();
+
+              const symbol = new CIMSymbol({
+                data: symbolData
+              });
+
+              info.symbol = symbol;
             });
 
-            info.symbol = symbol;
-          });
-
-          renderer.visualVariables = visualVariables;
+            renderer.visualVariables = visualVariables;
+          }
 
           emuLayer.renderer = renderer;
         }
@@ -1184,6 +1260,12 @@
       }
 
       function updateHistogram(features) {
+
+        if(!features || features.length < 1){
+          console.error("[HISTOGRAM] You must provide features from the client.");
+          return;
+        }
+
         const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
 
         if (histograms[variableField]) {
@@ -1329,7 +1411,14 @@
     <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
   </div>
 
-  <div id="options" class="esri-widget"></div>
+  <div id="options" class="esri-widget">
+    <div class="esri-widget">
+      <input type="radio" id="salinity-radio" name="variables" class="esri-widget" value="salinity" checked> Salinity<br/>
+      <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
+      <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship">Salinity & Temperature<br/>
+      <input type="checkbox" id="currents-checkbox" class="esri-widget">Show Currents<br/>
+    </div>
+  </div>
 
 
   <div id="containerDiv" class="esri-widget">
