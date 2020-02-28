@@ -31,7 +31,21 @@
 
     #options {
       padding: 10px;
-    }
+  }
+
+  #containerDiv {
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0;
+  }
+
+  #histogram {
+    width: 500px;
+    height: 150px;
+  }
+  .labels {
+    padding: 5px;
+  }
   </style>
 
   <!-- Load the Chart.js library -->
@@ -49,11 +63,15 @@
       "esri/geometry/geometryEngine",
       "esri/renderers/support/jsonUtils",
       "esri/widgets/Histogram",
-      "esri/renderers/smartMapping/statistics/histogram"
+      "esri/renderers/smartMapping/statistics/histogram",
+      "esri/renderers/smartMapping/statistics/summaryStatistics",
+      "esri/symbols/CIMSymbol",
+      "esri/core/lang",
+      "esri/Color"
       ], function(
         MapView, WebMap, FeatureLayer,
         Slider, geometryEngine, rendererJsonUtils,
-        Histogram, createHistogram
+        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
@@ -82,7 +100,7 @@
         const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
 
 
-        let variable = variables[0];
+        let variable = variables[1];
 
 
         function createVariableSelect(){
@@ -101,8 +119,10 @@
 
           select.addEventListener("change", (event) => {
             variable = select.value;
-            emuLayer.outFields = createOutFields(variable);
+            const variableFields = createOutFields(variable)
+            emuLayer.outFields = variableFields;
             updateRenderer();
+            // updateRotationRenderer();
           });
         }
 
@@ -125,7 +145,7 @@
         const velocityFields = createOutFields("Velocity");
         const tempFields = createOutFields("temp");
         const directionFields = createOutFields("Direction");
-        const outFields = velocityFields.concat(directionFields.concat(tempFields));
+        const outFields = velocityFields.concat(tempFields, salinityFields, directionFields);
         // const outFields = createOutFields(variable) // salinityFields.concat(velocityFields);  //createOutFields(variable)
         console.log(outFields);
 
@@ -272,11 +292,6 @@
 
         let emuLayerView;
 
-
-        // // updateRenderer();
-        // // updateSalinityVelocityRelationship();
-        // updateRotationRenderer();
-
         function updateRenderer(){
           emuLayer.renderer = {
             type: "simple",
@@ -300,12 +315,12 @@
 
           // depthSlider.steps = directionDepthValues;
 
-          const tempField = `temp_${getLevelFromDepth(depthSlider.values[0])}`;
+          const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
           const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
           const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
 
           emuLayerView.filter = {
-            where: `${tempField} IS NOT NULL AND ${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
+            where: `${variableField} IS NOT NULL AND ${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
           };
 
           emuLayer.renderer = {
@@ -317,8 +332,8 @@
             },
             visualVariables: [{
               type: "color",
-              field: tempField,
-              stops: variableConfig["temp"].stops
+              field: variableField,
+              stops: variableConfig[variable].stops
             }, {
               type: "size",
               field: velocityField,
@@ -334,9 +349,9 @@
           };
         }
 
-        // depthSlider.on(["thumb-change", "thumb-drag"], updateRenderer);
-        // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityVelocityRelationship);
-        depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
+        depthSlider.on(["thumb-change", "thumb-drag"], updateRenderer);
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityTempRelationship);
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
 
         const webmap = new WebMap({
           // portalItem: {
@@ -364,6 +379,8 @@
         view.ui.add("verticalDiv", "top-right");
         view.ui.add("chartContainer", "bottom-left");
         view.ui.add("options", "bottom-right");
+        view.ui.add("containerDiv", "bottom-left");
+        containerDiv
 
         view.when().then(function(){
           createVariableSelect();
@@ -376,11 +393,11 @@
             emuLayerView = lv;
             createChart();
 
-             // updateRenderer();
-            // updateSalinityVelocityRelationship();
             depthSlider.steps = directionDepthValues;
             depthSlider.values = [-5];
-            updateRotationRenderer();
+            // updateSalinityTempRelationship();
+             updateRenderer();
+            // updateRotationRenderer();
           });
 
         view.on("pointer-move", function(event){
@@ -445,7 +462,16 @@
               // spatialRelationship: "intersects"
             }
           }
+
+
+          const query = emuLayerView.createQuery();
+          query.geometry = emuLayerView.effect.filter.geometry;
+          emuLayerView.queryFeatures(query).then(function(response){
+            return response.features;
+          }).then(updateHistogram);
         }
+
+
 
         function buffer(geometry){
           // var result = geometryEngine.buffer(geometry, 100, "kilometers");
@@ -462,13 +488,213 @@
           emuLayerView.effect = null;
         }
 
-        function updateSalinityVelocityRelationship(){
+        const cimData = {
+          "type":"CIMPointSymbol",
+          "symbolLayers":[
+            {
+              "type":"CIMVectorMarker",
+              "enable":true,
+              "anchorPoint":{
+                "x":0,
+                "y":-0.5
+              },
+              "anchorPointUnits":"Relative",
+              "dominantSizeAxis3D":"Y",
+              "size":18.5,
+              "billboardMode3D":"FaceNearPlane",
+              "frame":{
+                "xmin":0.0,
+                "ymin":0.0,
+                "xmax":21.0,
+                "ymax":21.0
+              },
+              "markerGraphics":[
+                {
+                  "type":"CIMMarkerGraphic",
+                  "geometry":{
+                    "rings":[
+                      [
+                        [
+                          17.17,
+                          14.33
+                        ],
+                        [
+                          16.97,
+                          12.96
+                        ],
+                        [
+                          16.38,
+                          11.37
+                        ],
+                        [
+                          12.16,
+                          3.98
+                        ],
+                        [
+                          11.2,
+                          1.94
+                        ],
+                        [
+                          10.5,
+                          0.0
+                        ],
+                        [
+                          9.8,
+                          1.96
+                        ],
+                        [
+                          8.84,
+                          4.02
+                        ],
+                        [
+                          4.61,
+                          11.41
+                        ],
+                        [
+                          4.02,
+                          12.98
+                        ],
+                        [
+                          3.83,
+                          14.33
+                        ],
+                        [
+                          3.96,
+                          15.63
+                        ],
+                        [
+                          4.34,
+                          16.88
+                        ],
+                        [
+                          4.95,
+                          18.03
+                        ],
+                        [
+                          5.78,
+                          19.04
+                        ],
+                        [
+                          6.8,
+                          19.88
+                        ],
+                        [
+                          7.95,
+                          20.49
+                        ],
+                        [
+                          9.2,
+                          20.87
+                        ],
+                        [
+                          10.5,
+                          21.0
+                        ],
+                        [
+                          11.8,
+                          20.87
+                        ],
+                        [
+                          13.05,
+                          20.5
+                        ],
+                        [
+                          14.2,
+                          19.88
+                        ],
+                        [
+                          15.22,
+                          19.05
+                        ],
+                        [
+                          16.05,
+                          18.03
+                        ],
+                        [
+                          16.66,
+                          16.88
+                        ],
+                        [
+                          17.04,
+                          15.63
+                        ],
+                        [
+                          17.17,
+                          14.33
+                        ]
+                      ]
+                    ]
+                  },
+                  "symbol":{
+                    "type":"CIMPolygonSymbol",
+                    "symbolLayers":[
+                      {
+                        "type":"CIMSolidStroke",
+                        "enable":true,
+                        "capStyle":"Round",
+                        "joinStyle":"Round",
+                        "lineStyle3D":"Strip",
+                        "miterLimit":10,
+                        "width":0,
+                        "color":[
+                          110,
+                          110,
+                          110,
+                          255
+                        ]
+                      },
+                      {
+                        "type":"CIMSolidFill",
+                        "enable":true,
+                        "color":[
+                          201,
+                          49,
+                          0,
+                          255
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "scaleSymbolsProportionally":true,
+              "respectFrame":true
+            }
+          ],
+          "haloSize":1,
+          "scaleX":1,
+          "angleAlignment":"Display",
+          "version":"2.0.0",
+          "build":"8933"
+        };
+
+        function updateSalinityTempRelationship(){
           const level = getLevelFromDepth(depthSlider.values[0]);
-          emuLayer.renderer = rendererJsonUtils.fromJSON({
+
+          const field1 = `salinity_${level}`;
+          const field2 = `temp_${level}`;
+          const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+          const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
+
+          const visualVariables = [{
+            type: "size",
+            field: velocityField,
+            minDataValue: 0,
+            maxDataValue: 0.5,
+            minSize: "4px",
+            maxSize: "12px"  //18
+          }, {
+            type: "rotation",
+            valueExpression: `$feature.${directionField} - 180`,
+            rotationType: "geographic"
+          }];
+
+          const renderer = rendererJsonUtils.fromJSON({
             "authoringInfo": {
               "classificationMethod": "esriClassifyQuantile",
               "field1": {
-                "field": `salinity_${level}`,
+                "field": field1,
                 "normalizationField": "",
                 "classBreakInfos": [
                   {
@@ -486,20 +712,20 @@
                 ]
               },
               "field2": {
-                "field": `Velocity_${level}`,
+                "field": field2,
                 "normalizationField": "",
                 "classBreakInfos": [
                   {
-                    "minValue": 0,
-                    "maxValue": 0.03508973866701126
+                    "minValue": -1.8617100715637207,
+                    "maxValue": 5.463809967041016
                   },
                   {
-                    "minValue": 0.03508973866701126,
-                    "maxValue": 0.08506444096565247
+                    "minValue": 5.463809967041016,
+                    "maxValue": 22.64011001586914
                   },
                   {
-                    "minValue": 0.08506444096565247,
-                    "maxValue": 1.5980160236358643
+                    "minValue": 22.64011001586914,
+                    "maxValue": 30.277099609375
                   }
                 ]
               },
@@ -508,312 +734,331 @@
               "type": "relationship"
             },
             "type": "uniqueValue",
-            "valueExpression": `\n
-              var field1 = $feature['salinity_${level}'];\n
-              var field2 = $feature['Velocity_${level}'];\n
-              var hasNormField1 = false;\n
-              var hasNormField2 = false;\n
-              var normField1 = null;\n
-              var normField2 = null;\n\n
+            "valueExpression": `
+              var field1 = $feature['${field1}'];
+              var field2 = $feature['${field2}'];
+              var hasNormField1 = false;
+              var hasNormField2 = false;
+              var normField1 = null;
+              var normField2 = null;
 
-              if (\n
-                IsEmpty(field1) ||\n
-                IsEmpty(field2) ||\n
-                (hasNormField1 && (IsEmpty(normField1) || normField1 == 0)) ||\n
-                (hasNormField2 && (IsEmpty(normField2) || normField2 == 0))\n
-              ) {\n
-                return null;\n
-              }\n\n
+              if (
+                IsEmpty(field1) ||
+                IsEmpty(field2) ||
+                (hasNormField1 && (IsEmpty(normField1) || normField1 == 0)) ||
+                (hasNormField2 && (IsEmpty(normField2) || normField2 == 0))
+              ) {
+                return null;
+              }
 
-              var value1 = IIf(hasNormField1, (field1 / normField1), field1);\n
-              var value2 = IIf(hasNormField2, (field2 / normField2), field2);\n\n
-              var breaks1 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];\n
-              var breaks2 = [[0,0.03508973866701126],[0.03508973866701126,0.08506444096565247],[0.08506444096565247,1.5980160236358643]];\n
-              var classCodes = [\"L\",\"M\",\"H\"];\n\n
+              var value1 = IIf(hasNormField1, (field1 / normField1), field1);
+              var value2 = IIf(hasNormField2, (field2 / normField2), field2);
 
-              function getClassCode(value, breaks) {\n
-                var code = null;\n\n
+              var breaks1 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];
+              var breaks2 = [[-1.8617100715637207,5.463809967041016],[5.463809967041016,22.64011001586914],[22.64011001586914,30.277099609375]];
+              var classCodes = [\"L\",\"M\",\"H\"];\n\n  function getClassCode(value, breaks) {
+                var code = null;
 
-                for (var i in breaks) {\n
-                  var info = breaks[i];\n
-                  if (value >= info[0] && value <= info[1]) {\n
-                    code = classCodes[i];\n
-                    break;\n
-                  }\n
-                }\n\n
-                return code;\n
-              }\n\n
-              var code1 = getClassCode(value1, breaks1);\n
-              var code2 = getClassCode(value2, breaks2);\n\n
-              var classValue = IIf(IsEmpty(code1) || IsEmpty(code2), null, code1 + code2);\n
-              return classValue;\n
+                for (var i in breaks) {
+                  var info = breaks[i];
+                  if (value >= info[0] && value <= info[1]) {
+                    code = classCodes[i];\
+                    break;
+                  }
+                }
+
+                return code;
+              }
+
+              var code1 = getClassCode(value1, breaks1);
+              var code2 = getClassCode(value2, breaks2);\
+
+              var classValue = IIf(IsEmpty(code1) || IsEmpty(code2), null, code1 + code2);
+              return classValue;
             `,
             "valueExpressionTitle": "Relationship",
             "legendOptions": {},
             "uniqueValueInfos": [
-              {
-                "label": "High - High",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    92,
-                    71,
-                    61,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "HH"
-              },
-              {
-                "label": "High - Medium",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    66,
-                    122,
-                    142,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "HM"
-              },
-              {
-                "label": "High - Low",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    0,
-                    175,
-                    231,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "HL"
-              },
-              {
-                "label": "Medium - High",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    170,
-                    95,
-                    55,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "MH"
-              },
-              {
-                "label": "Medium - Medium",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    175,
-                    151,
-                    139,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "MM"
-              },
-              {
-                "label": "Medium - Low",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    152,
-                    207,
-                    229,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "ML"
-              },
-              {
-                "label": "Low - High",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    249,
-                    117,
-                    41,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "LH"
-              },
-              {
-                "label": "Low - Medium",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    255,
-                    178,
-                    134,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "LM"
-              },
-              {
-                "label": "Low - Low",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    255,
-                    239,
-                    226,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 6,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "LL"
-              }
-            ]
-          })
+  {
+    "label": "High - High",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        6,
+        107,
+        45,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "HH"
+  },
+  {
+    "label": "High - Medium",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        57,
+        130,
+        115,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "HM"
+  },
+  {
+    "label": "High - Low",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        102,
+        191,
+        255,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "HL"
+  },
+  {
+    "label": "Medium - High",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        125,
+        119,
+        85,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "MH"
+  },
+  {
+    "label": "Medium - Medium",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        161,
+        172,
+        156,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "MM"
+  },
+  {
+    "label": "Medium - Low",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        172,
+        217,
+        249,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "ML"
+  },
+  {
+    "label": "Low - High",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        240,
+        153,
+        0,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "LH"
+  },
+  {
+    "label": "Low - Medium",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        231,
+        198,
+        150,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "LM"
+  },
+  {
+    "label": "Low - Low",
+    "symbol": {
+      "type": "esriSMS",
+      "color": [
+        242,
+        242,
+        242,
+        255
+      ],
+      "angle": 0,
+      "xoffset": 0,
+      "yoffset": 0,
+      "size": 6,
+      "style": "esriSMSCircle",
+      "outline": {
+        "type": "esriSLS",
+        "color": [
+          153,
+          153,
+          153,
+          64
+        ],
+        "width": 0.75,
+        "style": "esriSLSSolid"
+      }
+    },
+    "value": "LL"
+  }
+]
+          });
+
+          renderer.uniqueValueInfos.forEach(function(info){
+            const color = info.symbol.color;
+
+            const symbolData = lang.clone(cimData);
+            symbolData.symbolLayers[0].markerGraphics[0].symbol.symbolLayers[1].color = color.toJSON();
+
+            const symbol = new CIMSymbol({
+              data: symbolData
+            });
+
+            info.symbol = symbol;
+          });
+
+          renderer.visualVariables = visualVariables;
+
+          emuLayer.renderer = renderer;
         }
 
         let scatterChart = null;
@@ -876,58 +1121,6 @@
             }
         });
 
-
-          // scatterChart = new Chart(chartCanvas.getContext("2d"), {
-          //   type: "line",
-          //   data: {
-          //     labels: [0,5,10,15,20,25,30],
-          //     datasets: [{
-          //       label: 'Temperature',
-          //       backgroundColor: "#008837",
-          //       borderColor: "#008837",
-          //       data: [ 0 ],
-          //       fill: false,
-          //     }]
-          //   },
-          //   options: {
-          //     responsive: true,
-          //     legend: {
-          //       display: false
-          //     },
-          //     title: {
-          //       display: false,
-          //       text: "Salinity"
-          //     },
-          //     scales: {
-          //       xAxes: [
-          //         {
-          //           ticks: {
-          //             beginAtZero: true,
-          //             min: xMin,
-          //             max: xMax,
-          //             stepSize: 1,
-          //             callback:(label, index, labels) => {
-          //               return label % 5 === 0 ? label : "";
-          //             }
-          //           }
-          //         }
-          //       ],
-          //       yAxes: [
-          //         {
-          //           ticks: {
-          //             enabled: false,
-          //             min: -3000,
-          //             max: 0,
-          //             stepSize: 150,
-          //             callback:(label, index, labels) => {
-          //               return label;// / 1000000 + " m";
-          //             }
-          //           }
-          //         }
-          //       ]
-          //     }
-          //   }
-          // })
         }
 
       function updateChart(graphic){
@@ -965,6 +1158,134 @@
         }];
         scatterChart.update();
       }
+
+      let histograms = {};
+      let histogramChart = null;
+
+
+
+      function getAverage(params) {
+        return summaryStatistics(params).then(function(statistics) {
+          return statistics.avg;
+        });
+      }
+
+      function updateHistogram(features) {
+        const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
+
+        if (histograms[variableField]) {
+          histogramChart.bins = histograms[variableField];
+        }
+
+        // params for generating a histogram using the
+        // points available on the client
+
+        const params = {
+          layer: emuLayer,
+          field: variableField,
+          view: view,
+          features: features,
+          numBins: 100,
+        };
+
+        let average = null;
+
+        getAverage(params)
+          .then(function(avg) {
+            average = avg;
+            return histogram(params);
+          })
+          .then(function(histogramResult) {
+            // cache previously used histograms to improve performance
+            histograms[variableField] = histogramResult.bins;
+
+            if (!histogramChart) {
+              histogramChart = new Histogram({
+                container: "histogram",
+                min: histogramResult.minValue,
+                max: histogramResult.maxValue,
+                bins: histogramResult.bins,
+                average: average,
+                // dataLines: [
+                //   {
+                //     value: 0
+                //   }
+                // ],
+                dataLineCreatedFunction: function(element, label, index) {
+                  if (index === 0) {
+                    element.setAttribute("y2", "75%");
+                  }
+                },
+                labelFormatFunction: function(value, type) {
+                  return type === "average" ? value.toFixed(2) : value;
+                },
+                barCreatedFunction: function(index, element) {
+                  const bin = histogramChart.bins[index];
+                  const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
+                  const color = getColorFromValue(midValue);
+                  element.setAttribute("fill", color.toHex());
+                }
+              });
+            } else {
+              histogramChart.bins = histogramResult.bins;
+              histogramChart.average = average;
+            }
+          })
+          .catch(function(e) {
+            console.error(e);
+          });
+      }
+
+      // Infers the color of the visual variable based on a given value
+      // This is used to render and update histogram bars with colors
+      // matching the features in the map
+      function getColorFromValue(value) {
+        const visualVariable = emuLayer.renderer.visualVariables.filter(function(
+          vv
+        ) {
+          return vv.type === "color";
+        })[0];
+        const stops = visualVariable.stops;
+        let minStop = stops[0];
+        let maxStop = stops[stops.length - 1];
+
+        let minStopValue = minStop.value;
+        let maxStopValue = maxStop.value;
+
+        if (value < minStopValue) {
+          return minStop.color;
+        }
+
+        if (value > maxStopValue) {
+          return maxStop.color;
+        }
+
+        const exactMatches = stops.filter(function(stop) {
+          return stop.value === value;
+        });
+
+        if (exactMatches.length > 0) {
+          return exactMatches[0].color;
+        }
+
+        minStop = null;
+        maxStop = null;
+
+        stops.forEach(function(stop, i) {
+          if (!minStop && !maxStop && stop.value >= value) {
+            minStop = stops[i - 1];
+            maxStop = stop;
+          }
+        });
+
+        const weightedPosition = (value - minStop.value) / (maxStop.value - minStop.value);
+
+        return Color.blendColors(
+          minStop.color,
+          maxStop.color,
+          weightedPosition
+        );
+      }
     });
   </script>
 </head>
@@ -974,9 +1295,26 @@
   <div id="verticalDiv" class="esri-widget">
     <div id="depthSlider"></div>
   </div>
+
   <div id="chartContainer" class="esri-widget">
     <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
   </div>
+
   <div id="options" class="esri-widget"></div>
+
+
+  <div id="containerDiv" class="esri-widget">
+    <div class="esri-widget">
+      <div id="title" class="esri-widget">
+        <h3>Histogram title</h3>
+      </div>
+      <div id="histogram" class="esri-widget"></div>
+      <div class="labels esri-widget">
+        <span style="float: left">-5° C</span>
+        <span style="float: center">0° C</span>
+        <span style="float: right">+5° C</span>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
