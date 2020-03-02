@@ -73,6 +73,7 @@
 
 
         let variable = "salinity";
+        let lastHit = null;
 
 
         function createVariableSelect(){
@@ -128,6 +129,7 @@
           if(relationshipRadio.checked){
             variableDisplay.innerText = "Salinity & Temperature";
             updateSalinityTempRelationship(currentsCheckbox.checked);
+            updateChart();
           } else {
 
             variable = salinityRadio.checked ? "salinity" : "temp";
@@ -141,6 +143,9 @@
             }
 
             updateHistogram(selectedFeatures);
+            if(lastHit){
+              updateChart(lastHit);
+            }
           }
         }
 
@@ -315,7 +320,7 @@
 
         depthSlider.on(["thumb-change", "thumb-drag"], function(){
           updateVisualization();
-          updateHistogram(selectedFeatures);
+          // updateHistogram(selectedFeatures);
         });
 
         const sketchLayer = new GraphicsLayer();
@@ -515,50 +520,76 @@
               view.container.style.opacity = "100%";
               loadingControl.style.visibility = "hidden";
               enableViewInteraction(handles);
+              // enableViewPointerMove();
             });
 
             createChart();
             updateVisualization();
           });
 
-        view.on("pointer-move", function(event){
-          view.hitTest(event)
-            .then(function(hitResponse){
-              if(hitResponse.results.length < 1){
+        // let viewPointerMoveHandle = null;
+        // let viewClickHandle = null;
+        // let viewPointerMoveEnabled = true;
+
+        // function disableViewPointerMove(){
+        //   viewPointerMoveEnabled = false;
+        //   if(viewPointerMoveHandle){
+        //     viewPointerMoveHandle.remove();
+        //     viewPointerMoveHandle = null;
+        //   }
+        // }
+
+        // function enableViewPointerMove(){
+        //   viewPointerMoveHandle = true;
+        //   if(!viewPointerMoveHandle){
+        // let lastHit = null;
+          view.on("pointer-move", function(event){
+              if(relationshipRadio.checked){
                 return;
               }
+              view.hitTest(event)
+                .then(function(hitResponse){
+                  if(hitResponse.results.length < 1){
+                    return;
+                  }
 
-              const emuHit = hitResponse.results
-                .map( result => result.graphic )
-                .filter( graphic => graphic.layer.title === emuLayer.title )[0];
+                  const emuHit = hitResponse.results
+                    .map( result => result.graphic )
+                    .filter( graphic => graphic.layer.title === emuLayer.title )[0];
 
-
-              if(emuHit){
-                updateChart(emuHit);
-              }
+                  if(emuHit){
+                    lastHit = emuHit;
+                    updateChart(emuHit);
+                  }
+                });
             });
-        });
+          // }
+        // }
 
+        // let emuHighlight = null;
 
+        // viewClickHandle = view.on("click", function(event){
+        //   view.hitTest(event)
+        //     .then(function(hitResponse){
 
-        // view.on("click", function(event){
-        //   // view.hitTest(event)
-        //   //   .then(function(hitResponse){
-        //   //     // console.log(hitResponse);
+        //       if(emuHighlight){
+        //         emuHighlight.remove();
+        //         emuHighlight = null;
+        //       }
 
-        //   //     const currentHit = hitResponse.results
-        //   //       .map( result => result.graphic )
-        //   //       .filter( graphic => graphic.layer.title === currentsLayer.title )[0];
+        //       const emuHit = hitResponse.results
+        //         .map( result => result.graphic )
+        //         .filter( graphic => graphic.layer.title === emuLayer.title )[0];
 
+        //       if(emuHit){
+        //         disableViewPointerMove();
+        //         filterByGeometry(emuHit.geometry);
 
-        //   //     // positiveHit.geometry;
-        //   //     if(currentHit){
-        //   //       filterByGeometry(currentHit.geometry);
-        //   //     } else {
-        //   //       // clearFilter();
-        //   //     }
-        //   //     // buffer(positiveHit.geometry);
-        //   //   });
+        //         emuHighlight = emuLayerView.highlight(emuHit);
+        //       } else {
+        //         enableViewPointerMove();
+        //       }
+        //     });
         // });
 
 
@@ -1272,6 +1303,12 @@
           return;
         }
 
+        if(!graphic){
+          scatterChart.data.datasets[0].data = [];
+          scatterChart.update();
+          return;
+        }
+
         const attributes = graphic.attributes;
         let data = [];
 
@@ -1388,8 +1425,10 @@
                 barCreatedFunction: function(index, element) {
                   const bin = histogramChart.bins[index];
                   const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
-                  const color = getColorFromValue(midValue);
-                  element.setAttribute("fill", color.toHex());
+                  if(midValue){
+                    const color = getColorFromValue(midValue);
+                    element.setAttribute("fill", color.toHex());
+                  }
                   binElements.push(element);
                 }
               });
@@ -1402,8 +1441,10 @@
               binElements.forEach(function(element, i){
                 const bin = bins[i];
                 const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
-                const color = getColorFromValue(midValue);
-                element.setAttribute("fill", color.toHex());
+                if(midValue){
+                  const color = getColorFromValue(midValue);
+                  element.setAttribute("fill", color.toHex());
+                }
               });
             }
           })
@@ -1421,6 +1462,10 @@
         ) {
           return vv.type === "color";
         })[0];
+
+        if(!visualVariable){
+          return;
+        }
 
         const stops = visualVariable.stops;
 

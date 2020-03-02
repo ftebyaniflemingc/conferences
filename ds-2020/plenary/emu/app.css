@@ -146,10 +146,8 @@
     padding-bottom: 5px;
   }
 
-
-
   #loading-control {
-    filter: drop-shadow(0 0 20px #e6550d);
+    filter: drop-shadow(0 0 10px #e6550d);
     position: absolute;
     z-index: 99;
     top: 40%;
