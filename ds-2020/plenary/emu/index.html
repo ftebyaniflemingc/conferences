@@ -7,30 +7,89 @@
   <title>EMU explorer - Spilhaus</title>
 
   <style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
+
+    .subtitle{
+      font-weight: 400;
+      font-size: 12pt;
+      padding-top: 5px;
+      padding-bottom: 5px;
     }
 
-    #verticalDiv{
-      width: 250px;
-      height: 600px;
-    }
-    #chartContainer {
-      /* position: inherit; */
+    .subtitle-large{
+      font-weight: 400;
+      font-size: 14pt;
       padding-top: 10px;
-      height: 600px;
-      /* bottom: 20px; */
-      width: 300px;
-      z-index: 96;
+      padding-bottom: 10px;
     }
 
-    #options {
-      padding: 10px;
+  #distance-subtitle{
+    padding-bottom: 12px;
+  }
+
+  #titleDiv {
+    padding: 10px;
+    width: 300px;
+    text-align: center;
+    /* background-color: rgba(50,50,50,0.9);
+    color: white; */
+  }
+  #titleText {
+    font-size: 32pt;
+    font-weight: 600;
+    padding: 10px 5px 10px 5px;
+  }
+
+  #dataDescription {
+    font-size: 12pt;
+    padding: 10px 5px 0px 5px;
+  }
+
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  #viewDiv {
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    right: 0;
+    left: 335px;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    /* width: 100%; */
+  }
+
+  #depthSliderContainer{
+    height: 230px;
+  }
+
+  /* #verticalDiv{
+    width: 100px;
+    height: 600px;
+  } */
+  #chartContainer {
+    padding-top: 10px;
+    /* position: relative; */
+    height: 100%;
+    /* width: 300px; */
+    z-index: 96;
+  }
+
+  #options {
+    /* padding: 10px; */
+
+    width: 335px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 15px;
+    height: 100%;
+    overflow-y: scroll;
   }
 
   #containerDiv {
@@ -40,6 +99,7 @@
   }
   #bufferSliderContainer{
     width: 100%;
+    padding-bottom: 5px;
   }
 
   #histogram {
@@ -53,6 +113,120 @@
   .esri-button {
     margin: 2px;
   }
+
+  .options-top {
+    height: 235px;
+  }
+
+  .options-top-right {
+    float: right;
+  }
+
+  .options-top-left {
+    float: left;
+    width: 80%;
+  }
+
+  .options-bottom {
+    /* position: inherit; */
+    padding-top: 10px;
+    height: 400px;
+    padding-bottom: 15px;
+    /* bottom: 20px; */
+    width: 300px;
+    z-index: 96;
+  }
+
+  #input-options{
+    padding-bottom: 5px;
+  }
+
+  #loading-control {
+    filter: drop-shadow(0 0 20px #e6550d);
+    position: absolute;
+    z-index: 99;
+    top: 40%;
+    left: 55%;
+    width: 120px;
+    height: 165px;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: -40px 0 0 -125px;
+    background-color: #fff;
+    color: #323232;
+    text-align: center;
+    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .lds-grid {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-grid div {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e6550d;
+  animation: lds-grid 1.2s linear infinite;
+}
+.lds-grid div:nth-child(1) {
+  top: 8px;
+  left: 8px;
+  animation-delay: 0s;
+}
+.lds-grid div:nth-child(2) {
+  top: 8px;
+  left: 32px;
+  animation-delay: -0.4s;
+}
+.lds-grid div:nth-child(3) {
+  top: 8px;
+  left: 56px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(4) {
+  top: 32px;
+  left: 8px;
+  animation-delay: -0.4s;
+}
+.lds-grid div:nth-child(5) {
+  top: 32px;
+  left: 32px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(6) {
+  top: 32px;
+  left: 56px;
+  animation-delay: -1.2s;
+}
+.lds-grid div:nth-child(7) {
+  top: 56px;
+  left: 8px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(8) {
+  top: 56px;
+  left: 32px;
+  animation-delay: -1.2s;
+}
+.lds-grid div:nth-child(9) {
+  top: 56px;
+  left: 56px;
+  animation-delay: -1.6s;
+}
+@keyframes lds-grid {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
   </style>
 
   <!-- Load the Chart.js library -->
@@ -80,12 +254,15 @@
       "esri/widgets/Sketch/SketchViewModel",
       "esri/layers/GraphicsLayer",
       "esri/views/draw/Draw",
-      "esri/Graphic"
+      "esri/Graphic",
+      "esri/widgets/Expand",
+      "esri/widgets/Zoom",
+      "esri/core/watchUtils"
       ], function(
         MapView, WebMap, FeatureLayer,
         Slider, geometryEngine, rendererJsonUtils,
         Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, SizeVariable,
-        Legend, SketchVM, GraphicsLayer, Draw, Graphic
+        Legend, SketchVM, GraphicsLayer, Draw, Graphic, Expand, Zoom, watchUtils
       ) {
 
         depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
@@ -104,10 +281,18 @@
           // rangeLabelsVisible: true,
           steps: depthValues,
           visibleElements: {
-            labels: true,
+            labels: false,
             rangeLabels: true
           }
-        });
+        })
+
+        // let histograms = {};
+        let histogramChart = null;
+        let binElements = [];
+
+        const histogramMinElement = document.getElementById("histogram-min-label");
+        const histogramMaxElement = document.getElementById("histogram-max-label");
+        const histogramTitle = document.getElementById("histogram-title");
 
         // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
         // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
@@ -476,20 +661,57 @@
         view = new MapView({
           map: webmap,
           container: "viewDiv",
-          // center: [0,0],
-          // scale: 5000000,
+          ui: {
+            components: [ "attribution" ]
+          },
+          constraints: {
+            snapToZoom: false
+          },
+          center: {
+            spatialReference: {
+              latestWkid: 54099,
+              wkid: 54099
+            },
+            x: -551776,
+            y: -1021353
+          },
+          scale: 122231056,
           // spatialReference: { wkid: 54010 }
         });
-        view.ui.add("verticalDiv", "bottom-right");
-        view.ui.add("chartContainer", "bottom-right");
-        view.ui.add("options", "top-right");
-        view.ui.add("containerDiv", "bottom-left");
-        // view.ui.add(new Legend({ view: view }), "top-left");
+        const zoomControl = new Zoom({ view: view })
+        view.ui.add(zoomControl, "bottom-right");
 
-        view.when().then(function(){
-          // createVariableSelect();
+        // const optionsExpand = new Expand({
+        //   content: document.getElementById("options"),
+        //   view: view,
+        //   expanded: true
+        // });
+        // view.ui.add(optionsExpand, "top-left");
+
+        // const titleExpand = new Expand({
+        //   content: document.getElementById("titleDiv"),
+        //   view: view,
+        //   expanded: true,
+        //   group: "top-right"
+        // });
+        // view.ui.add(titleExpand, "top-right");
+
+        const histogramExpand = new Expand({
+          content: document.getElementById("containerDiv"),
+          view: view,
+          expanded: false,
+          group: "top-right",
+          expandIconClass: "esri-icon-chart"
         });
+        view.ui.add(histogramExpand, "top-right");
 
+
+
+        // view.ui.add("titleDiv", "top-right");
+        // // view.ui.add("verticalDiv", "bottom-right");
+        // // view.ui.add("chartContainer", "bottom-right");
+        // view.ui.add("containerDiv", "top-right");
+        // view.ui.add(new Legend({ view: view }), "top-left");
         const draw = new Draw({
           view: view
         });
@@ -515,6 +737,13 @@
             ],
             updateVertices
           );
+
+          action.on("draw-complete", function(event){
+            drawBtn.classList.remove("esri-button--secondary");
+            updateVertices(event);
+            deactivateButton();
+            // drawBtn.classList.remove("esri-button--secondary");
+          });
         }
 
         // Checks if the last vertex is making the line intersect itself.
@@ -584,12 +813,11 @@
 
         drawBtn.addEventListener("click", function(event) {
           deactivateButton(drawBtn);
-          event.target.classList.add("esri-button--secondary");
           drawLine();
         });
 
         function deactivateButton(button) {
-          button.classList.remove("esri-button--secondary");
+          event.target.classList.add("esri-button--secondary");
         }
 
         const resetBtn = document.getElementById("reset-btn");
@@ -620,11 +848,24 @@
 
           const graphic = view.graphics.getItemAt(0);
           filterByGeometry(graphic.geometry, bufferSlider.values[0]);
-        })
+        });
+
+        const loadingControl = document.getElementById("loading-control");
 
         view.whenLayerView(emuLayer)
           .then(function(lv){
             emuLayerView = lv;
+
+
+            const handles = disableViewInteraction(view);
+
+            watchUtils.whenFalseOnce(emuLayerView, "updating", function(updating){
+              view.container.style.opacity = "100%";
+              loadingControl.style.visibility = "hidden";
+              enableViewInteraction(handles);
+            });
+
+
             createChart();
 
             updateVisualization();
@@ -721,9 +962,19 @@
         }
 
         function clearFilter(){
-          emuLayerView.filter = null;
+          const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
+          const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+          const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
           emuLayerView.effect = null;
+          emuLayerView.filter = null; //{
+          //   where: `${variableField} IS NOT NULL AND ${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
+          // };
           selectedFeatures = [];
+          drawBtn.classList.remove("esri-button--secondary");
+          view.graphics.removeAll();
+          draw.reset();
+          clearHisogram();
         }
 
         const cimData = {
@@ -1345,6 +1596,7 @@
         }
 
         let scatterChart = null;
+        let pointBackgroundColors = [];
 
         function createChart(){
           const chartCanvas = document.getElementById("line-chart");
@@ -1356,8 +1608,10 @@
             data: {
               datasets: [{
                 label: variable,
-                backgroundColor: "#008837",
-                borderColor: "#008837",
+                // backgroundColor: pointBackgroundColors, //"#008837",
+                // borderColor: "#008837",
+                pointRadius: 4,
+                pointBackgroundColor: pointBackgroundColors,
                 data: [{
                   x: 0,
                   y: 0
@@ -1365,42 +1619,30 @@
               }]
             },
             options: {
-                scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'top',
-                        ticks: {
-                          min: variableConfig[variable].chartOptions.min,
-                          max: variableConfig[variable].chartOptions.max
-                        }
-                    }],
-                //     xAxes: [
-                //   {
-                //     ticks: {
-                //       beginAtZero: true,
-                //       min: xMin,
-                //       max: xMax,
-                //       stepSize: 1,
-                //       callback:(label, index, labels) => {
-                //         return label % 5 === 0 ? label : "";
-                //       }
-                //     }
-                //   }
-                // ],
-                // yAxes: [
-                //   {
-                //     ticks: {
-                //       enabled: false,
-                //       min: -3000,
-                //       max: 0,
-                //       stepSize: 150,
-                //       callback:(label, index, labels) => {
-                //         return label;// / 1000000 + " m";
-                //       }
-                //     }
-                //   }
-                // ]
-                }
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'top',
+                    ticks: {
+                      min: variableConfig[variable].chartOptions.min,
+                      max: variableConfig[variable].chartOptions.max
+                    }
+                }],
+                yAxes: [{
+                  ticks: {
+                    // enabled: false,
+                    min: -3500,
+                    max: 0,
+                    // stepSize: 150,
+                    // callback:(label, index, labels) => {
+                    //   return label;// / 1000000 + " m";
+                    // }
+                  }
+                }]
+              }
             }
         });
 
@@ -1429,7 +1671,20 @@
         scatterChart.data.datasets[0].data = data;
         scatterChart.data.datasets[0].label = variable;
         scatterChart.data.datasets[0].backgroundColor = variableConfig[variable].colors[2];
-        scatterChart.data.datasets[0].borderColor = variableConfig[variable].colors[2];
+        // scatterChart.data.datasets[0].borderColor = variableConfig[variable].colors[2];
+        // console.log("scatter", scatterChart.data.datasets[0]);
+
+        // scatterChart.datasets[0].points.forEach(function(point){
+        //   console.log(point);
+        // })
+
+        for (i = 0; i < scatterChart.data.datasets[0].data.length; i++) {
+          const value = scatterChart.data.datasets[0].data[i].x;
+          if(value){
+            const color = getColorFromValue(value);
+            pointBackgroundColors[i] = color.toHex();
+          }
+        }
 
         scatterChart.options.scales.xAxes = [{
           type: 'linear',
@@ -1442,13 +1697,6 @@
         scatterChart.update();
       }
 
-      // let histograms = {};
-      let histogramChart = null;
-      let binElements = [];
-
-      const minTemp = document.getElementById("min-temp");
-      const maxTemp = document.getElementById("max-temp");
-
       function getAverage(params) {
         return summaryStatistics(params).then(function(statistics) {
           return statistics.avg;
@@ -1456,8 +1704,13 @@
       }
 
       function clearHisogram(){
-        histogramChart.destroy();
-        histogramChart = null;
+        if(histogramChart){
+          histogramChart.bins = [];
+          histogramMinElement.innerText = "";
+          histogramMaxElement.innerText = "";
+          histogramTitle.innerText = "";
+        }
+        histogramExpand.expanded = false;
       }
 
       function updateHistogram(features) {
@@ -1465,6 +1718,10 @@
         if(!features || features.length < 1){
           // console.error("[HISTOGRAM] You must provide features from the client.");
           return;
+        }
+
+        if(!histogramExpand.expanded){
+          histogramExpand.expanded = true;
         }
 
         const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
@@ -1495,8 +1752,16 @@
             // cache previously used histograms to improve performance
             const bins = histogramResult.bins
             // histograms[variableField] = bins;
-            minTemp.innerText = histogramResult.minValue.toFixed(2) + "° C";
-            maxTemp.innerText = histogramResult.maxValue.toFixed(2) + "° C";
+
+            if (variable === "temp"){
+              histogramMinElement.innerText = histogramResult.minValue.toFixed(2) + "° C";
+              histogramMaxElement.innerText = histogramResult.maxValue.toFixed(2) + "° C";
+              histogramTitle.innerText = "Temperature (° C)";
+            } else {
+              histogramMinElement.innerText = histogramResult.minValue.toFixed(2);
+              histogramMaxElement.innerText = histogramResult.maxValue.toFixed(2);
+              histogramTitle.innerText = "Salinity";
+            }
 
             if (!histogramChart) {
               histogramChart = new Histogram({
@@ -1598,53 +1863,140 @@
           weightedPosition
         );
       }
+
+      function disableViewInteraction(view) {
+        const disabledHandles = [];
+
+        // stops propagation of default behavior when an event fires
+        function stopEvtPropagation(event) {
+          event.stopPropagation();
+        }
+
+        if(zoomControl){
+          zoomControl.container.style.visibility = "hidden";
+        }
+
+        // disable mouse wheel scroll zooming on the view
+        const mouseWheelHandle = view.on("mouse-wheel", stopEvtPropagation);
+
+        // disable zooming via double-click on the view
+        const doubleClickHandle = view.on("double-click", stopEvtPropagation);
+
+        // disable zooming out via double-click + Control on the view
+        const doubleClickControlHandle = view.on("double-click", ["Control"], stopEvtPropagation);
+
+        // disables pinch-zoom and panning on the view
+        const dragHandle = view.on("drag", stopEvtPropagation);
+
+        // disable the view's zoom box to prevent the Shift + drag
+        // and Shift + Control + drag zoom gestures.
+        const dragShiftHandle = view.on("drag", ["Shift"], stopEvtPropagation);
+        const dragShiftCntrlHandle = view.on("drag", ["Shift", "Control"], stopEvtPropagation);
+
+        // prevents zooming with the + and - keys
+        const keyDownHandle = view.on("key-down", function(event) {
+          var prohibitedKeys = ["+", "-", "Shift", "_", "="];
+          var keyPressed = event.key;
+          if (prohibitedKeys.indexOf(keyPressed) !== -1) {
+            event.stopPropagation();
+          }
+        });
+
+        return [
+          mouseWheelHandle,
+          doubleClickHandle,
+          doubleClickControlHandle,
+          dragHandle,
+          dragShiftHandle,
+          dragShiftCntrlHandle,
+          keyDownHandle
+        ];
+      }
+
+      function enableViewInteraction(handles){
+        if(zoomControl){
+          zoomControl.container.style.visibility = "visible";
+        }
+        handles.forEach(function(handle){
+          handle.remove();
+        });
+        handles = [];
+      }
     });
   </script>
 </head>
 
 <body>
-  <div id="viewDiv"></div>
-  <div id="verticalDiv" class="esri-widget">
-    <div id="depthSlider"></div>
-  </div>
-
-  <div id="chartContainer" class="esri-widget">
-    <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
+  <div id="viewDiv">
+    <div id="loading-control" class="esri-widget">
+      Hold on while we load data the size of an ocean...
+      <div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
   </div>
 
   <div id="options" class="esri-widget">
-    <div class="esri-widget">
-      <input type="radio" id="salinity-radio" name="variables" class="esri-widget" value="salinity" checked> Salinity<br/>
-      <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
-      <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship">Salinity & Temperature<br/>
-      <input type="checkbox" id="currents-checkbox" class="esri-widget">Show Currents<br/>
-    </div>
-    <button id="draw-btn" data-type="polyline" class="esri-button">
-      Draw a path
-    </button>
 
-    <div id="bufferSliderContainer">
-      Set Distance
-      <div id="bufferSlider"></div>
+    <div id="titleDiv" class="esri-widget">
+      <div id="titleText">One Ocean</div>
+      <div id="dataDescription">Explore Temperature and Salinity in the world's oceans</div>
     </div>
 
+    <div class="options-top">
+      <div class="options-top-left">
+        <div class="subtitle-large">
+          Options
+        </div>
+        <div id="input-options" class="esri-widget">
+          <input type="radio" id="salinity-radio" name="variables" class="esri-widget" value="salinity" checked> Salinity<br/>
+          <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
+          <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship"> Salinity & Temperature<br/>
+          <input type="checkbox" id="currents-checkbox" class="esri-widget"> Show Currents<br/>
+        </div>
+        <button id="draw-btn" data-type="polyline" class="esri-button">
+          Explore
+        </button>
+        <div id="bufferSliderContainer">
+          <div id="distance-subtitle" class="subtitle">
+            Set Distance
+          </div>
+          <div id="bufferSlider"></div>
+        </div>
 
-    <button id="reset-btn" class="esri-button">
-      Reset Filter
-    </button>
+        <button id="reset-btn" class="esri-button">
+          Reset Filter
+        </button>
+      </div>
+      <div class="options-top-right">
+        <div id="verticalDiv" class="esri-widget">
+          <div class="subtitle">
+            Depth
+          </div>
+          <div id="depthSliderContainer">
+            <div id="depthSlider"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="options-bottom">
+      <div class="subtitle">
+        Depth Profile
+      </div>
+      <div id="chartContainer" class="esri-widget">
+        <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
+      </div>
+    </div>
   </div>
-
 
   <div id="containerDiv" class="esri-widget">
     <div class="esri-widget">
       <div id="title" class="esri-widget">
-        <h3>Histogram title</h3>
+        <h3><span id="histogram-title">Histogram Title</span></h3>
       </div>
       <div id="histogram" class="esri-widget"></div>
       <div class="labels esri-widget">
-        <span style="float: left"><span id="min-temp"></span></span>
+        <span style="float: left"><span id="histogram-min-label"></span></span>
         <!-- <span style="float: center">0° C</span> -->
-        <span style="float: right"><span id="max-temp"></span></span>
+        <span style="float: right"><span id="histogram-max-label"></span></span>
       </div>
     </div>
   </div>
