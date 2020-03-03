@@ -7,12 +7,17 @@
   <title>EMU explorer - Spilhaus</title>
 
   <!-- Load the Chart.js library -->
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+  <script type="module" src="https://unpkg.com/@esri/calcite-components@1.0.0-beta.20/dist/calcite/calcite.esm.js"></script>
+  <script nomodule="" src="https://unpkg.com/@esri/calcite-components@1.0.0-beta.20/dist/calcite/calcite.js"></script>
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/@esri/calcite-components@1.0.0-beta.20/dist/calcite/calcite.css">
 
   <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
   <link rel="stylesheet" href="app.css" />
 
-  <script src="https://js.arcgis.com/next/"></script>
 
   <script>
     require([
@@ -99,19 +104,23 @@
         }
 
         const currentsCheckbox = document.getElementById("currents-checkbox");
+
+        // currentsCheckbox.addEventListener("calciteSwitchChange", )
+
         const salinityRadio = document.getElementById("salinity-radio");
         const tempRadio = document.getElementById("temp-radio");
         const relationshipRadio = document.getElementById("relationship-radio");
+        const variableSelect = document.getElementById("variable-select");
 
         const variableDisplay = document.getElementById("variable-display");
         const depthDisplay = document.getElementById("depth-display");
         const depthProfileDisplay = document.getElementById("depth-profile-title");
 
-        salinityRadio.addEventListener("change", updateVisualization);
-        tempRadio.addEventListener("change", updateVisualization);
-        relationshipRadio.addEventListener("change", updateVisualization);
+        variableSelect.addEventListener("calciteRadioGroupChange", updateVisualization);
 
-        currentsCheckbox.addEventListener("change", function(){
+        currentsCheckbox.addEventListener("calciteSwitchChange", function(event){
+          // console.log(event);
+          currentsCheckbox.checked = event.srcElement.switched;
           if(currentsCheckbox.checked){
             depthSlider.steps = directionDepthValues;
             depthSlider.values = [ -5 ];
@@ -132,9 +141,20 @@
             updateChart();
           } else {
 
-            variable = salinityRadio.checked ? "salinity" : "temp";
+            // variable = salinityRadio.checked ? "salinity" : "temp";
+
+            if (salinityRadio.checked){
+              variable = "salinity";
+              variableDisplay.innerText = "Salinity";
+              depthProfileDisplay.innerText = "Salinity";
+            } else {
+              variable = "temp";
+              variableDisplay.innerText = "Temperature (°C)";
+              depthProfileDisplay.innerText = "Temperature (°C)";
+            }
+
             variableDisplay.innerText = salinityRadio.checked ? "Salinity" : "Temperature (°C)"
-            depthProfileDisplay.innerText = salinityRadio.checked ? "Depth Profile - Salinity" : "Depth Profile - Temperature (°C)"
+            depthProfileDisplay.innerText = salinityRadio.checked ? "Salinity" : "Temperature (°C)"
 
             if (currentsCheckbox.checked){
               updateRotationRenderer();
@@ -310,7 +330,8 @@
               legendOptions: {
                 showLegend: false
               },
-              valueExpression: `$feature.${directionField} - 180`,
+              field: directionField,
+              // valueExpression: `$feature.${directionField} - 180`,
               rotationType: "geographic"
             }]
           };
@@ -357,15 +378,6 @@
         });
         const zoomControl = new Zoom({ view: view })
         view.ui.add(zoomControl, "bottom-right");
-
-        const histogramExpand = new Expand({
-          content: document.getElementById("containerDiv"),
-          view: view,
-          expanded: false,
-          group: "bottom-left",
-          expandIconClass: "esri-icon-chart"
-        });
-        view.ui.add(histogramExpand, "bottom-left");
 
         const legendExpand = new Expand({
           content: new Legend({
@@ -1198,7 +1210,7 @@
               legendOptions: {
                 showLegend: false
               },
-              // Velocity_1, Velocity_2, 
+              // Velocity_1, Velocity_2,
               field: velocityField,
               minDataValue: 0,
               maxDataValue: 0.5,
@@ -1231,7 +1243,8 @@
               legendOptions: {
                 showLegend: false
               },
-              valueExpression: `$feature.${directionField} - 180`,
+              field: directionField,
+              // valueExpression: `$feature.${directionField} - 180`,
               rotationType: "geographic"
             }];
 
@@ -1276,6 +1289,7 @@
               }]
             },
             options: {
+              responsive: true,
               legend: {
                 display: false
               },
@@ -1362,17 +1376,12 @@
           histogramMaxElement.innerText = "";
           histogramTitle.innerText = "";
         }
-        histogramExpand.expanded = false;
       }
 
       function updateHistogram(features) {
 
         if(!features || features.length < 1){
           return;
-        }
-
-        if(!histogramExpand.expanded){
-          histogramExpand.expanded = true;
         }
 
         const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
@@ -1594,28 +1603,16 @@
 
     <div class="options-top">
       <div class="options-top-left">
-        <div class="subtitle-large">
-          Options
-        </div>
-        <div id="input-options" class="esri-widget">
-          <input type="radio" id="salinity-radio" name="variables" class="esri-widget" value="salinity" checked> Salinity<br/>
-          <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
-          <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship"> Salinity & Temperature<br/>
-          <input type="checkbox" id="currents-checkbox" class="esri-widget"> Show Currents<br/>
-        </div>
-        <button id="draw-btn" data-type="polyline" class="esri-button">
-          Filter data along a path
-        </button>
-        <div id="bufferSliderContainer">
-          <div id="distance-subtitle" class="subtitle">
-            Within a distance (km) of...
-          </div>
-          <div id="bufferSlider"></div>
-        </div>
 
-        <button id="reset-btn" class="esri-button">
-          Reset Filter
-        </button>
+        <calcite-radio-group id="variable-select" scale="l" role="radiogroup" theme="light" class="hydrated">
+          <calcite-radio-group-item id="salinity-radio" value="salinity" checked="" tabindex="0" role="radio" aria-checked="true" scale="l" class="hydrated">Salinity</calcite-radio-group-item>
+          <calcite-radio-group-item id="temp-radio" value="temp" tabindex="-1" role="radio" aria-checked="false" scale="l" class="hydrated">Temperature</calcite-radio-group-item>
+          <calcite-radio-group-item id="relationship-radio" value="relationship" tabindex="-1" role="radio" aria-checked="false" scale="l" class="hydrated">Salinity & Temperature</calcite-radio-group-item>
+        </calcite-radio-group>
+
+        <div style="padding: 10px;" class="esri-widget">
+          <label> <calcite-switch id="currents-checkbox" switched="false"></calcite-switch> Show currents</label>
+        </div>
       </div>
       <div class="options-top-right">
         <div id="verticalDiv" class="esri-widget">
@@ -1629,26 +1626,49 @@
       </div>
     </div>
     <div class="options-bottom">
-      <div id="depth-profile-title" class="subtitle">
-        Depth Profile
-      </div>
-      <div id="chartContainer" class="esri-widget">
-        <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
-      </div>
-    </div>
-  </div>
 
-  <div id="containerDiv" class="esri-widget">
-    <div class="esri-widget">
-      <div id="title" class="esri-widget">
-        <h3><span id="histogram-title">Histogram Title</span></h3>
-      </div>
-      <div id="histogram" class="esri-widget"></div>
-      <div class="labels esri-widget">
-        <span style="float: left"><span id="histogram-min-label"></span></span>
-        <!-- <span style="float: center">0° C</span> -->
-        <span style="float: right"><span id="histogram-max-label"></span></span>
-      </div>
+      <calcite-tabs>
+        <calcite-tab-nav slot="tab-nav">
+          <calcite-tab-title is-active>Depth Profile</calcite-tab-title>
+          <calcite-tab-title>Filter Tools</calcite-tab-title>
+        </calcite-tab-nav>
+
+        <calcite-tab is-active>
+          <div id="depth-profile-title" class="subtitle">
+            Depth Profile
+          </div>
+          <div id="chartContainer" class="esri-widget">
+            <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
+          </div>
+        </calcite-tab>
+
+        <calcite-tab>
+          <div style="display: flex; flex-direction: row; background-color: #fff">
+            <button id="draw-btn" data-type="polyline" class="esri-button">
+              Filter along a path
+            </button>
+            <button id="reset-btn" class="esri-button">
+              Reset Filter
+            </button>
+          </div>
+          <div id="bufferSliderContainer">
+            <div id="distance-subtitle" class="subtitle">
+              Within a distance (km) of...
+            </div>
+            <div id="bufferSlider"></div>
+          </div>
+          <div class="esri-widget">
+            <div id="title" class="esri-widget">
+              <h3><span id="histogram-title">Histogram</span></h3>
+            </div>
+            <div id="histogram" class="esri-widget"></div>
+            <div class="labels esri-widget">
+              <span style="float: left"><span id="histogram-min-label"></span></span>
+              <span style="float: right"><span id="histogram-max-label"></span></span>
+            </div>
+          </div>
+        </calcite-tab>
+      </calcite-tabs>
     </div>
   </div>
 
