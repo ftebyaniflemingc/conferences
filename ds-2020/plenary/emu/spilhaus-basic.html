@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+
+  <title>EMU explorer - Spilhaus</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <script>
+    require([
+      "esri/views/MapView",
+      "esri/WebMap",
+      ], function(
+        MapView, WebMap
+      ) {
+
+        const webmap = new WebMap({
+          portalItem: {
+            id: "06d3dc52f5cb4ddc96825b399919e916",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          }
+        });
+
+        const view = new MapView({
+          map: webmap,
+          container: "viewDiv",
+          constraints: {
+            snapToZoom: false
+          },
+          center: {
+            spatialReference: {
+              latestWkid: 54099,
+              wkid: 54099
+            },
+            x: -551776,
+            y: -1021353
+          },
+          scale: 122231056,
+        });
+      });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
