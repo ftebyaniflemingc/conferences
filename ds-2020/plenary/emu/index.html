@@ -1198,6 +1198,7 @@
               legendOptions: {
                 showLegend: false
               },
+              // Velocity_1, Velocity_2, 
               field: velocityField,
               minDataValue: 0,
               maxDataValue: 0.5,
@@ -1385,6 +1386,8 @@
           view: view,
           features: features,
           numBins: 100,
+          minValue: variableConfig[variable].chartOptions.min,
+          maxValue: variableConfig[variable].chartOptions.max
         };
 
         let average = null;
