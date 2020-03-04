@@ -243,6 +243,7 @@
                 title: variable.charAt(0).toUpperCase() + variable.slice(1),
                 showLegend: true
               },
+              // temp_1, temp_2, temp_3, etc
               field: variableField,
               stops: variableConfig[variable].stops
             }, {
@@ -250,6 +251,7 @@
               legendOptions: {
                 showLegend: false
               },
+              // Velocity_1, Velocity_2, Velocity_3, etc
               field: velocityField,
               minDataValue: 0,
               maxDataValue: 0.5,
@@ -282,8 +284,8 @@
               legendOptions: {
                 showLegend: false
               },
+              // Direction_1, Direction_2, Direction_3, etc
               field: directionField,
-              // valueExpression: `$feature.${directionField} - 180`,
               rotationType: "geographic"
             }]
           };
@@ -1487,67 +1489,67 @@
       }
 
       const bookmarks = new Bookmarks({
-          view: view,
-          bookmarks: [
-            new Bookmark({
-              name: "World",
-              extent: {
-                spatialReference: {
-                  latestWkid: 54099,
-                  wkid: 54099
-                },
-                xmin: -17546006.114587966,
-                ymin: -13796049.80015584,
-                xmax: 15796910.111811157,
-                ymax: 11041350.45384467
-                            }
-              }),
-            new Bookmark({
-              name: "Mid Atlantic Ocean",
-              extent: {
-                spatialReference: {
-                  latestWkid: 54099,
-                  wkid: 54099
-                },
-                xmin: -9331161.138770934,
-                ymin: 821918.3497348882,
-                xmax: -5068880.478792946,
-                ymax: 3996924.6997475885
-                            }
-              }),
-            new Bookmark({
-              name: "South Indian Ocean",
-              extent: {
-                spatialReference: {
-                  latestWkid: 54099,
-                  wkid: 54099
-                },
-                xmin: -3919897.7138591977,
-                ymin: -773166.8475296779,
-                xmax: 1945372.616901,
-                ymax: 3595919.102056968
-              }
+        view: view,
+        bookmarks: [
+          new Bookmark({
+            name: "World",
+            extent: {
+              spatialReference: {
+                latestWkid: 54099,
+                wkid: 54099
+              },
+              xmin: -17546006.114587966,
+              ymin: -13796049.80015584,
+              xmax: 15796910.111811157,
+              ymax: 11041350.45384467
+                          }
             }),
-            new Bookmark({
-              name: "North Atlantic Ocean",
-              extent: {
-                spatialReference: {
-                  latestWkid: 54099,
-                  wkid: 54099
-                },
-                xmin: -14980844.14269451,
-                ymin: 4454228.417656096,
-                xmax: -5820309.4512356715,
-                ymax: 11277982.678607006
-              }
-            })
-          ]
-        });
+          new Bookmark({
+            name: "Mid Atlantic Ocean",
+            extent: {
+              spatialReference: {
+                latestWkid: 54099,
+                wkid: 54099
+              },
+              xmin: -9331161.138770934,
+              ymin: 821918.3497348882,
+              xmax: -5068880.478792946,
+              ymax: 3996924.6997475885
+                          }
+            }),
+          new Bookmark({
+            name: "South Indian Ocean",
+            extent: {
+              spatialReference: {
+                latestWkid: 54099,
+                wkid: 54099
+              },
+              xmin: -3919897.7138591977,
+              ymin: -773166.8475296779,
+              xmax: 1945372.616901,
+              ymax: 3595919.102056968
+            }
+          }),
+          new Bookmark({
+            name: "North Atlantic Ocean",
+            extent: {
+              spatialReference: {
+                latestWkid: 54099,
+                wkid: 54099
+              },
+              xmin: -14980844.14269451,
+              ymin: 4454228.417656096,
+              xmax: -5820309.4512356715,
+              ymax: 11277982.678607006
+            }
+          })
+        ]
+      });
 
-        view.ui.add(new Expand({
-          view: view,
-          content: bookmarks
-        }), "top-left");
+      view.ui.add(new Expand({
+        view: view,
+        content: bookmarks
+      }), "top-left");
 
     });
   </script>

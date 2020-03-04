@@ -76,27 +76,20 @@ body {
   height: 150px;
 }
 
-/* #verticalDiv{
-  width: 100px;
-  height: 600px;
-} */
 #chartContainer {
-  padding-top: 10px;
-  /* position: relative; */
   height: 375px;
-  /* width: 300px; */
   z-index: 96;
 }
 
 #options {
-  /* padding: 10px; */
+  border-style: solid;
+  border-color: #323232;
   width: 335px;
   padding-top: 10px;
   padding-right: 10px;
   padding-left: 10px;
   padding-bottom: 15px;
   height: 100%;
-  /* overflow-y: scroll; */
 }
 
 #containerDiv {
@@ -158,7 +151,6 @@ label {
 .options-bottom {
   margin-top: 5px;
   height: 375px;
-  padding-bottom: 15px;
   width: 300px;
   z-index: 96;
 }
