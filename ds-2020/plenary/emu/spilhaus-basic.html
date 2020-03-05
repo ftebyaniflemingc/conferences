@@ -24,9 +24,24 @@
     require([
       "esri/views/MapView",
       "esri/WebMap",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/LayerList"
       ], function(
-        MapView, WebMap
+        MapView, WebMap, FeatureLayer, LayerList
       ) {
+
+        const emuLayer = new FeatureLayer({
+          title: "Ecological Marine Unit Points",
+          portalItem: {
+            id: "06de2b96a7fa42d5891c4e79e17dd347",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          },
+          outFields: ["OBJECTID"],
+          popupEnabled: false,
+          visible: false
+        });
 
         const webmap = new WebMap({
           portalItem: {
@@ -34,7 +49,8 @@
             portal: {
               url: "https://qaext.arcgis.com"
             }
-          }
+          },
+          layers: [ emuLayer ]
         });
 
         const view = new MapView({
@@ -53,6 +69,8 @@
           },
           scale: 122231056,
         });
+
+        view.ui.add(new LayerList({ view: view }), "top-left");
       });
   </script>
 </head>

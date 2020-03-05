@@ -97,7 +97,6 @@
             depthSlider.values = [ -5 ];
           } else {
             depthSlider.steps = depthValues;
-            depthSlider.values = [ 0 ];
           }
           updateVisualization();
         });
@@ -110,8 +109,8 @@
             variableDisplay.innerText = "Salinity & Temperature";
             updateSalinityTempRelationship(currentsCheckbox.checked);
             updateChart();
+            legendExpand.expanded = true;
           } else {
-
             if (salinityRadio.checked){
               variable = "salinity";
               variableDisplay.innerText = "Salinity";
@@ -143,7 +142,7 @@
           return index > -1 ? index + 1 : null;
         }
 
-        emuLayer = new FeatureLayer({
+        const emuLayer = new FeatureLayer({
           title: "Observation Point",
           portalItem: {
             id: "06de2b96a7fa42d5891c4e79e17dd347",
@@ -163,8 +162,8 @@
               max: 40
             },
             stops: [
-              { value: 33/*31.6*/, color: "#fee6ce" },
-              { value: 34.0, color: "#fdae6b" },
+              { value: 33.0, color: "#fee6ce" },
+              { value: 35.0, color: "#fdae6b" },
               { value: 36.4, color: "#e6550d" }
             ]
           },
@@ -200,7 +199,7 @@
             visualVariables: [{
               type: "color",
               legendOptions: {
-                title: variable.charAt(0).toUpperCase() + variable.slice(1),
+                title: variable === "salinity" ? "Salinity" : "Temperature",
                 showLegend: true
               },
               field: `${variable}_${getLevelFromDepth(depthSlider.values[0])}`,
@@ -240,7 +239,7 @@
             visualVariables: [{
               type: "color",
               legendOptions: {
-                title: variable.charAt(0).toUpperCase() + variable.slice(1),
+                title: variable === "salinity" ? "Salinity" : "Temperature",
                 showLegend: true
               },
               // temp_1, temp_2, temp_3, etc
@@ -337,7 +336,7 @@
             view: view
           }),
           view: view,
-          expanded: false,
+          expanded: true,
           group: "bottom-left"
         });
         view.ui.add(legendExpand, "bottom-left");
@@ -392,8 +391,8 @@
               spatialReference: view.spatialReference
             },
             symbol: {
-              type: "simple-line", // autocasts as new SimpleFillSymbol
-              color: "#00ff78",//[4, 90, 141],
+              type: "simple-line",
+              color: "rgba(220,220,220,1)",
               width: 4,
               cap: "round",
               join: "round"
@@ -1567,7 +1566,7 @@
 
     <div id="titleDiv" class="esri-widget">
       <div id="titleText">One Ocean</div>
-      <div id="dataDescription">Explore Temperature and Salinity in the world's oceans</div>
+      <div id="dataDescription">Explore temperature and salinity in the world's oceans</div>
     </div>
 
     <div class="options-top">
@@ -1576,7 +1575,7 @@
         <calcite-radio-group id="variable-select" scale="l" role="radiogroup" theme="light" class="hydrated">
           <calcite-radio-group-item id="salinity-radio" value="salinity" checked="" tabindex="0" role="radio" aria-checked="true" scale="l" class="hydrated">Salinity</calcite-radio-group-item>
           <calcite-radio-group-item id="temp-radio" value="temp" tabindex="-1" role="radio" aria-checked="false" scale="l" class="hydrated">Temperature</calcite-radio-group-item>
-          <calcite-radio-group-item id="relationship-radio" value="relationship" tabindex="-1" role="radio" aria-checked="false" scale="l" class="hydrated">Salinity & Temperature</calcite-radio-group-item>
+          <calcite-radio-group-item id="relationship-radio" value="relationship" tabindex="-1" role="radio" aria-checked="false" scale="l" class="hydrated">Salinity & temperature</calcite-radio-group-item>
         </calcite-radio-group>
 
         <div style="padding: 10px;" class="esri-widget">
@@ -1598,13 +1597,13 @@
 
       <calcite-tabs>
         <calcite-tab-nav slot="tab-nav">
-          <calcite-tab-title is-active>Depth Profile</calcite-tab-title>
-          <calcite-tab-title>Filter Tools</calcite-tab-title>
+          <calcite-tab-title is-active>Depth profile</calcite-tab-title>
+          <calcite-tab-title>Filter tools</calcite-tab-title>
         </calcite-tab-nav>
 
         <calcite-tab is-active>
           <div id="depth-profile-title" class="subtitle">
-            Depth Profile
+            Depth profile
           </div>
           <div id="chartContainer" class="esri-widget">
             <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
@@ -1617,7 +1616,7 @@
               Filter along a path
             </button>
             <button id="reset-btn" class="esri-button">
-              Reset Filter
+              Reset filter
             </button>
           </div>
           <div id="bufferSliderContainer">

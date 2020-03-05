@@ -4,9 +4,9 @@ length: 60 min
 
 presenters: Raluca Nicola, Kristian Ekenes
 
-Mar. 7, 2019 10:30 a.m. - 11:30 a.m.
+Mar. 11, 2020 5:30 p.m. - 6:30 p.m.
 
-Palm Springs Convention Center, Smoketree A-E
+Palm Springs Convention Center, Primrose A
 
 ## Summary
 
