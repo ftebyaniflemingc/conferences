@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+
+  <title>EMU explorer - Spilhaus</title>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #verticalDiv{
+      width: 250px;
+      height: 600px;
+    }
+    #chartContainer {
+      /* position: inherit; */
+      padding-top: 10px;
+      height: 600px;
+      /* bottom: 20px; */
+      width: 300px;
+      z-index: 96;
+    }
+
+    #options {
+      padding: 10px;
+  }
+
+  #containerDiv {
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0;
+  }
+  #bufferSliderContainer{
+    width: 100%;
+  }
+
+  #histogram {
+    width: 500px;
+    height: 150px;
+  }
+  .labels {
+    padding: 5px;
+  }
+
+  .esri-button {
+    margin: 2px;
+  }
+  </style>
+
+  <!-- Load the Chart.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <script>
+    require([
+      "esri/views/MapView",
+      "esri/WebMap",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Slider",
+      "esri/geometry/geometryEngine",
+      "esri/renderers/support/jsonUtils",
+      "esri/widgets/Histogram",
+      "esri/renderers/smartMapping/statistics/histogram",
+      "esri/renderers/smartMapping/statistics/summaryStatistics",
+      "esri/symbols/CIMSymbol",
+      "esri/core/lang",
+      "esri/Color",
+      "esri/renderers/visualVariables/SizeVariable",
+      "esri/widgets/Legend",
+      "esri/widgets/Sketch/SketchViewModel",
+      "esri/layers/GraphicsLayer",
+      "esri/views/draw/Draw",
+      "esri/Graphic"
+      ], function(
+        MapView, WebMap, FeatureLayer,
+        Slider, geometryEngine, rendererJsonUtils,
+        Histogram, histogram, summaryStatistics, CIMSymbol, lang, Color, SizeVariable,
+        Legend, SketchVM, GraphicsLayer, Draw, Graphic
+      ) {
+
+        depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
+        directionDepthValues = [ -5, -10, -30, -40, -50, -65, -95, -150, -200, -275, -325, -375, -450]// -650, -750, -850, -1150, -2100, -2500, -2900];
+        depthValues = [ 0, -5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -425, -450, -475, -500, -550, -600, -650, -700, -750, -800, -850, -900, -950, -1000, -1050, -1100, -1150, -1200, -1250, -1300, -1350, -1400, -1450, -1500, -1550, -1600, -1650, -1700, -1750, -1800, -1850, -1900, -1950, -2000, -2100, -2200, -2300, -2400, -2500, -2600, -2700, -2800, -2900, -3000, -3100, -3200, -3300, -3400, -3500, -3600, -3700, -3800, -3900, -4000, -4100, -4200, -4300, -4400, -4500, -4600, -4700 ];
+        const numDepthLevels = 80;  //depthValues.length;
+
+        const depthSlider = new Slider({
+          container: document.getElementById("depthSlider"),
+          values: [ 0 ],
+          min: -600,//depthValues[numDepthLevels-1], //-4700,  // -600
+          max: 0,
+          layout: "vertical",
+          precision: 0,
+          // labelsVisible: true,
+          // rangeLabelsVisible: true,
+          steps: depthValues,
+          visibleElements: {
+            labels: true,
+            rangeLabels: true
+          }
+        });
+
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        // const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+        const variables = [ "salinity", "temp", "dissO2", "nitrate", "phosphate", "silicate", "Direction", "Velocity" ];
+
+
+        let variable = "salinity";
+
+
+        function createVariableSelect(){
+          const select = document.createElement("select");
+          select.classList.add("esri-widget");
+          const optionsDiv = document.getElementById("options");
+          optionsDiv.appendChild(select);
+
+          variables.forEach( (variable, i) => {
+            const option = document.createElement("option");
+            option.value = variable;
+            option.innerText = variable;
+            option.selected = i === 0;
+            select.appendChild(option);
+          });
+
+          select.addEventListener("change", (event) => {
+            variable = select.value;
+            const variableFields = createOutFields(variable)
+            emuLayer.outFields = variableFields;
+            updateRenderer();
+          });
+        }
+
+        const currentsCheckbox = document.getElementById("currents-checkbox");
+        const salinityRadio = document.getElementById("salinity-radio");
+        const tempRadio = document.getElementById("temp-radio");
+        const relationshipRadio = document.getElementById("relationship-radio");
+
+        salinityRadio.addEventListener("change", updateVisualization);
+        tempRadio.addEventListener("change", updateVisualization);
+        relationshipRadio.addEventListener("change", updateVisualization);
+
+        currentsCheckbox.addEventListener("change", function(){
+          if(currentsCheckbox.checked){
+            depthSlider.steps = directionDepthValues;
+            depthSlider.values = [ -5 ];
+          } else {
+            depthSlider.steps = depthValues;
+            depthSlider.values = [ 0 ];
+          }
+          updateVisualization();
+        });
+
+        function updateVisualization(){
+          if(relationshipRadio.checked){
+            updateSalinityTempRelationship(currentsCheckbox.checked);
+          } else {
+
+            variable = salinityRadio.checked ? "salinity" : "temp";
+
+            if (currentsCheckbox.checked){
+              updateRotationRenderer();
+            } else {
+              updateRenderer();
+            }
+
+            updateHistogram(selectedFeatures);
+          }
+        }
+
+
+        getLevelFromDepth = function (depth) {
+          const index = depthValues.indexOf(depth);
+          return index > -1 ? index + 1 : null;
+        }
+
+        function createOutFields (variable){
+          return depthValues
+            .map( (value, i) => `${variable}_${i+1}`)
+            .slice(0,numDepthLevels);
+        }
+
+        // console.log(createOutFields(variable));
+
+        const salinityFields = createOutFields("salinity");
+        const velocityFields = createOutFields("Velocity");
+        const tempFields = createOutFields("temp");
+        const directionFields = createOutFields("Direction");
+        const outFields = velocityFields.concat(tempFields, salinityFields, directionFields);
+        // const outFields = createOutFields(variable) // salinityFields.concat(velocityFields);  //createOutFields(variable)
+        console.log(outFields);
+
+        const currentsLayer = new FeatureLayer({
+          portalItem: {
+            id: "46b28da7ed5b4f28a6fab6ba75f4bdbc",
+            portal: {
+              url: "https://devext.arcgis.com"
+            }
+          },
+          popupEnabled: false,
+          // spatialReference: { wkid: 54010 }
+        })
+
+        emuLayer = new FeatureLayer({
+          portalItem: {
+            id: "06de2b96a7fa42d5891c4e79e17dd347",
+            // id: "2b85d9fa877149ae89f1194910c555a4",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          },
+          outFields: ["*"],  //outFields,
+          popupEnabled: false,
+          // spatialReference: { wkid: 54010 }
+        });
+
+
+        const colors = {
+          "salinity": [ "#fee6ce", "#fdae6b", "#e6550d" ],
+          "temp": [ "#1993ff", "#2e6ca4", "#403031", "#a6242e", "#ff2638" ],
+          "dissO2": [ "#edf8b1", "#7fcdbb", "#2c7fb8" ],
+          "nitrate": [ "#e0ecf4", "#9ebcda", "#8856a7" ],
+          "phosphate": [  "#e6f4ff", "#6f9988",  "#2c593f"],
+          "silicate": [ "#e5f5e0", "#a1d99b", "#31a354" ],
+          "Velocity": [ "#deebf7", "#9ecae1", "#3182bd" ],
+          "Direction": [ "#eae2bb", "#c59ca4", "#1d4e89" ]
+        };
+
+        const variableConfig = {
+          "salinity": {
+            colors: [ "#fee6ce", "#fdae6b", "#e6550d" ],
+            chartOptions: {
+              min: 32,
+              max: 37
+            },
+            stops: [
+              { value: 33/*31.6*/, color: colors.salinity[0] },
+              { value: 34.0, color: colors.salinity[1] },
+              { value: 36.4, color: colors.salinity[2] }
+            ]
+          },
+          "temp": {
+            colors: [ "#1993ff", "#2e6ca4", "#403031", "#a6242e", "#ff2638" ],
+            chartOptions: {
+              min: -2,
+              max: 30
+            },
+            stops: [
+              // { value: 0/*2*/, color: colors.temp[0] },
+              // { value: 15 /*13*/, color: colors.temp[1] },
+              // { value: 30, color: colors.temp[2] }
+
+
+              { value: 0/*2*/, color: colors.temp[0] },
+              { value: 5 /*13*/, color: colors.temp[1] },
+              { value: 15, color: colors.temp[2] },
+              { value: 27/*2*/, color: colors.temp[3] },
+              { value: 30 /*13*/, color: colors.temp[4] }
+            ]
+          },
+          "dissO2": {
+            colors: [ "#edf8b1", "#7fcdbb", "#2c7fb8" ],
+            chartOptions: {
+              min: 0,
+              max: 10
+            },
+            stops: [
+              { value: 4.75/*31.6*/, color: colors.dissO2[0] },
+              { value: 6.19, color: colors.dissO2[1] },
+              { value: 8, color: colors.dissO2[2] }
+            ]
+          },
+          "nitrate": {
+            colors: [ "#e0ecf4", "#9ebcda", "#8856a7" ],
+            chartOptions: {
+              min: 0,
+              max: 50
+            },
+            stops: [
+              { value: 12/*31.6*/, color: colors.nitrate[0] },
+              { value: 25, color: colors.nitrate[1] },
+              { value: 30, color: colors.nitrate[2] }
+            ]
+          },
+          "phosphate": {
+            colors: [ "#e6f4ff", "#6f9988",  "#2c593f"],
+            chartOptions: {
+              min: 0,
+              max: 3
+            },
+            stops: [
+              { value: 0.07/*31.6*/, color: colors.phosphate[0] },
+              { value: 1, color: colors.phosphate[1] },
+              { value: 2, color: colors.phosphate[2] }
+            ]
+          },
+          "silicate": {
+            colors: [ "#e5f5e0", "#a1d99b", "#31a354" ],
+            chartOptions: {
+              min: 0,
+              max: 175
+            },
+            stops: [
+              { value: 2/*31.6*/, color: colors.silicate[0] },
+              { value: 50, color: colors.silicate[1] },
+              { value: 150, color: colors.silicate[2] }
+            ]
+          },
+          "Velocity": {
+            colors: [ "#deebf7", "#9ecae1", "#3182bd" ],
+            chartOptions: {
+              min: 0,
+              max: 0.5
+            },
+            stops: [
+              { value: 0, color: colors.Velocity[0] },
+              { value: 0.09, color: colors.Velocity[1] },
+              { value: 0.2, color: colors.Velocity[2] }
+            ]
+          },
+          "Direction": {
+            colors: [ "#eae2bb", "#c59ca4", "#1d4e89" ],
+            chartOptions: {
+              min: 0,
+              max: 360
+            },
+            stops: [
+              { value: 0, color: colors.Direction[0] },
+              { value: 180, color: colors.Direction[1] },
+              { value: 360, color: colors.Direction[2] }
+            ]
+          }
+        };
+
+        let emuLayerView;
+
+        function updateRenderer(){
+          emuLayer.renderer = {
+            type: "simple",
+            symbol: {
+              type: "simple-marker",
+              size: 4,
+              outline: {
+                width: 0,
+                color: [255,255,255,0.5]
+              }
+            },
+            visualVariables: [{
+              type: "color",
+              legendOptions: {
+                showLegend: false
+              },
+              field: `${variable}_${getLevelFromDepth(depthSlider.values[0])}`,
+              stops: variableConfig[variable].stops
+            }, {
+              type: "size",
+              valueExpression: "$view.scale",
+              stops: [
+                { value: 7812500, size: 12 },
+                { value: 15625000, size: 10 },
+                { value: 31250000, size: 6 },
+                { value: 62500000, size: 4 },
+                { value: 125000000, size: 4 },
+                { value: 250000000, size: 2 }
+              ]
+            }]
+          }
+        }
+
+        function updateRotationRenderer(){
+
+          const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
+          const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+          const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
+          emuLayerView.filter = {
+            where: `${variableField} IS NOT NULL AND ${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
+          };
+
+          emuLayer.renderer = {
+            type: "simple",
+            symbol: {
+              type: "web-style",
+              name: "tear-pin-1",
+              styleName: "Esri2DPointSymbolsStyle"
+            },
+            visualVariables: [{
+              type: "color",
+              legendOptions: {
+                showLegend: false
+              },
+              field: variableField,
+              stops: variableConfig[variable].stops
+            }, {
+              type: "size",
+              legendOptions: {
+                showLegend: false
+              },
+              field: velocityField,
+              minDataValue: 0,
+              maxDataValue: 0.5,
+              minSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "12px" },
+                  { value: 15625000, size: "8px" },
+                  { value: 31250000, size: "6px" },
+                  { value: 62500000, size: "4px" },
+                  { value: 125000000, size: "2px" },
+                  { value: 250000000, size: "1px" }
+                ]
+              },
+              maxSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "32px" },
+                  { value: 15625000, size: "20px" },
+                  { value: 31250000, size: "16px" },
+                  { value: 62500000, size: "12px" },
+                  { value: 125000000, size: "6px" },
+                  { value: 250000000, size: "4px" }
+                ]
+              }
+              // minSize: "4px",
+              // maxSize: "12px"  //18
+            }, {
+              type: "rotation",
+              legendOptions: {
+                showLegend: false
+              },
+              valueExpression: `$feature.${directionField} - 180`,
+              rotationType: "geographic"
+            }]
+          };
+        }
+
+        let selectedFeatures = [];
+
+        depthSlider.on(["thumb-change", "thumb-drag"], function(){
+          updateVisualization();
+          updateHistogram(selectedFeatures);
+        });
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateSalinityTempRelationship);
+        // depthSlider.on(["thumb-change", "thumb-drag"], updateRotationRenderer);
+
+        const sketchLayer = new GraphicsLayer();
+
+        const webmap = new WebMap({
+          // portalItem: {
+          //   id: "e6c998e10de7442c832b66bf4916ef32",
+          //   portal: {
+          //     url: "https://devext.arcgis.com"
+          //   }
+          // },
+          portalItem: {
+            id: "06d3dc52f5cb4ddc96825b399919e916",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          },
+          //currentsLayer
+          layers: [ emuLayer, sketchLayer ]
+        });
+
+        view = new MapView({
+          map: webmap,
+          container: "viewDiv",
+          // center: [0,0],
+          // scale: 5000000,
+          // spatialReference: { wkid: 54010 }
+        });
+        view.ui.add("verticalDiv", "bottom-right");
+        view.ui.add("chartContainer", "bottom-right");
+        view.ui.add("options", "top-right");
+        view.ui.add("containerDiv", "bottom-left");
+        // view.ui.add(new Legend({ view: view }), "top-left");
+
+        view.when().then(function(){
+          // createVariableSelect();
+        });
+
+        const draw = new Draw({
+          view: view
+        });
+
+        function drawLine(){
+
+          // creates and returns an instance of PolyLineDrawAction
+          const action = draw.create("polyline");
+
+          // focus the view to activate keyboard shortcuts for sketching
+          view.focus();
+
+          // listen polylineDrawAction events to give immediate visual feedback
+          // to users as the line is being drawn on the view.
+          action.on(
+            [
+              "vertex-add",
+              // "vertex-remove",
+              // "cursor-update",
+              // "redo",
+              // "undo",
+              "draw-complete"
+            ],
+            updateVertices
+          );
+        }
+
+        // Checks if the last vertex is making the line intersect itself.
+        function updateVertices(event) {
+          // create a polyline from returned vertices
+          if (event.vertices.length > 1) {
+            const result = createGraphic(event);
+          }
+        }
+
+        // create a new graphic presenting the polyline that is being drawn on the view
+        function createGraphic(event) {
+          const vertices = event.vertices;
+          view.graphics.removeAll();
+
+          // a graphic representing the polyline that is being drawn
+          const graphic = new Graphic({
+            geometry: {
+              type: "polyline",
+              paths: vertices,
+              spatialReference: view.spatialReference
+            },
+            symbol: {
+              type: "simple-line", // autocasts as new SimpleFillSymbol
+              color: [4, 90, 141],
+              width: 4,
+              cap: "round",
+              join: "round"
+            }
+          });
+
+          view.graphics.add(graphic);
+
+          filterByGeometry(graphic.geometry, bufferSlider.values[0]);
+        }
+
+        // define the SketchViewModel and pass in the symbols for each geometry type
+        const sketchVM = new SketchVM({
+          layer: sketchLayer,
+          view: view,
+          pointSymbol: {
+            type: "simple-marker",
+            color: "black",
+            size: 12,
+            outline: null
+          },
+          polylineSymbol: {
+            type: "simple-line",
+            color: "black",
+            width: 3
+          },
+          defaultUpdateOptions: {
+            enableScaling: false,
+            enableRotation: false
+          }
+        });
+
+        // after drawing the geometry, enter the update mode to update the geometry
+        // and the deactivate the buttons
+        sketchVM.on("create", function(event) {
+          if (event.state === "complete") {
+            deactivateButton(drawBtn);
+          }
+        });
+
+        const drawBtn = document.getElementById("draw-btn");
+
+        drawBtn.addEventListener("click", function(event) {
+          deactivateButton(drawBtn);
+          event.target.classList.add("esri-button--secondary");
+          drawLine();
+        });
+
+        function deactivateButton(button) {
+          button.classList.remove("esri-button--secondary");
+        }
+
+        const resetBtn = document.getElementById("reset-btn");
+
+        resetBtn.addEventListener("click", function(){
+          clearFilter();
+          clearHisogram();
+        })
+
+        const bufferSlider = new Slider({
+          container: document.getElementById("bufferSlider"),
+          values: [ 500 ],
+          min: 100,
+          max: 1000,
+          layout: "horizontal",
+          precision: 0,
+          steps: 100,
+          visibleElements: {
+            labels: true,
+            rangeLabels: true
+          }
+        });
+
+        bufferSlider.on(["thumb-change", "thumb-drag"], function(){
+          if(view.graphics.length < 1){
+            return;
+          }
+
+          const graphic = view.graphics.getItemAt(0);
+          filterByGeometry(graphic.geometry, bufferSlider.values[0]);
+        })
+
+        view.whenLayerView(emuLayer)
+          .then(function(lv){
+            emuLayerView = lv;
+            createChart();
+
+            updateVisualization();
+
+            // depthSlider.steps = directionDepthValues;
+            // depthSlider.values = [-5];
+            // updateSalinityTempRelationship();
+            //  updateRenderer();
+            // updateRotationRenderer();
+          });
+
+        view.on("pointer-move", function(event){
+          view.hitTest(event)
+            .then(function(hitResponse){
+              if(hitResponse.results.length < 1){
+                return;
+              }
+
+              // console.log(hitResponse);
+
+              const emuHit = hitResponse.results
+                .map( result => result.graphic )
+                .filter( graphic => graphic.layer.title === emuLayer.title )[0];
+
+
+              if(emuHit){
+                updateChart(emuHit);
+              }
+            });
+        });
+
+
+
+        // view.on("click", function(event){
+        //   // view.hitTest(event)
+        //   //   .then(function(hitResponse){
+        //   //     // console.log(hitResponse);
+
+        //   //     const currentHit = hitResponse.results
+        //   //       .map( result => result.graphic )
+        //   //       .filter( graphic => graphic.layer.title === currentsLayer.title )[0];
+
+
+        //   //     // positiveHit.geometry;
+        //   //     if(currentHit){
+        //   //       filterByGeometry(currentHit.geometry);
+        //   //     } else {
+        //   //       // clearFilter();
+        //   //     }
+        //   //     // buffer(positiveHit.geometry);
+        //   //   });
+        // });
+
+
+        function filterByGeometry(geometry, distance){
+          // clearFilter();
+
+          // emuLayerView.filter = {
+          //   geometry: geometryEngine.buffer(geometry, 100, "kilometers"),
+          //   // distance: 100000,
+          //   // units: "kilometers",
+          //   // spatialRelationship: "intersects"
+          // };
+
+          emuLayerView.effect = {
+            excludedEffect: "grayscale(100%) opacity(20%)",
+            filter: {
+              geometry: geometryEngine.buffer(geometry, distance, "kilometers"),
+              // distance: 100000,
+              // units: "kilometers",
+              // spatialRelationship: "intersects"
+            }
+          }
+
+
+          const query = emuLayerView.createQuery();
+          query.geometry = emuLayerView.effect.filter.geometry;
+          emuLayerView.queryFeatures(query).then(function(response){
+            selectedFeatures = response.features;
+            return selectedFeatures;
+          }).then(updateHistogram);
+        }
+
+
+
+        function buffer(geometry){
+          // var result = geometryEngine.buffer(geometry, 100, "kilometers");
+          try{
+            var result = geometryEngine.geodesicBuffer(geometry, 500, "kilometers");
+            console.log(result);
+          } catch(e){
+            console.log(e);
+          }
+        }
+
+        function clearFilter(){
+          emuLayerView.filter = null;
+          emuLayerView.effect = null;
+          selectedFeatures = [];
+        }
+
+        const cimData = {
+          "type":"CIMPointSymbol",
+          "symbolLayers":[
+            {
+              "type":"CIMVectorMarker",
+              "enable":true,
+              "anchorPoint":{
+                "x":0,
+                "y":-0.5
+              },
+              "anchorPointUnits":"Relative",
+              "dominantSizeAxis3D":"Y",
+              "size":18.5,
+              "billboardMode3D":"FaceNearPlane",
+              "frame":{
+                "xmin":0.0,
+                "ymin":0.0,
+                "xmax":21.0,
+                "ymax":21.0
+              },
+              "markerGraphics":[
+                {
+                  "type":"CIMMarkerGraphic",
+                  "geometry":{
+                    "rings":[
+                      [
+                        [
+                          17.17,
+                          14.33
+                        ],
+                        [
+                          16.97,
+                          12.96
+                        ],
+                        [
+                          16.38,
+                          11.37
+                        ],
+                        [
+                          12.16,
+                          3.98
+                        ],
+                        [
+                          11.2,
+                          1.94
+                        ],
+                        [
+                          10.5,
+                          0.0
+                        ],
+                        [
+                          9.8,
+                          1.96
+                        ],
+                        [
+                          8.84,
+                          4.02
+                        ],
+                        [
+                          4.61,
+                          11.41
+                        ],
+                        [
+                          4.02,
+                          12.98
+                        ],
+                        [
+                          3.83,
+                          14.33
+                        ],
+                        [
+                          3.96,
+                          15.63
+                        ],
+                        [
+                          4.34,
+                          16.88
+                        ],
+                        [
+                          4.95,
+                          18.03
+                        ],
+                        [
+                          5.78,
+                          19.04
+                        ],
+                        [
+                          6.8,
+                          19.88
+                        ],
+                        [
+                          7.95,
+                          20.49
+                        ],
+                        [
+                          9.2,
+                          20.87
+                        ],
+                        [
+                          10.5,
+                          21.0
+                        ],
+                        [
+                          11.8,
+                          20.87
+                        ],
+                        [
+                          13.05,
+                          20.5
+                        ],
+                        [
+                          14.2,
+                          19.88
+                        ],
+                        [
+                          15.22,
+                          19.05
+                        ],
+                        [
+                          16.05,
+                          18.03
+                        ],
+                        [
+                          16.66,
+                          16.88
+                        ],
+                        [
+                          17.04,
+                          15.63
+                        ],
+                        [
+                          17.17,
+                          14.33
+                        ]
+                      ]
+                    ]
+                  },
+                  "symbol":{
+                    "type":"CIMPolygonSymbol",
+                    "symbolLayers":[
+                      {
+                        "type":"CIMSolidStroke",
+                        "enable":true,
+                        "capStyle":"Round",
+                        "joinStyle":"Round",
+                        "lineStyle3D":"Strip",
+                        "miterLimit":10,
+                        "width":0,
+                        "color":[
+                          110,
+                          110,
+                          110,
+                          255
+                        ]
+                      },
+                      {
+                        "type":"CIMSolidFill",
+                        "enable":true,
+                        "color":[
+                          201,
+                          49,
+                          0,
+                          255
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "scaleSymbolsProportionally":true,
+              "respectFrame":true
+            }
+          ],
+          "haloSize":1,
+          "scaleX":1,
+          "angleAlignment":"Display",
+          "version":"2.0.0",
+          "build":"8933"
+        };
+
+        function updateSalinityTempRelationship(addCurrents){
+          const level = getLevelFromDepth(depthSlider.values[0]);
+
+          const field1 = `salinity_${level}`;
+          const field2 = `temp_${level}`;
+
+          const renderer = rendererJsonUtils.fromJSON({
+            "authoringInfo": {
+              "classificationMethod": "esriClassifyQuantile",
+              "field1": {
+                "field": field1,
+                "normalizationField": "",
+                "classBreakInfos": [
+                  {
+                    "minValue": 5.017099857330322,
+                    "maxValue": 33.93169021606445
+                  },
+                  {
+                    "minValue": 33.93169021606445,
+                    "maxValue": 34.94491195678711
+                  },
+                  {
+                    "minValue": 34.94491195678711,
+                    "maxValue": 41.148712158203125
+                  }
+                ]
+              },
+              "field2": {
+                "field": field2,
+                "normalizationField": "",
+                "classBreakInfos": [
+                  {
+                    "minValue": -1.8617100715637207,
+                    "maxValue": 5.463809967041016
+                  },
+                  {
+                    "minValue": 5.463809967041016,
+                    "maxValue": 22.64011001586914
+                  },
+                  {
+                    "minValue": 22.64011001586914,
+                    "maxValue": 30.277099609375
+                  }
+                ]
+              },
+              // "focus": null,
+              "numClasses": 3,
+              "type": "relationship"
+            },
+            "type": "uniqueValue",
+            "valueExpression": `
+              var field1 = $feature['${field1}'];
+              var field2 = $feature['${field2}'];
+              var hasNormField1 = false;
+              var hasNormField2 = false;
+              var normField1 = null;
+              var normField2 = null;
+
+              if (
+                IsEmpty(field1) ||
+                IsEmpty(field2) ||
+                (hasNormField1 && (IsEmpty(normField1) || normField1 == 0)) ||
+                (hasNormField2 && (IsEmpty(normField2) || normField2 == 0))
+              ) {
+                return null;
+              }
+
+              var value1 = IIf(hasNormField1, (field1 / normField1), field1);
+              var value2 = IIf(hasNormField2, (field2 / normField2), field2);
+
+              var breaks1 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];
+              var breaks2 = [[-1.8617100715637207,5.463809967041016],[5.463809967041016,22.64011001586914],[22.64011001586914,30.277099609375]];
+              var classCodes = [\"L\",\"M\",\"H\"];\n\n  function getClassCode(value, breaks) {
+                var code = null;
+
+                for (var i in breaks) {
+                  var info = breaks[i];
+                  if (value >= info[0] && value <= info[1]) {
+                    code = classCodes[i];\
+                    break;
+                  }
+                }
+
+                return code;
+              }
+
+              var code1 = getClassCode(value1, breaks1);
+              var code2 = getClassCode(value2, breaks2);\
+
+              var classValue = IIf(IsEmpty(code1) || IsEmpty(code2), null, code1 + code2);
+              return classValue;
+            `,
+            "valueExpressionTitle": "Relationship",
+            "legendOptions": {},
+            "uniqueValueInfos": [
+              {
+                "label": "High Salinity - Warm",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    89,
+                    63,
+                    179,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HH"
+              },
+              {
+                "label": "High - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    148,
+                    92,
+                    144,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HM"
+              },
+              {
+                "label": "High Salinity - Cold",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    255,
+                    115,
+                    115,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "HL"
+              },
+              {
+                "label": "Medium - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    85,
+                    147,
+                    212,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MH"
+              },
+              {
+                "label": "Medium - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    166,
+                    153,
+                    212,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MM"
+              },
+              {
+                "label": "Medium - Low",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    249,
+                    184,
+                    184,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "ML"
+              },
+              {
+                "label": "Low Salinity - Warm",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    98,
+                    231,
+                    245,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LH"
+              },
+              {
+                "label": "Low - Medium",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    163,
+                    236,
+                    244,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LM"
+              },
+              {
+                "label": "Low Salinity, Cold",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    242,
+                    242,
+                    242,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LL"
+              }
+            ]
+          });
+
+          renderer.visualVariables = [{
+            type: "size",
+            valueExpression: "$view.scale",
+            stops: [
+              { value: 7812500, size: 12 },
+              { value: 15625000, size: 10 },
+              { value: 31250000, size: 6 },
+              { value: 62500000, size: 4 },
+              { value: 125000000, size: 4 },
+              { value: 250000000, size: 2 }
+            ]
+          }];
+
+          if(addCurrents){
+            const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
+            const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
+            const visualVariables = [{
+              type: "size",
+              legendOptions: {
+                showLegend: false
+              },
+              field: velocityField,
+              minDataValue: 0,
+              maxDataValue: 0.5,
+              minSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "12px" },
+                  { value: 15625000, size: "8px" },
+                  { value: 31250000, size: "6px" },
+                  { value: 62500000, size: "4px" },
+                  { value: 125000000, size: "2px" },
+                  { value: 250000000, size: "1px" }
+                ]
+              },
+              maxSize: {
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                  { value: 7812500, size: "32px" },
+                  { value: 15625000, size: "20px" },
+                  { value: 31250000, size: "16px" },
+                  { value: 62500000, size: "12px" },
+                  { value: 125000000, size: "6px" },
+                  { value: 250000000, size: "4px" }
+                ]
+              }
+              // minSize: "4px",
+              // maxSize: "12px"  //18
+            }, {
+              type: "rotation",
+              legendOptions: {
+                showLegend: false
+              },
+              valueExpression: `$feature.${directionField} - 180`,
+              rotationType: "geographic"
+            }];
+
+            renderer.uniqueValueInfos.forEach(function(info){
+              const color = info.symbol.color;
+
+              const symbolData = lang.clone(cimData);
+              symbolData.symbolLayers[0].markerGraphics[0].symbol.symbolLayers[1].color = color.toJSON();
+
+              const symbol = new CIMSymbol({
+                data: symbolData
+              });
+
+              info.symbol = symbol;
+            });
+
+            renderer.visualVariables = visualVariables;
+          }
+
+          emuLayer.renderer = renderer;
+        }
+
+        let scatterChart = null;
+
+        function createChart(){
+          const chartCanvas = document.getElementById("line-chart");
+          let xMin = 0;
+          let xMax = 30;
+
+          scatterChart = new Chart(chartCanvas.getContext("2d"), {
+            type: 'scatter',
+            data: {
+              datasets: [{
+                label: variable,
+                backgroundColor: "#008837",
+                borderColor: "#008837",
+                data: [{
+                  x: 0,
+                  y: 0
+                }]
+              }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'top',
+                        ticks: {
+                          min: variableConfig[variable].chartOptions.min,
+                          max: variableConfig[variable].chartOptions.max
+                        }
+                    }],
+                //     xAxes: [
+                //   {
+                //     ticks: {
+                //       beginAtZero: true,
+                //       min: xMin,
+                //       max: xMax,
+                //       stepSize: 1,
+                //       callback:(label, index, labels) => {
+                //         return label % 5 === 0 ? label : "";
+                //       }
+                //     }
+                //   }
+                // ],
+                // yAxes: [
+                //   {
+                //     ticks: {
+                //       enabled: false,
+                //       min: -3000,
+                //       max: 0,
+                //       stepSize: 150,
+                //       callback:(label, index, labels) => {
+                //         return label;// / 1000000 + " m";
+                //       }
+                //     }
+                //   }
+                // ]
+                }
+            }
+        });
+
+        }
+
+      function updateChart(graphic){
+        if(!scatterChart){
+          createChart();
+          return;
+        }
+
+        const attributes = graphic.attributes;
+        let data = [];
+
+        for (let key in attributes){
+          const splitName = key.split("_");
+          const variableName = splitName[0];
+          const depthLevel = splitName[1];
+          if (key.indexOf(variable) > -1){
+            data.push({
+              x: attributes[key],
+              y: depthValues[depthLevel-1]
+            });
+          }
+        }
+        scatterChart.data.datasets[0].data = data;
+        scatterChart.data.datasets[0].label = variable;
+        scatterChart.data.datasets[0].backgroundColor = variableConfig[variable].colors[2];
+        scatterChart.data.datasets[0].borderColor = variableConfig[variable].colors[2];
+
+        scatterChart.options.scales.xAxes = [{
+          type: 'linear',
+          position: 'top',
+          ticks: {
+            min: variableConfig[variable].chartOptions.min,
+            max: variableConfig[variable].chartOptions.max
+          }
+        }];
+        scatterChart.update();
+      }
+
+      // let histograms = {};
+      let histogramChart = null;
+      let binElements = [];
+
+      const minTemp = document.getElementById("min-temp");
+      const maxTemp = document.getElementById("max-temp");
+
+      function getAverage(params) {
+        return summaryStatistics(params).then(function(statistics) {
+          return statistics.avg;
+        });
+      }
+
+      function clearHisogram(){
+        histogramChart.destroy();
+        histogramChart = null;
+      }
+
+      function updateHistogram(features) {
+
+        if(!features || features.length < 1){
+          // console.error("[HISTOGRAM] You must provide features from the client.");
+          return;
+        }
+
+        const variableField = `${variable}_${getLevelFromDepth(depthSlider.values[0])}`;
+
+        // if (histograms[variableField]) {
+        //   histogramChart.bins = histograms[variableField];
+        // }
+
+        // params for generating a histogram using the
+        // points available on the client
+
+        const params = {
+          layer: emuLayer,
+          field: variableField,
+          view: view,
+          features: features,
+          numBins: 100,
+        };
+
+        let average = null;
+
+        getAverage(params)
+          .then(function(avg) {
+            average = avg;
+            return histogram(params);
+          })
+          .then(function(histogramResult) {
+            // cache previously used histograms to improve performance
+            const bins = histogramResult.bins
+            // histograms[variableField] = bins;
+            minTemp.innerText = histogramResult.minValue.toFixed(2) + "° C";
+            maxTemp.innerText = histogramResult.maxValue.toFixed(2) + "° C";
+
+            if (!histogramChart) {
+              histogramChart = new Histogram({
+                container: "histogram",
+                min: histogramResult.minValue,
+                max: histogramResult.maxValue,
+                bins: histogramResult.bins,
+                average: average,
+                // dataLines: [
+                //   {
+                //     value: 0
+                //   }
+                // ],
+                dataLineCreatedFunction: function(element, label, index) {
+                  if (index === 0) {
+                    element.setAttribute("y2", "75%");
+                  }
+                },
+                labelFormatFunction: function(value, type) {
+                  return type === "average" ? value.toFixed(2) : value;
+                },
+                barCreatedFunction: function(index, element) {
+                  const bin = histogramChart.bins[index];
+                  const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
+                  const color = getColorFromValue(midValue);
+                  // console.log(midValue);
+                  element.setAttribute("fill", color.toHex());
+                  binElements.push(element);
+                }
+              });
+            } else {
+              histogramChart.bins = bins;
+              histogramChart.average = average;
+              histogramChart.min = histogramResult.minValue;
+              histogramChart.max = histogramResult.maxValue;
+
+              binElements.forEach(function(element, i){
+                const bin = bins[i];
+                const midValue = (bin.maxValue - bin.minValue) / 2 + bin.minValue;
+                const color = getColorFromValue(midValue);
+                element.setAttribute("fill", color.toHex());
+              });
+            }
+          })
+          .catch(function(e) {
+            console.error(e);
+          });
+      }
+
+      // Infers the color of the visual variable based on a given value
+      // This is used to render and update histogram bars with colors
+      // matching the features in the map
+      function getColorFromValue(value) {
+        const visualVariable = emuLayer.renderer.visualVariables.filter(function(
+          vv
+        ) {
+          return vv.type === "color";
+        })[0];
+
+        const stops = visualVariable.stops;
+
+        let minStop = stops[0];
+        let maxStop = stops[stops.length - 1];
+
+        let minStopValue = minStop.value;
+        let maxStopValue = maxStop.value;
+
+        if (value < minStopValue) {
+          return minStop.color;
+        }
+
+        if (value > maxStopValue) {
+          return maxStop.color;
+        }
+
+        const exactMatches = stops.filter(function(stop) {
+          return stop.value === value;
+        });
+
+        if (exactMatches.length > 0) {
+          return exactMatches[0].color;
+        }
+
+        minStop = null;
+        maxStop = null;
+
+        stops.forEach(function(stop, i) {
+          if (!minStop && !maxStop && stop.value >= value) {
+            minStop = stops[i - 1];
+            maxStop = stop;
+          }
+        });
+
+        const weightedPosition = (value - minStop.value) / (maxStop.value - minStop.value);
+
+        return Color.blendColors(
+          minStop.color,
+          maxStop.color,
+          weightedPosition
+        );
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="verticalDiv" class="esri-widget">
+    <div id="depthSlider"></div>
+  </div>
+
+  <div id="chartContainer" class="esri-widget">
+    <canvas id="line-chart" style="width:100%; height:100%;"></canvas>
+  </div>
+
+  <div id="options" class="esri-widget">
+    <div class="esri-widget">
+      <input type="radio" id="salinity-radio" name="variables" class="esri-widget" value="salinity" checked> Salinity<br/>
+      <input type="radio" id="temp-radio" name="variables" class="esri-widget" value="temp"> Temperature<br/>
+      <input type="radio" id="relationship-radio" name="variables" class="esri-widget" value="relationship">Salinity & Temperature<br/>
+      <input type="checkbox" id="currents-checkbox" class="esri-widget">Show Currents<br/>
+    </div>
+    <button id="draw-btn" data-type="polyline" class="esri-button">
+      Draw a path
+    </button>
+
+    <div id="bufferSliderContainer">
+      Set Distance
+      <div id="bufferSlider"></div>
+    </div>
+
+
+    <button id="reset-btn" class="esri-button">
+      Reset Filter
+    </button>
+  </div>
+
+
+  <div id="containerDiv" class="esri-widget">
+    <div class="esri-widget">
+      <div id="title" class="esri-widget">
+        <h3>Histogram title</h3>
+      </div>
+      <div id="histogram" class="esri-widget"></div>
+      <div class="labels esri-widget">
+        <span style="float: left"><span id="min-temp"></span></span>
+        <!-- <span style="float: center">0° C</span> -->
+        <span style="float: right"><span id="max-temp"></span></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
