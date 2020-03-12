@@ -415,7 +415,7 @@
 
         resetBtn.addEventListener("click", function(){
           clearFilter();
-          clearHisogram();
+          clearHistogram();
         })
 
         const bufferSlider = new Slider({
@@ -509,7 +509,7 @@
           drawBtn.classList.remove("esri-button--secondary");
           view.graphics.removeAll();
           draw.reset();
-          clearHisogram();
+          clearHistogram();
         }
 
         const tearDropCIMData = {
@@ -1232,7 +1232,7 @@
         });
       }
 
-      function clearHisogram(){
+      function clearHistogram(){
         if(histogramChart){
           histogramChart.bins = [];
           histogramMinElement.innerText = "";

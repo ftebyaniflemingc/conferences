@@ -11,3 +11,14 @@ Palm Springs Convention Center, Primrose B
 ## Summary
 
 Learn about the various technologies used behind the scenes by ArcGIS Online and the ArcGIS API for JavaScript that help you work with more features in the browser. We’ll demonstrate step-by-step how to optimize a large dataset for rendering and analysis in the browser starting with data preparation, feature service settings, and visualization techniques in the ArcGIS API for JavaScript that will allow your users to work with more data more efficiently in your web apps. We hope to have you walk away inspired with innovative ways to do the same in your apps.
+
+## Outline
+
+I. Behind the scenes
+
+II. Visualization techniques
+
+  A. Water pipes
+  B. Eugene tree data
+
+III. One Ocean
