@@ -72,10 +72,10 @@
 
         view.watch("scale", function(scale){
           let definitionExpression = null;
-          if(scale >= 72223){
+          if(scale >= 16000){
             definitionExpression = "PIPE_SIZE >= 150"
           }
-          if(scale >= 288895){
+          if(scale >= 36111){
             definitionExpression = "PIPE_SIZE >= 300"
           }
           if(definitionExpression !== featureLayer.definitionExpression){
