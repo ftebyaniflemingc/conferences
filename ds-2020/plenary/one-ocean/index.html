@@ -151,8 +151,12 @@
           return index > -1 ? index + 1 : null;
         }
 
+        const authorUrl = "https://github.com/ekenes";
+        const emuUrl = "https://www.esri.com/en-us/about/science/ecological-marine-units/overview";
+
         const emuLayer = new FeatureLayer({
           title: "Observation Point",
+          copyright: `App by <a target='_blank' href='${authorUrl}'>Kristian Ekenes</a> | Data provided by <a target='_blank' href='${emuUrl}'>Esri</a> | Basemap designed by John Nelson`,
           portalItem: {
             id: "06de2b96a7fa42d5891c4e79e17dd347",
             portal: {
