@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+
+  <title>EMU explorer - Spilhaus</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <script>
+    require([
+      "esri/views/MapView",
+      "esri/WebMap",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/LayerList"
+      ], function(
+        MapView, WebMap, FeatureLayer, LayerList
+      ) {
+
+        const emuLayer = new FeatureLayer({
+          title: "Ecological Marine Unit Points",
+          portalItem: {
+            id: "06de2b96a7fa42d5891c4e79e17dd347",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          },
+          outFields: ["OBJECTID"],
+          popupEnabled: false,
+          visible: false
+        });
+
+        const webmap = new WebMap({
+          portalItem: {
+            id: "06d3dc52f5cb4ddc96825b399919e916",
+            portal: {
+              url: "https://qaext.arcgis.com"
+            }
+          },
+          layers: [ emuLayer ]
+        });
+
+        const view = new MapView({
+          map: webmap,
+          container: "viewDiv",
+          constraints: {
+            snapToZoom: false
+          },
+          center: {
+            spatialReference: {
+              latestWkid: 54099,
+              wkid: 54099
+            },
+            x: -551776,
+            y: -1021353
+          },
+          scale: 122231056,
+        });
+
+        view.ui.add(new LayerList({ view: view }), "top-left");
+      });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
