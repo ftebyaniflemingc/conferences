@@ -10,7 +10,6 @@ body, #viewDiv {
 #panel {
   padding: 10px;
   max-width: 350px;
-  background-color: white;
 }
 
 select {

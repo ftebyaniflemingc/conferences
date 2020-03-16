@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -33,11 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/renderers/smartMapping/creators/color", "esri/renderers/smartMapping/statistics/histogram", "esri/widgets/ColorSlider"], function (require, exports, EsriMap, MapView, FeatureLayer, colorRendererCreator, histogram, ColorSlider) {
+define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/renderers/smartMapping/creators/color", "esri/renderers/smartMapping/statistics/histogram", "esri/widgets/smartMapping/ColorSlider"], function (require, exports, EsriMap, MapView, FeatureLayer, colorRendererCreator, histogram, ColorSlider) {
     "use strict";
-    var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
-    (function () { return __awaiter(_this, void 0, void 0, function () {
+    (function () { return __awaiter(void 0, void 0, void 0, function () {
         /**
          * Creates the DOM elements needed to render basic UI and contextual information,
          * including the title, description, and attribute field select
@@ -91,7 +91,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
          */
         function selectVariable(event) {
             return __awaiter(this, void 0, void 0, function () {
-                var selectedValue, selectedInfo, rendererResponse;
+                var selectedValue, selectedInfo, rendererResponse, sliderContainer, panelDiv;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -108,13 +108,26 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                             // update the layer with the generated renderer and popup template
                             layer.renderer = rendererResponse.renderer;
                             layer.popupTemplate = rendererResponse.popupTemplate;
-                            // updates the ColorSlider with the stats and histogram 
+                            // updates the ColorSlider with the stats and histogram
                             // generated from the smart mapping generator
-                            colorSlider = updateSlider({
-                                statistics: rendererResponse.statistics,
-                                histogram: rendererResponse.histogram,
-                                visualVariable: rendererResponse.visualVariable
-                            }, colorSlider);
+                            if (!colorSlider) {
+                                sliderContainer = document.createElement("div");
+                                panelDiv = document.getElementById("panel");
+                                panelDiv.appendChild(sliderContainer);
+                                colorSlider = ColorSlider.fromRendererResult(rendererResponse.rendererResponse, rendererResponse.histogram);
+                                colorSlider.container = sliderContainer;
+                                colorSlider.on("thumb-drag", function () {
+                                    var renderer = layer.renderer;
+                                    var rendererClone = renderer.clone();
+                                    var colorVariable = rendererClone.visualVariables[0];
+                                    colorVariable.stops = colorSlider.stops;
+                                    rendererClone.visualVariables = [colorVariable];
+                                    layer.renderer = rendererClone;
+                                });
+                            }
+                            else {
+                                colorSlider.updateFromRendererResult(rendererResponse.rendererResponse, rendererResponse.histogram);
+                            }
                             return [2 /*return*/];
                     }
                 });
@@ -160,14 +173,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
          * @returns {string}
          */
         function generateArcade(fields, normalizationField) {
-            var value;
-            if (fields.length === 1) {
-                value = "$feature." + fields[0];
-            }
-            else {
-                value = fields.reduce(function (a, c, i) { return i === 1 ?
-                    "$feature." + a + " + $feature." + c : a + " + $feature." + c; });
-            }
+            var value = fields.map(function (field) { return "$feature." + field; }).reduce(function (a, c) { return a + " + " + c; });
             var percentValue = normalizationField ?
                 "( ( " + value + " ) / $feature." + normalizationField + " ) * 100" : value;
             return "Round( " + percentValue + " )";
@@ -187,11 +193,11 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                     switch (_a.label) {
                         case 0:
                             valueExpressionInfo = getValueExpression(params.value, params.normalize);
+                            console.log(valueExpressionInfo.valueExpression);
                             rendererParams = {
                                 layer: params.layer,
                                 valueExpression: valueExpressionInfo.valueExpression,
                                 valueExpressionTitle: valueExpressionInfo.valueExpressionTitle,
-                                basemap: params.view.map.basemap,
                                 view: params.view
                             };
                             return [4 /*yield*/, colorRendererCreator.createContinuousRenderer(rendererParams)];
@@ -213,6 +219,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                                 totalField: normalizationVariable
                             });
                             return [2 /*return*/, {
+                                    rendererResponse: rendererResponse,
                                     renderer: rendererResponse.renderer,
                                     popupTemplate: popupTemplate,
                                     statistics: rendererResponse.statistics,
@@ -222,38 +229,6 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                     }
                 });
             });
-        }
-        /**
-         * Creates a ColorSlider instance if it doesn't already exist. Updates it with the
-         * given parameters if it does exist.
-         *
-         * @param {UpdateSliderParams} params
-         * @param {ColorSlider} slider
-         *
-         * @returns {ColorSlider}
-         */
-        function updateSlider(params, slider) {
-            if (!slider) {
-                var sliderContainer = document.createElement("div");
-                var panelDiv = document.getElementById("panel");
-                panelDiv.appendChild(sliderContainer);
-                slider = new ColorSlider({
-                    container: sliderContainer,
-                    statistics: params.statistics,
-                    histogram: params.histogram,
-                    visualVariable: params.visualVariable
-                });
-                slider.on("handle-value-change", function () {
-                    var renderer = layer.renderer;
-                    var rendererClone = renderer.clone();
-                    rendererClone.visualVariables = [slider.visualVariable.clone()];
-                    layer.renderer = rendererClone;
-                });
-            }
-            else {
-                slider.set(params);
-            }
-            return slider;
         }
         /**
          * Creates a popup template specific to the generated renderer
@@ -294,7 +269,11 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                         }
                     });
                     map = new EsriMap({
-                        basemap: "gray",
+                        basemap: {
+                            portalItem: {
+                                id: "4f2e99ba65e34bb8af49733d9778fb8e"
+                            }
+                        },
                         layers: [layer]
                     });
                     view = new MapView({
@@ -304,7 +283,7 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                         zoom: 7
                     });
                     title = "2014 Educational Attainment";
-                    appDescription = "\n    Educational attainment refers to the \n    highest level of education that an \n    individual has completed. People\n    who completed higher levels of\n    education are not included in counts\n    of lower education levels.\n  ";
+                    appDescription = "\n    Educational attainment refers to the\n    highest level of education that an\n    individual has completed. People\n    who completed higher levels of\n    education are not included in counts\n    of lower education levels.\n  ";
                     variables = [
                         {
                             value: "no-school",
