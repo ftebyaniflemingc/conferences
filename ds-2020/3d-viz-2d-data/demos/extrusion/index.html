@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Thematic visualization with realistic 3D symbols - next</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/css/main.css">
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #sliderContainer{
+      background-color: white;
+      height: 500px;
+      width: 100px;
+    }
+  </style>
+
+  <script>
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Slider"
+      ],
+      function(
+        Map, SceneView, FeatureLayer, Slider
+      ) {
+
+        const startingHeight = 100;
+
+        const buildingsLayer = new FeatureLayer({
+          portalItem: {
+            id: "8573b205d20d4be38b6e11eb05dd151b"
+          },
+          labelsVisible: false,
+          opacity: 1,
+          definitionExpression: "osm_id2 = '496246723'",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "polygon-3d",
+              // symbolLayers: [{
+              //   type: "fill",
+              //   material: {
+              //     color: [150,0,150,1]
+              //   }
+              // }]
+              symbolLayers: [{
+                type: "extrude",
+                material: {
+                  color: [150,150,150,1]
+                },
+                edges: {
+                  type: "solid", // autocasts as new SolidEdges3D()
+                  color: [50, 50, 50, 0.7],
+                  size: 1
+                },
+                size: startingHeight  // meters
+              }]
+            }
+          },
+          minScale: 0,
+          maxScale: 0
+        });
+
+        var map = new Map({
+          basemap: "osm",
+          ground: "world-elevation",
+          layers: [ buildingsLayer ]
+        });
+
+        view = new SceneView({
+          container: "viewDiv",
+          map: map,
+          camera: {
+            "position": {
+              "spatialReference": {
+                "latestWkid": 3857,
+                "wkid": 102100
+              },
+              "x": -13162985.173057035,
+              "y": 4032310.7691150224,
+              "z": 1795.67781002447
+            },
+            "heading": 332.2641758283873,
+            "tilt": 67.23746205713846
+          },
+          // Set dock options on the view's popup
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              breakpoint: false
+            }
+          },
+          // enable shadows to be cast from the features
+          environment: {
+            lighting: {
+              directShadowsEnabled: true
+            }
+          }
+        });
+
+        const heightSlider = new Slider({
+          container: "slider",
+          min: 10,
+          max: 1000,
+          values: [ startingHeight ],
+          precision: 0,
+          visibleElements: {
+            rangeLabels: true,
+            labels: true
+          },
+          layout: "vertical"
+        });
+
+        view.ui.add("sliderContainer", "bottom-left");
+
+        heightSlider.on("thumb-drag", function(event){
+          const renderer = buildingsLayer.renderer.clone();
+          const symbol = renderer.symbol;//.clone();
+          const extrusion = symbol.symbolLayers.getItemAt(0);
+          // const newExtrusion = extrusion.clone();
+          extrusion.size = event.value;
+          symbol.symbolLayers = [ extrusion ];
+          renderer.symbol = symbol;
+          buildingsLayer.renderer = renderer;
+        });
+      });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="sliderContainer">
+    <div id="slider"></div>
+  </div>
+</body>
+
+</html>
