@@ -707,14 +707,32 @@
         function updateSalinityTempRelationship(addCurrents){
           const level = getLevelFromDepth(depthSlider.values[0]);
 
-          const field1 = `salinity_${level}`;
-          const field2 = `temp_${level}`;
+          const field1 = `temp_${level}`;
+          const field2 = `salinity_${level}`;
 
           const renderer = rendererJsonUtils.fromJSON({
             "authoringInfo": {
               "classificationMethod": "esriClassifyQuantile",
               "field1": {
                 "field": field1,
+                "normalizationField": "",
+                "classBreakInfos": [
+                  {
+                    "minValue": -1.8617100715637207,
+                    "maxValue": 5.463490009307861
+                  },
+                  {
+                    "minValue": 5.463490009307861,
+                    "maxValue": 22.641408920288086
+                  },
+                  {
+                    "minValue": 22.641408920288086,
+                    "maxValue": 30.277099609375
+                  }
+                ]
+              },
+              "field2": {
+                "field": field2,
                 "normalizationField": "",
                 "classBreakInfos": [
                   {
@@ -731,25 +749,7 @@
                   }
                 ]
               },
-              "field2": {
-                "field": field2,
-                "normalizationField": "",
-                "classBreakInfos": [
-                  {
-                    "minValue": -1.8617100715637207,
-                    "maxValue": 5.463809967041016
-                  },
-                  {
-                    "minValue": 5.463809967041016,
-                    "maxValue": 22.64011001586914
-                  },
-                  {
-                    "minValue": 22.64011001586914,
-                    "maxValue": 30.277099609375
-                  }
-                ]
-              },
-              // "focus": null,
+              "focus": "HL",
               "numClasses": 3,
               "type": "relationship"
             },
@@ -774,24 +774,24 @@
               var value1 = IIf(hasNormField1, (field1 / normField1), field1);
               var value2 = IIf(hasNormField2, (field2 / normField2), field2);
 
-              var breaks1 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];
-              var breaks2 = [[-1.8617100715637207,5.463809967041016],[5.463809967041016,22.64011001586914],[22.64011001586914,30.277099609375]];
-              var classCodes = [\"L\",\"M\",\"H\"];\n\n  function getClassCode(value, breaks) {
+              var breaks1 = [[-1.8617100715637207,5.463490009307861],[5.463490009307861,22.641408920288086],[22.641408920288086,30.277099609375]];
+              var breaks2 = [[5.017099857330322,33.93169021606445],[33.93169021606445,34.94491195678711],[34.94491195678711,41.148712158203125]];
+              var classCodes = [\"L\",\"M\",\"H\"];
+
+              function getClassCode(value, breaks) {
                 var code = null;
 
                 for (var i in breaks) {
                   var info = breaks[i];
                   if (value >= info[0] && value <= info[1]) {
-                    code = classCodes[i];\
+                    code = classCodes[i];
                     break;
                   }
                 }
-
                 return code;
               }
-
               var code1 = getClassCode(value1, breaks1);
-              var code2 = getClassCode(value2, breaks2);\
+              var code2 = getClassCode(value2, breaks2);
 
               var classValue = IIf(IsEmpty(code1) || IsEmpty(code2), null, code1 + code2);
               return classValue;
@@ -800,13 +800,13 @@
             "legendOptions": {},
             "uniqueValueInfos": [
               {
-                "label": "High Salinity - Warm",
+                "label": "Low Salinity, Warm",
                 "symbol": {
                   "type": "esriSMS",
                   "color": [
-                    89,
-                    63,
-                    179,
+                    255,
+                    115,
+                    115,
                     255
                   ],
                   "angle": 0,
@@ -826,7 +826,7 @@
                     "style": "esriSLSSolid"
                   }
                 },
-                "value": "HH"
+                "value": "HL"
               },
               {
                 "label": "High - Medium",
@@ -858,13 +858,13 @@
                 "value": "HM"
               },
               {
-                "label": "High Salinity - Cold",
+                "label": "High Salinity, Warm",
                 "symbol": {
                   "type": "esriSMS",
                   "color": [
-                    255,
-                    115,
-                    115,
+                    89,
+                    63,
+                    179,
                     255
                   ],
                   "angle": 0,
@@ -884,65 +884,7 @@
                     "style": "esriSLSSolid"
                   }
                 },
-                "value": "HL"
-              },
-              {
-                "label": "Medium - High",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    85,
-                    147,
-                    212,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 4,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "MH"
-              },
-              {
-                "label": "Medium - Medium",
-                "symbol": {
-                  "type": "esriSMS",
-                  "color": [
-                    166,
-                    153,
-                    212,
-                    255
-                  ],
-                  "angle": 0,
-                  "xoffset": 0,
-                  "yoffset": 0,
-                  "size": 4,
-                  "style": "esriSMSCircle",
-                  "outline": {
-                    "type": "esriSLS",
-                    "color": [
-                      153,
-                      153,
-                      153,
-                      64
-                    ],
-                    "width": 0.75,
-                    "style": "esriSLSSolid"
-                  }
-                },
-                "value": "MM"
+                "value": "HH"
               },
               {
                 "label": "Medium - Low",
@@ -974,13 +916,13 @@
                 "value": "ML"
               },
               {
-                "label": "Low Salinity - Warm",
+                "label": "Medium - Medium",
                 "symbol": {
                   "type": "esriSMS",
                   "color": [
-                    98,
-                    231,
-                    245,
+                    166,
+                    153,
+                    212,
                     255
                   ],
                   "angle": 0,
@@ -1000,7 +942,65 @@
                     "style": "esriSLSSolid"
                   }
                 },
-                "value": "LH"
+                "value": "MM"
+              },
+              {
+                "label": "Medium - High",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    85,
+                    147,
+                    212,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "MH"
+              },
+              {
+                "label": "Low Salinity, Cold",
+                "symbol": {
+                  "type": "esriSMS",
+                  "color": [
+                    242,
+                    242,
+                    242,
+                    255
+                  ],
+                  "angle": 0,
+                  "xoffset": 0,
+                  "yoffset": 0,
+                  "size": 4,
+                  "style": "esriSMSCircle",
+                  "outline": {
+                    "type": "esriSLS",
+                    "color": [
+                      153,
+                      153,
+                      153,
+                      64
+                    ],
+                    "width": 0.75,
+                    "style": "esriSLSSolid"
+                  }
+                },
+                "value": "LL"
               },
               {
                 "label": "Low - Medium",
@@ -1032,13 +1032,13 @@
                 "value": "LM"
               },
               {
-                "label": "Low Salinity, Cold",
+                "label": "High Salinity, Cold",
                 "symbol": {
                   "type": "esriSMS",
                   "color": [
-                    242,
-                    242,
-                    242,
+                    98,
+                    231,
+                    245,
                     255
                   ],
                   "angle": 0,
@@ -1058,7 +1058,7 @@
                     "style": "esriSLSSolid"
                   }
                 },
-                "value": "LL"
+                "value": "LH"
               }
             ]
           });
@@ -1077,8 +1077,14 @@
           }];
 
           if(addCurrents){
+
             const velocityField = `Velocity_${getLevelFromDepth(depthSlider.values[0])}`;
             const directionField = `Direction_${getLevelFromDepth(depthSlider.values[0])}`;
+
+
+            emuLayerView.filter = {
+              where: `${velocityField} IS NOT NULL AND ${directionField} IS NOT NULL`
+            };
 
             const visualVariables = [{
               type: "size",
@@ -1181,6 +1187,9 @@
                   ticks: {
                     min: -3500,
                     max: 0,
+                    callback:(label, index, labels) => {
+                      return Math.abs(label) + " m";
+                    }
                   }
                 }]
               }

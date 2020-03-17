@@ -147,3 +147,5 @@ I'll post a video describing the process for prepping the data used in this app.
 ### Credits
 
 The app was developed by Kristian Ekenes under the direction of Jeremy Bartley. Keith VanGraafeiland provided the flat table of EMU data points at 1/4 degree resolution for all ocean depths. This data was later thinned to 1/2 degree resolution up to 3500m in depth. John Nelson designed and published the basemap tile layer.
+
+I also want to thank Aurélie Albert, Jean Marc Molines, and Bernard Barnier from the Multiscale Ocean Modelling (MEOM) Group at Institut des Géosceinces de l’Environnement (IGE) in Grenoble for making available the [DRAKKAR](https://www.drakkar-ocean.eu/) model of ocean currents.
