@@ -51,20 +51,20 @@
               // symbolLayers: [{
               //   type: "fill",
               //   material: {
-              //     color: [150,0,150,1]
+              //     color: "orange"
               //   }
               // }]
               symbolLayers: [{
                 type: "extrude",
                 material: {
-                  color: [150,150,150,1]
+                  color: "orange"
                 },
                 edges: {
                   type: "solid", // autocasts as new SolidEdges3D()
                   color: [50, 50, 50, 0.7],
                   size: 1
                 },
-                size: startingHeight  // meters
+                size: startingHeight
               }]
             }
           },
@@ -73,12 +73,12 @@
         });
 
         var map = new Map({
-          basemap: "osm",
+          basemap: "satellite",
           ground: "world-elevation",
           layers: [ buildingsLayer ]
         });
 
-        view = new SceneView({
+        var view = new SceneView({
           container: "viewDiv",
           map: map,
           camera: {
