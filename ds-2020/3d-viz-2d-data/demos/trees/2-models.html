@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>Thematic visualization with realistic 3D symbols - 4.10</title>
+  <title>Thematic visualization with realistic 3D symbols - next</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
-  <script src="https://js.arcgis.com/4.10/"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/css/main.css">
+  <script src="https://js.arcgis.com/next/"></script>
 
   <style>
     html,
@@ -35,22 +35,22 @@
           axis: "height",
           field: "Height", // tree height
           valueUnit: "feet"
-        }; 
-          
+        };
+
         var treeWidth = {
           type: "size",
           axis: "width",
           field: "Width_EW", // crown diameter from east to west
           valueUnit: "feet"
-        }; 
-        
+        };
+
         var treeDepth = {
           type: "size",
           axis: "depth",
           field: "Width_NS", // crown diameter from north to south
           valueUnit: "feet"
         };
-          
+
         var carbonStorage = {
           type: "color",
           field: "C_Storage", // Carbon storage
@@ -69,7 +69,71 @@
           }
         };
 
-        var renderer = {
+        const uniqueValueInfos = [{
+          // Northern Red Oak
+          // White Oak
+          value: "White oak",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Quercus"
+          }
+        }, {
+          // Flowering Dogwood
+          value: "Flowering dogwood",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Cornus"
+          }
+        }, {
+          // Norway Spruce
+          value: "Norway spruce",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Picea"
+          }
+        }, {
+          // Lodgepole Pine
+          value: "Eastern white pine",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Pinus"
+          }
+        }, {
+          // Norway Maple
+          value: "Red maple",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Acer"
+          }
+        }, {
+          // Black Locust
+          value: "Black tupelo",
+          symbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Robinia"
+          }
+        }]
+
+        var realisticRenderer = {
+          type: "unique-value",
+          field: "Cmn_Name",
+          uniqueValueInfos: uniqueValueInfos,
+          defaultSymbol: {
+            type: "web-style",
+            styleName: "esriRealisticTreesStyle",
+            name: "Ulmus"
+          },
+          label: "tree",
+          visualVariables: [ treeDepth, treeHeight, treeWidth ]
+        };
+
+        var carbonRenderer = {
           type: "simple",
           symbol: {
             type: "web-style",
@@ -77,13 +141,13 @@
             name: "Other"
           },
           label: "tree",
-          visualVariables: [ treeDepth, treeHeight, treeWidth, carbonStorage ]
+          visualVariables: [ /* treeDepth, treeHeight, treeWidth,*/ carbonStorage ]
         };
 
         // Construct the layer and set the renderer and popupTemplate on it
         var treesLayer = new FeatureLayer({
           url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
-          renderer: renderer,
+          renderer: carbonRenderer,
           popupTemplate: { // autocasts as new PopupTemplate()
             title: "{Cmn_Name}",
             content: "<i>{Sci_Name}</i><br>" +

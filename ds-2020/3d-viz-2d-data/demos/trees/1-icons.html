@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>Scale feature sizes based on real world sizes (2D) - 4.10</title>
+  <title>Scale feature sizes based on real world sizes (2D) - 4.12</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
-  <script src="https://js.arcgis.com/4.10/"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/css/main.css">
+  <script src="https://js.arcgis.com/next/"></script>
 
   <style>
     html,
@@ -37,7 +37,7 @@
         valueUnit: "feet", // values of Width_EW are expressed in feet
         valueRepresentation: "diameter"
       };
-        
+
       var carbonStorage = {
         type: "color",
         field: "C_Storage", // Carbon storage
@@ -60,16 +60,21 @@
       var renderer = {
         type: "simple",
         symbol: {
-          type: "simple-marker",
-          color: "green",
-          size: 6,
-          outline: {
-            color: "lightgray",
-            width: 0.5
-          }
+          type: "point-3d",
+          symbolLayers: [{
+            type: "icon",
+            size: 6,
+            material: {
+              color: "green"
+            },
+            outline: {
+              color: "lightgray",
+              width: 0.5
+            }
+          }]
         },
-        label: "tree",
-        visualVariables: [ realWorldDiameter, carbonStorage ]
+        visualVariables: [ carbonStorage, realWorldDiameter ],
+        label: "tree"
       };
 
       // Assign the renderer to the layer

@@ -2,7 +2,7 @@
 
 length: 60 min
 
-presenters: Raluca Nicola, Kristian Ekenes
+presenters: Kristian Ekenes, Raluca Nicola
 
 Mar. 11, 2020 5:30 p.m. - 6:30 p.m.
 
@@ -20,31 +20,20 @@ Have you hesitated to build 3D apps because they look complicated or you lack th
 
 ## Demos
 
-### [Trees](https://ekenes.github.io/conferences/ds-2019/3d-viz-2d-data/demos/trees/2-models.html)
+### [Basic Extrusion](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/extrusion/index.html)
 
-Visualizes trees with their real world sizes using a 3D model provided out-of-the-box in the ArcGIS API for JavaScript.
+This app demonstrates how to extrude a single polygon with a hard-coded value. It also uses a slider to demonstrate how the extrusion appears with various values.
 
-### [GeoJSON earthquakes](https://ycabon.github.io/2019-devsummit-plenary/2_geojson.html)
+[![extrusion](images/extrusion.gif)](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/extrusion/)
 
-Demonstrates how to use a layer's attributes to calculate z values for each feature so it renders its position
-correctly in a 3D scene.
+### [Building Extrusion](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/buildings/index.html)
 
-### [Ecological Marine Units](https://ekenes.github.io/esri-ts-samples/visualization/emu/3d/)
+This app builds on the previous one, but demonstrates how to extrude all polygons in a layer dynamically based on a `height` attribute field.
 
-Visualizes points as 3D cylinders to represent a section of the Indian Ocean. Each point has various data attributes that can be explored, filtered, and sliced. This demonstrates how to represent a point as a volume and how to place that point correctly with a z value that comes from an attribute (not from geometry). It also shows how you can add exaggeration to an elevation surface to make a more pleasing visual. The exaggeration also coincides with all the elevation values in the data.
+[![buildings](images/buildings.png)](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/buildings/)
 
-### [Hiking Trails](https://ralucanicola.github.io/hiking-app/)
+### [Trees](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/trees/2-models.html)
 
-A 3D progressive web application allowing you to explore Swiss hiking trails.
+Visualizes trees with their real world sizes using a 3D model provided out-of-the-box in the ArcGIS API for JavaScript. The underlying data is a 2D point FeatureLayer with attributes for height, width, and tree species.
 
-[Live app](https://ralucanicola.github.io/hiking-app/)
-
-[Code](https://github.com/RalucaNicola/hiking-app)
-
-### [3D elevation contours](https://ralucanicola.github.io/JSAPI_demos/malta-contour-lines/)
-
-A 3D thematic representation of contour data.
-
-[Live app](https://ralucanicola.github.io/JSAPI_demos/malta-contour-lines/)
-
-[Code](https://github.com/RalucaNicola/JSAPI_demos/tree/master/malta-contour-lines)
+[![trees](images/trees.png)](https://ekenes.github.io/conferences/ds-2020/3d-viz-2d-data/demos/trees/2-models.html)

@@ -6,14 +6,15 @@ import FeatureLayer = require("esri/layers/FeatureLayer");
 
 import colorRendererCreator = require("esri/renderers/smartMapping/creators/color");
 import histogram = require("esri/renderers/smartMapping/statistics/histogram");
-import ColorSlider = require("esri/widgets/ColorSlider");
+import ColorSlider = require("esri/widgets/smartMapping/ColorSlider");
 import Legend = require("esri/widgets/Legend");
 import lang = require("esri/core/lang");
+import { ClassBreaksRenderer } from "esri/rasterRenderers";
 
 (async () => {
 
   //
-  // Create map with a single FeatureLayer 
+  // Create map with a single FeatureLayer
   //
 
   const layer = new FeatureLayer({
@@ -23,7 +24,11 @@ import lang = require("esri/core/lang");
   });
 
   const map = new EsriMap({
-    basemap: "streets",
+    basemap: {
+      portalItem: {
+        id: "4f2e99ba65e34bb8af49733d9778fb8e"
+      }
+    },
     layers: [ layer ]
   });
 
@@ -39,10 +44,10 @@ import lang = require("esri/core/lang");
   await view.when();
 
   const rendererParams = {
-    layer: layer,
+    layer,
+    view,
     field: "EDUC01_CY",
-    normalizationField: "EDUCA_BASE",
-    basemap: view.map.basemap
+    normalizationField: "EDUCA_BASE"
   };
 
   const rendererResponse = await colorRendererCreator.createContinuousRenderer(rendererParams);
@@ -62,17 +67,15 @@ import lang = require("esri/core/lang");
   panelDiv.appendChild(sliderContainer);
   view.ui.add(panelDiv, "bottom-left");
 
-  const slider = new ColorSlider({
-    container: sliderContainer,
-    statistics: rendererResponse.statistics,
-    histogram: rendererHistogram,
-    visualVariable: rendererResponse.visualVariable
-  });
+  const colorSlider = ColorSlider.fromRendererResult(rendererResponse, rendererHistogram);
+  colorSlider.container = sliderContainer;
 
-  slider.on("data-change", (event: any) => {
-    const renderer = layer.renderer as esri.ClassBreaksRenderer;
+  colorSlider.on("thumb-drag", () => {
+    const renderer = layer.renderer as ClassBreaksRenderer;
     const rendererClone = renderer.clone();
-    rendererClone.visualVariables = [ lang.clone( slider.visualVariable ) ];
+    const colorVariable = rendererClone.visualVariables[0] as esri.ColorVariable;
+    colorVariable.stops = colorSlider.stops;
+    rendererClone.visualVariables = [ colorVariable ];
     layer.renderer = rendererClone;
   });
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Thematic visualization with realistic 3D symbols - next</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/next/esri/css/main.css">
+  <script src="https://js.arcgis.com/next/"></script>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <script>
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Legend"
+      ],
+      function(
+        Map, SceneView, FeatureLayer, Legend
+      ) {
+
+        const buildingsLayer = new FeatureLayer({
+          portalItem: {
+            id: "8573b205d20d4be38b6e11eb05dd151b"
+          },
+          labelsVisible: false,
+          opacity: 1
+        });
+
+        var map = new Map({
+          basemap: "osm",
+          ground: "world-elevation",
+          layers: [ buildingsLayer ]
+        });
+
+        view = new SceneView({
+          container: "viewDiv",
+          map: map,
+          camera: {
+            "position": {
+              "spatialReference": {
+                "latestWkid": 3857,
+                "wkid": 102100
+              },
+              "x": -13162054.208348304,
+              "y": 4036034.2526594745,
+              "z": 439.6947426442057
+            },
+            "heading": 272.6032183268078,
+            "tilt": 78.46943246407636
+          },
+          // Set dock options on the view's popup
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              breakpoint: false
+            }
+          },
+          // enable shadows to be cast from the features
+          environment: {
+            lighting: {
+              directShadowsEnabled: true
+            }
+          }
+        });
+
+        var legend = new Legend({
+          view: view
+        });
+        view.ui.add(legend, "top-right");
+
+        buildingsLayer.when().then(function() {
+          const renderer = buildingsLayer.renderer.clone();
+          renderer.uniqueValueInfos.forEach( (info) => {
+            info.symbol = {
+              type: "polygon-3d",
+              symbolLayers: [{
+                type: "extrude",
+                material: {
+                  color: info.symbol.color
+                },
+                size: 50,
+                edges: {
+                  type: "solid", // autocasts as new SolidEdges3D()
+                  color: [50, 50, 50, 0.7],
+                  size: 1
+                }
+              }]
+            }
+          });
+          renderer.visualVariables = [{
+            type: "size",
+            field: "height",
+            valueUnit: "meters"
+          }];
+          buildingsLayer.renderer = renderer;
+        });
+
+      });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>

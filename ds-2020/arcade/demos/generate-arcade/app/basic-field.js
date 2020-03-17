@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -33,12 +34,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/renderers/smartMapping/creators/color", "esri/renderers/smartMapping/statistics/histogram", "esri/widgets/ColorSlider", "esri/widgets/Legend", "esri/core/lang"], function (require, exports, EsriMap, MapView, FeatureLayer, colorRendererCreator, histogram, ColorSlider, Legend, lang) {
+define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/renderers/smartMapping/creators/color", "esri/renderers/smartMapping/statistics/histogram", "esri/widgets/smartMapping/ColorSlider", "esri/widgets/Legend"], function (require, exports, EsriMap, MapView, FeatureLayer, colorRendererCreator, histogram, ColorSlider, Legend) {
     "use strict";
-    var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
-    (function () { return __awaiter(_this, void 0, void 0, function () {
-        var layer, map, view, rendererParams, rendererResponse, rendererHistogram, sliderContainer, panelDiv, slider;
+    (function () { return __awaiter(void 0, void 0, void 0, function () {
+        var layer, map, view, rendererParams, rendererResponse, rendererHistogram, sliderContainer, panelDiv, colorSlider;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -48,7 +48,11 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                         }
                     });
                     map = new EsriMap({
-                        basemap: "streets",
+                        basemap: {
+                            portalItem: {
+                                id: "4f2e99ba65e34bb8af49733d9778fb8e"
+                            }
+                        },
                         layers: [layer]
                     });
                     view = new MapView({
@@ -63,9 +67,9 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                     _a.sent();
                     rendererParams = {
                         layer: layer,
+                        view: view,
                         field: "EDUC01_CY",
-                        normalizationField: "EDUCA_BASE",
-                        basemap: view.map.basemap
+                        normalizationField: "EDUCA_BASE"
                     };
                     return [4 /*yield*/, colorRendererCreator.createContinuousRenderer(rendererParams)];
                 case 2:
@@ -84,16 +88,14 @@ define(["require", "exports", "esri/Map", "esri/views/MapView", "esri/layers/Fea
                     panelDiv = document.getElementById("panel");
                     panelDiv.appendChild(sliderContainer);
                     view.ui.add(panelDiv, "bottom-left");
-                    slider = new ColorSlider({
-                        container: sliderContainer,
-                        statistics: rendererResponse.statistics,
-                        histogram: rendererHistogram,
-                        visualVariable: rendererResponse.visualVariable
-                    });
-                    slider.on("data-change", function (event) {
+                    colorSlider = ColorSlider.fromRendererResult(rendererResponse, rendererHistogram);
+                    colorSlider.container = sliderContainer;
+                    colorSlider.on("thumb-drag", function () {
                         var renderer = layer.renderer;
                         var rendererClone = renderer.clone();
-                        rendererClone.visualVariables = [lang.clone(slider.visualVariable)];
+                        var colorVariable = rendererClone.visualVariables[0];
+                        colorVariable.stops = colorSlider.stops;
+                        rendererClone.visualVariables = [colorVariable];
                         layer.renderer = rendererClone;
                     });
                     return [2 /*return*/];
