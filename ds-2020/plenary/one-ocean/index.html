@@ -134,7 +134,7 @@
 
           function updateVisualization(){
 
-            depthDisplay.innerText = depthSlider.values[0] + "m"
+            depthDisplay.innerText = Math.abs(depthSlider.values[0]) + "m"
 
             if(relationshipRadio.checked){
               variableDisplay.innerText = "Salinity & Temperature";
