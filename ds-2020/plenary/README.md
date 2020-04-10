@@ -2,6 +2,12 @@
 
 ## One Ocean
 
+### Presentation
+
+[Watch](https://www.youtube.com/watch?v=TE3fIN2I3eQ&list=PLaPDDLTCmy4a-_G7sW0JHxgQ60pM_sAmI&index=7) the video presentation.
+
+[![watch video presentation](https://i.ytimg.com/vi/TE3fIN2I3eQ/hqdefault.jpg)](https://www.youtube.com/watch?v=TE3fIN2I3eQ&list=PLaPDDLTCmy4a-_G7sW0JHxgQ60pM_sAmI&index=7)
+
 ### Summary
 
 [This app](https://ekenes.github.io/conferences/ds-2020/plenary/one-ocean/index.html) loads a subset of Esri's open [Ecological Marine Unit](https://www.esri.com/en-us/about/science/ecological-marine-units/overview) data as points, and renders them in the [Spilhaus projection](https://storymaps.arcgis.com/stories/756bcae18d304a1eac140f19f4d5cb3d).
@@ -142,7 +148,9 @@ function updateCurrentsRenderer(){
 
 ### Methods
 
-I'll post a video describing the process for prepping the data used in this app.
+[Watch](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18) the video presentation below to learn more about the steps taken to create this app.
+
+[![watch video presentation](https://i.ytimg.com/vi/n4Y0qnbqfMg/hqdefault.jpg)](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18)
 
 ### Credits
 
