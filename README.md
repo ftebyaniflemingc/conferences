@@ -8,6 +8,7 @@ The following are links to slides and demos used in all my presentations at Esri
 - [2017](https://github.com/ekenes/conferences/tree/master/ds-2017)
 - [2018](https://github.com/ekenes/conferences/tree/master/ds-2018)
 - [2019](https://github.com/ekenes/conferences/tree/master/ds-2019)
+- [2019](https://github.com/ekenes/conferences/tree/master/ds-2020)
 
 ## Esri International User Conference
 
@@ -15,3 +16,7 @@ The following are links to slides and demos used in all my presentations at Esri
 - [2017](https://github.com/ekenes/conferences/tree/master/uc-2017)
 - [2018](https://github.com/ekenes/conferences/tree/master/uc-2018)
 - [2019](https://github.com/ekenes/conferences/tree/master/uc-2019)
+
+## Esri Federal GIS Conference
+
+- [2020](https://github.com/ekenes/conferences/tree/master/fed-2020)
