@@ -34,7 +34,7 @@ This sample demonstrates how to filter features by attributes depending on the s
 
 This sample demonstrates how to filter features by length depending on the view resolution using a water pipes layer of Bangkok, Thailand containing more than 550,000 features. The approach involves filtering out pipes shorter than the resolution of the view multiplied by a factor (e.g. lines shorter than 2 pixels, 3 pixels, etc.). This results in maps that look visually degraded, but is one approach for aggressively reducing your total download size.
 
-[![attribute-resolution](images/attribute-resolution.png)](https://ekenes.github.io/conferences/ds-2020/large-data/demos/thailand-pipes/attributes.html)
+[![attribute-resolution](images/resolution-filter.png)](https://ekenes.github.io/conferences/ds-2020/large-data/demos/thailand-pipes/attributes.html)
 
 ### One Ocean
 
