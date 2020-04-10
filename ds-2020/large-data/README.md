@@ -4,13 +4,23 @@ length: 60 min
 
 presenters: Jeremy Bartley, Kristian Ekenes
 
-Mar. 11, 2020 10:30 a.m. - 11:30 a.m.
+~~Mar. 11, 2020 10:30 a.m. - 11:30 a.m.~~ Prerecorded and presented on YouTube.
 
 Palm Springs Convention Center, Primrose B
 
 ## Summary
 
 Learn about the various technologies used behind the scenes by ArcGIS Online and the ArcGIS API for JavaScript that help you work with more features in the browser. We’ll demonstrate step-by-step how to optimize a large dataset for rendering and analysis in the browser starting with data preparation, feature service settings, and visualization techniques in the ArcGIS API for JavaScript that will allow your users to work with more data more efficiently in your web apps. We hope to have you walk away inspired with innovative ways to do the same in your apps.
+
+## Presentation
+
+[Watch](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18) the video presentation.
+
+[![watch video presentation](https://i.ytimg.com/vi/n4Y0qnbqfMg/hqdefault.jpg)](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18)
+
+## Slides
+
+[Download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/large-data/slides.pptx)
 
 ## Demos
 

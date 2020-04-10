@@ -4,23 +4,13 @@ length: 60 min
 
 presenters: Kristian Ekenes, MohanRaj Balumuri
 
-Mar. 7, 2019 2:30 p.m. - 3:30 p.m.
+~~Mar. 7, 2019 2:30 p.m. - 3:30 p.m.~~ Prerecorded and presented on YouTube.
 
 Palm Springs Convention Center, Pasadena/Sierra/Ventura
 
 ## Summary
 
 Sometimes simple calculations can provide more insight than field values when creating data-driven visualizations. Arcade is a scripting language that allows you to drive visualizations, popup content, and labels by a value returned from an expression rather than a field value. This session will provide an overview of how to navigate the Arcade documentation while highlighting some of the key functions available in Arcade and the ArcGIS API for JavaScript. View examples of writing and debugging Arcade expressions for creating visualizations and labels for a FeatureLayer.
-
-## Presentation
-
-[Watch](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18) the video presentation.
-
-[![watch video presentation](https://i.ytimg.com/vi/n4Y0qnbqfMg/hqdefault.jpg)](https://www.youtube.com/watch?v=n4Y0qnbqfMg&list=PLaPDDLTCmy4Ys8vfmC7DbX3FHSsyosvh7&index=18)
-
-## Slides
-
-[Download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/large-data/slides.pptx)
 
 ## Demos
 
