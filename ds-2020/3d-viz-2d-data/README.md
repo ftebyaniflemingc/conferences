@@ -4,7 +4,7 @@ length: 60 min
 
 presenters: Kristian Ekenes, Raluca Nicola
 
-Mar. 11, 2020 5:30 p.m. - 6:30 p.m.
+~~Mar. 11, 2020 5:30 p.m. - 6:30 p.m.~~ Prerecorded and presented on YouTube.
 
 Palm Springs Convention Center, Primrose A
 
@@ -17,6 +17,16 @@ Have you hesitated to build 3D apps because they look complicated or you lack th
 - Building extrusion
 - 3D models
 - Z values from attributes
+
+## Presentation
+
+[Watch](https://www.youtube.com/watch?v=a0fyj4vPSCg) the video presentation.
+
+[![watch video presentation](https://i.ytimg.com/vi/a0fyj4vPSCg/hqdefault.jpg)](https://www.youtube.com/watch?v=a0fyj4vPSCg)
+
+## Slides
+
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/presentations/3d-viz-2d-data/slides.pptx)
 
 ## Demos
 

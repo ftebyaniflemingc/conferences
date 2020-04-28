@@ -4,13 +4,19 @@ length: 60 min
 
 presenters: Kristian Ekenes, Jeremy Bartley
 
-Mar. 11, 2020 2:30 p.m. - 3:30 p.m.
+~~Mar. 11, 2020 2:30 p.m. - 3:30 p.m.~~ Prerecorded and presented on YouTube.
 
 Palm Springs Convention Center, Catalina/Madera
 
 ## Summary
 
 The ArcGIS API for JavaScript lets you build powerful interactive mapping applications. Learn how you can turn your raw data into information that tells a story with simple 2D data-driven visualizations. This session will provide an overview to the various visualization techniques available in the API specific to 2D vector data.
+
+## Presentation
+
+[Watch](https://www.youtube.com/watch?v=IJMhAXil9i4) the video presentation.
+
+[![watch video presentation](https://i.ytimg.com/vi/IJMhAXil9i4/hqdefault.jpg)](https://www.youtube.com/watch?v=IJMhAXil9i4)
 
 ## Slides
 
