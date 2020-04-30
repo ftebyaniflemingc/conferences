@@ -20,7 +20,7 @@ Sometimes simple calculations can provide more insight than field values when cr
 
 ## Slides
 
-[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/presentations/arcade/slides.pptx)
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/arcade/slides.pptx)
 
 ## Demos
 

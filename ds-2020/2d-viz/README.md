@@ -20,7 +20,7 @@ The ArcGIS API for JavaScript lets you build powerful interactive mapping applic
 
 ## Slides
 
-[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/presentations/2d-viz/slides.pptx)
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/2d-viz/slides.pptx)
 
 ## Demos
 

@@ -26,7 +26,7 @@ Have you hesitated to build 3D apps because they look complicated or you lack th
 
 ## Slides
 
-[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/presentations/3d-viz-2d-data/slides.pptx)
+[Click here to download slides](https://github.com/ekenes/conferences/raw/master/ds-2020/3d-viz-2d-data/slides.pptx)
 
 ## Demos
 
